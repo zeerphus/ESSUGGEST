@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/jpg" href="/assets/LOGO.png" />
+<title>ESSUGGEST | FAQs</title>
+ <link rel="stylesheet" href="/src/output.css" />
+ <link rel="stylesheet" href="/pages/animationLp.css" />
+</head>
+
+<body class="font-body text-gray-900 antialiased">
+
+  <a href="#dots-area" class="skip-link">Skip to main content</a>
+
+  <!-- =========================================================
+       TOP UTILITY BAR
+  ========================================================== -->
+  <div class="bg-green-950 text-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 h-11 flex items-center gap-3 sm:gap-5 text-sm">
+
+      <a href="/pages/homepage.html#hero" aria-label="Go to home section" class="shrink-0 flex items-center">
+        <img src="/assets/ESSU LOGO no bg.png" alt="ESSU seal" class="w-6 h-6 sm:w-9 sm:h-9 shrink-0 object-contain">
+      </a>
+
+      <span class="h-5 sm:h-6 w-px bg-white/30" aria-hidden="true"></span>
+
+      <nav class="flex items-center gap-3 sm:gap-8 text-white/90 text-xs sm:text-sm whitespace-nowrap">
+        <a href="/pages/aboutus.html" class="text-white font-dm">About Us</a>
+        <a href="/pages/contactus.html" class="hover:text-white transition-colors duration-200 font-dm">Contact Us</a>
+      </nav>
+    </div>
+  </div>
+
+ <!-- =========================================================
+       MAIN NAVBAR / MASTHEAD
+       Now the sticky nav. #site-header + the site-* classes below
+       are hooked up in animationLp.css / dotted.js to shrink
+       smoothly once the page scrolls, staying the same solid
+       green — no glass/blur.
+  ========================================================== -->
+  <header id="site-header" class="sticky top-0 z-50">
+   <div class="site-header-bar bg-green-700">
+    <div class="site-header-inner mx-auto max-w-7xl px-4 sm:px-6 h-20 flex items-center justify-between">
+
+      <a href="#" class="flex items-center gap-2 sm:gap-3" aria-label="ESSUGGEST home">
+  <div class="site-logo-box w-11 h-11 sm:w-14 sm:h-14 flex justify-center items-center rounded-xl bg-green-800 shadow-2xl  shrink-0">
+    <img src="/assets/LOGO.png" alt="ESSUGGEST logo" class="site-logo-img w-8 h-8 sm:w-10 sm:h-10 object-contain">
+  </div>
+
+  <div class="leading-tight">
+    <p class="site-subtitle text-white/85 text-[10px] sm:text-[11px] tracking-wide font-plex">Eastern Samar State University</p>
+    <p class="site-wordmark text-white font-poppins font-black text-base sm:text-xl tracking-wide">ESSUGGEST</p>
+  </div>
+</a>
+
+      <div class="flex items-center gap-2 sm:gap-5">
+        <a href="/auth/LogIn.html" class="text-white/90 hover:text-white text-xs sm:text-sm font-dm transition-colors duration-200 whitespace-nowrap">Log in</a>
+        <a href="/auth/SignUp.html" class="btn-pop bg-yellow-200 text-black text-xs sm:text-sm px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-full hover:brightness-95 transition-all duration-200 font-dm whitespace-nowrap">
+          Create Account
+        </a>
+        
+        
+      </div>
+    </div>
+   </div>
+  </header>
+
+  <!-- =========================================================
+       FAQ CONTENT
+  ========================================================== -->
+  <main class="bg-white">
+    <section class="relative mx-auto max-w-3xl px-6 pt-20 pb-24">
+      <p class="text-green-600 mb-1 font-dm text-center">Need something cleared up?</p>
+      <h1 class="font-poppins font-bold text-4xl sm:text-5xl leading-[1.1] mb-1  text-center">
+        Frequently Asked <span class="text-red-600 font-dm-serif italic">Questions</span>
+      </h1>
+      <p class="text-gray-600 text-center mb-14 font-dm font-light max-w-xl mx-auto">
+        Can't find what you're looking for? Reach out at
+        <a href="mailto:essuggest@gmail.com" class="text-green-700 hover:text-green-800 font-medium font-dm">essuggest@gmail.com</a>.
+      </p>
+
+      <!-- Accordion — native <details>/<summary>, no JS required -->
+      <div class="space-y-3">
+
+        <details class="faq-item group border border-gray-200 rounded-2xl p-5 open:shadow-md transition-shadow duration-200">
+          <summary class="flex items-center justify-between cursor-pointer font-dm font-bold text-lg list-none">
+            How do I create an account?
+            <span class="faq-chevron text-green-700 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+          <p class="text-gray-600 font-dm font-light leading-relaxed mt-3">
+            Go to <b>Create Account</b> or <b>Get started</b> and sign up using your
+            email address. You'll get a verification link by email — click it,
+            then log in with your ESSUGGEST credentials.
+          </p>
+        </details>
+
+        <details class="faq-item group border border-gray-200 rounded-2xl p-5 open:shadow-md transition-shadow duration-200">
+          <summary class="flex items-center justify-between cursor-pointer font-dm font-bold text-lg list-none">
+            Do I need to verify anything before I can post, vote, or comment?
+            <span class="faq-chevron text-green-700 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+          <p class="text-gray-600 font-dm font-light leading-relaxed mt-3">
+            Yes. Verifying your email gets you logged in, but posting, commenting, voting, and
+            upvoting all require one more step: submitting your ESSU credentials — student number,
+            course, section, year, and college — through your profile. This confirms you're an
+            actual ESSUdyante before you can interact with anything on the platform.
+          </p>
+        </details>
+
+        <details class="faq-item group border border-gray-200 rounded-2xl p-5 open:shadow-md transition-shadow duration-200">
+          <summary class="flex items-center justify-between cursor-pointer font-dm font-bold text-lg list-none">
+            Is anonymous posting really anonymous?
+            <span class="faq-chevron text-green-700 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+          <p class="text-gray-600 font-dm font-light leading-relaxed mt-3">
+            Posts are anonymous by default — your name isn't shown to other students unless you
+            choose to turn that off for a given post. Anonymous posts still follow the same
+            Community Guidelines as named ones, so the option can be revoked if it's repeatedly
+            abused.
+          </p>
+        </details>
+
+        <details class="faq-item group border border-gray-200 rounded-2xl p-5 open:shadow-md transition-shadow duration-200">
+          <summary class="flex items-center justify-between cursor-pointer font-dm font-bold text-lg list-none">
+            How does voting on a poll work?
+            <span class="faq-chevron text-green-700 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+          <p class="text-gray-600 font-dm font-light leading-relaxed mt-3">
+            Each poll allows one vote per student and stays open for a
+            24-hour voting window. Results update live as votes come in, and
+            the poll stays visible after voting closes so everyone can see
+            the final outcome.
+          </p>
+        </details>
+
+        <details class="faq-item group border border-gray-200 rounded-2xl p-5 open:shadow-md transition-shadow duration-200">
+          <summary class="flex items-center justify-between cursor-pointer font-dm font-bold text-lg list-none">
+            How do I report inappropriate content?
+            <span class="faq-chevron text-green-700 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+          <p class="text-gray-600 font-dm font-light leading-relaxed mt-3">
+            Every suggestion, poll, and comment has a report option attached
+            to it. Open the post, select the report/flag option, choose a
+            reason, and submit — the moderation team reviews it from there.
+            See the Reporting Handbook for the full walkthrough.
+          </p>
+        </details>
+
+        <details class="faq-item group border border-gray-200 rounded-2xl p-5 open:shadow-md transition-shadow duration-200">
+          <summary class="flex items-center justify-between cursor-pointer font-dm font-bold text-lg list-none">
+            Will I know if ESSU responds to my suggestion?
+            <span class="faq-chevron text-green-700 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+          <p class="text-gray-600 font-dm font-light leading-relaxed mt-3">
+            ESSUGGEST doesn't currently have a built-in status-tracking feature for individual
+            suggestions. Visibility mostly comes through upvotes and comments from other students —
+            any official response or action from ESSU would be communicated separately rather than
+            shown as a status label on the post itself.
+          </p>
+        </details>
+
+        <details class="faq-item group border border-gray-200 rounded-2xl p-5 open:shadow-md transition-shadow duration-200">
+          <summary class="flex items-center justify-between cursor-pointer font-dm font-bold text-lg list-none">
+            Can I edit or delete a suggestion after posting it?
+            <span class="faq-chevron text-green-700 transition-transform duration-200 group-open:rotate-180">▾</span>
+          </summary>
+          <p class="text-gray-600 font-dm font-light leading-relaxed mt-3">
+            You can delete your own posts at any time from your account. If
+            you need to change something after other students have already
+            started commenting or upvoting, deleting and reposting is
+            usually clearer than editing.
+          </p>
+        </details>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       FOOTER (same as index.html)
+  ========================================================== -->
+  <footer class="bg-green-700 text-white">
+    <div class="mx-auto max-w-7xl px-8 py-16 grid sm:grid-cols-3 gap-10">
+      <div>
+        <h4 class="font-dm font-bold mb-4">Downloads</h4>
+        <ul class="space-y-2 text-white/85 text-sm">
+          <li><a href="/assets/pdfs/ESSUGGEST-User-Guide.pdf" target="_blank" rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">User Guide (PDF)</a></li>
+          <li><a href="/assets/pdfs/ESSUGGEST-Community-Guidelines.pdf" target="_blank" rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">Community Guidelines</a></li>
+          <li><a href="/assets/pdfs/ESSUGGEST-Reporting-Handbook.pdf" target="_blank" rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">Reporting Handbook</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-dm font-bold mb-4">Site Map</h4>
+        <ul class="space-y-2 text-white/85 text-sm">
+          <li><a href="/pages/homepage.html#hero" class="hover:text-white transition-colors duration-200">Get Started</a></li>
+          <li><a href="/pages/homepage.html#two-ways" class="hover:text-white transition-colors duration-200">Two ways to be heard</a></li>
+          <li><a href="/pages/homepage.html#conarea" class="hover:text-white transition-colors duration-200">How it works</a></li>
+          <li><a href="/auth/SignUp.html" class="hover:text-white transition-colors duration-200">Create your Account</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-dm font-bold mb-4">FAQ &amp; Contact</h4>
+        <ul class="space-y-2 text-white/85 text-sm">
+          <li><a href="/pages/faq.html" class="hover:text-white transition-colors duration-200">Frequently Asked Questions</a></li>
+          <li><a href="mailto:essuggest@gmail.com" class="hover:text-white transition-colors duration-200">essuggest@gmail.com</a></li>
+          <li><a href="#" class="hover:text-white transition-colors duration-200">Human Resources Management Office</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="bg-green-800">
+      <div class="mx-auto max-w-7xl px-8 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div class="flex items-center gap-4">
+           <a href="https://main.essu.edu.ph/" target="_blank" rel="noopener" aria-label="ESSU website">
+        <!-- LOGO PLACEHOLDER — ESSU seal -->
+        <img src="/assets/ESSU LOGO no bg.png" alt="ESSU seal" class="w-12 h-12 shrink-0 object-contain">
+      </a>
+          <div class="text-sm text-white/85 leading-snug">
+            <p class="font-dm text-white">Eastern Samar State University</p>
+            <p class="font-dm font-extralight text-gray-300 text-sm">Brgy. Maypangdan, Borongan City, Eastern Samar, 6800</p>
+          </div>
+        </div>
+
+        <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
+          <a href="https://main.essu.edu.ph/" target="_blank" rel="noopener" class="font-dm hover:text-white transition-colors duration-200">ESSU Official Website</a>
+          <a href="/assets/pdfs/ESSUGGEST-Data-Privacy-Policy.pdf" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">Data Privacy Policy</a>
+          <a href="/assets/pdfs/ESSUGGEST-Security-Policy.pdf" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">Security Policy</a>
+          <a href="/assets/pdfs/ESSUGGEST-IP-Rights-Policy.pdf" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">IP Rights Policy</a>
+        </nav>
+      </div>
+
+      <div class="border-t border-white/10">
+        <p class="mx-auto text-center px-6 py-5 text-xs text-white/60 font-dm font-extralight">
+          © 2026 Eastern Samar State University. All content is public domain unless otherwise stated.
+        </p>
+      </div>
+    </div>
+  </footer>
+
+<script src="/pages/dotted.js"></script>
+
+</body>
+</html>

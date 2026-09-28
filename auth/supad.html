@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpg" href="/assets/LOGO.png">
+    <title>ESSUGGEST | Super Admin</title>
+    <link rel="stylesheet" href="/src/output.css">
+    
+</head>
+<body class="flex justify-center items-center min-h-screen bg-gray-200 px-4 py-4 sm:px-6">
+
+  <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-5 sm:p-7">
+
+    <!-- ============================= HEADER ============================= -->
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-11 h-11 flex justify-center items-center rounded-xl bg-green-800 shadow-lg shrink-0">
+       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-white">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33" />
+</svg>
+
+      </div>
+      <div>
+        <h1 class="font-poppins font-black text-lg sm:text-xl leading-tight">WELCOME INSTRUCTORS!</h1>
+        <p class="text-xs opacity-50 font-thin italic font-jakarta">Create your account using your ESSU credentials</p>
+      </div>
+    </div>
+
+    <form class="space-y-4" onsubmit="SignUpInstructor(event)">
+
+      <!-- ============================= PERSONAL INFORMATION ============================= -->
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <h2 class="font-dm font-bold text-sm whitespace-nowrap">Personal Information</h2>
+          <span class="flex-1 h-px bg-gray-300" aria-hidden="true"></span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-[2fr_2fr_1fr] gap-2">
+          <div>
+            <label for="firstName" class="px-3 font-dm text-sm">First Name</label>
+            <input type="text" id="firstName"
+                   placeholder="Kaiser Benedict"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+          </div>
+          <div>
+            <label for="lastName" class="px-3 font-dm text-sm">Last Name</label>
+            <input type="text" id="lastName"
+                   placeholder="Coles"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+          </div>
+          <div>
+            <label for="middleInitial" class="px-3 font-dm text-sm">M.I</label>
+            <input type="text" id="middleInitial" maxlength="2"
+                   placeholder="A"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================= ESSU CREDENTIALS ============================= -->
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <h2 class="font-dm font-bold text-sm whitespace-nowrap">ESSU Credentials</h2>
+          <span class="flex-1 h-px bg-gray-300" aria-hidden="true"></span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+          <div>
+            <label for="facultyPosition" class="px-3 font-dm text-sm">Faculty Position</label>
+            <!-- DEMO CONTENT: swap these <option> values for your program's
+                 actual faculty rank list — this set is a placeholder
+                 covering common Philippine SUC faculty positions. -->
+            <select id="facultyPosition"
+                    class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm text-gray-700">
+              <option value="" disabled selected>Select position</option>
+              <option value="instructor-i">Instructor I</option>
+              <option value="instructor-ii">Instructor II</option>
+              <option value="instructor-iii">Instructor III</option>
+              <option value="assistant-professor">Assistant Professor</option>
+              <option value="associate-professor">Associate Professor</option>
+              <option value="professor">Professor</option>
+              <option value="program-chair">Program Chair</option>
+              <option value="dean">Dean</option>
+            </select>
+          </div>
+          <div>
+            <label for="collegeDepartment" class="px-3 font-dm text-sm">College Department</label>
+            <input type="text" id="collegeDepartment"
+                   placeholder="College of Computer Studies"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+          <div>
+            <label for="advisoryClass" class="px-3 font-dm text-sm">Advisory Class (if applicable)</label>
+            <input type="text" id="advisoryClass"
+                   placeholder="BSIT 3A"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+          </div>
+          <div>
+            <label for="courseHandled" class="px-3 font-dm text-sm">Course Handled (if applicable)</label>
+            <input type="text" id="courseHandled"
+                   placeholder="Data Structures and Algorithms"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label class="px-3 font-dm text-sm block mb-1">Degree/s (put N/A to other field if not multiple degree holder)</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input type="text" id="degree1"
+                   placeholder="BS Information Technology"
+                   aria-label="Degree 1"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+            <input type="text" id="degree2"
+                   placeholder="MS Computer Science / N/A"
+                   aria-label="Degree 2"
+                   class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================= ACCOUNT SECURITY ============================= -->
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <h2 class="font-dm font-bold text-sm whitespace-nowrap">Account Security</h2>
+          <span class="flex-1 h-px bg-gray-300" aria-hidden="true"></span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+
+          <div class="space-y-1.5">
+            <div>
+              <label for="email" class="px-3 font-dm">Email</label>
+              <input type="email" id="email"
+                     placeholder="JuanDelaCruz@essu.edu.ph"
+                     class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+            </div>
+
+            <div>
+              <label for="password" class="px-3 font-dm">Password</label>
+              <div class="relative">
+                <input type="password" id="password"
+                       placeholder="•••••••••••••"
+                       class="border border-gray-200 bg-gray-100 w-full py-1.5 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm">
+                <svg id="eyecon" onclick="eye(event)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <ul id="reqs" class="space-y-1 font-dm">
+            <li data-rule="len" class="flex items-center gap-2 text-xs text-gray-400">
+              <span class="req-dot w-2 h-2 rounded-full border border-gray-400 shrink-0"></span>
+              At least 8 characters
+            </li>
+            <li data-rule="upper" class="flex items-center gap-2 text-xs text-gray-400">
+              <span class="req-dot w-2 h-2 rounded-full border border-gray-400 shrink-0"></span>
+              One upper case letter <span class="italic text-gray-300">(A-Z)</span>
+            </li>
+            <li data-rule="lower" class="flex items-center gap-2 text-xs text-gray-400">
+              <span class="req-dot w-2 h-2 rounded-full border border-gray-400 shrink-0"></span>
+              One lower case letter <span class="italic text-gray-300">(a-z)</span>
+            </li>
+            <li data-rule="num" class="flex items-center gap-2 text-xs text-gray-400">
+              <span class="req-dot w-2 h-2 rounded-full border border-gray-400 shrink-0"></span>
+              One number <span class="italic text-gray-300">(0-9)</span>
+            </li>
+            <li data-rule="special" class="flex items-center gap-2 text-xs text-gray-400">
+              <span class="req-dot w-2 h-2 rounded-full border border-gray-400 shrink-0"></span>
+              One special character <span class="italic text-gray-300">(!@#$%^&*()-+...)</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <p id="message" class="font-dm font-light h-5 text-center"></p>
+
+      <div>
+        <button id="submit" type="submit" class="bg-green-600 text-white w-full h-9 rounded-md hover:bg-green-700 transition duration-300 font-poppins text-sm font-bold">
+          Create Account
+        </button>
+      </div>
+
+      <p class="text-center text-xs font-dm text-gray-400">© 2026</p>
+    </form>
+  </div>
+
+</body>
+</html>

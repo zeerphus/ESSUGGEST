@@ -1,0 +1,12 @@
+[build]
+  # No build step needed since output.css is already committed.
+  # If you later want Netlify to run Tailwind itself, uncomment the line below
+  # and make sure "tailwindcss" is in your package.json dependencies.
+  # command = "npm install && npx tailwindcss -i src/input.css -o src/output.css --minify"
+
+  publish = "."
+
+[[redirects]]
+  from = "/"
+  to = "/pages/homepage.html"
+  status = 200

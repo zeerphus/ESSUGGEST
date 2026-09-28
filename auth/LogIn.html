@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/jpg" href="/assets/LOGO.png" />
+    <title>ESSUGGEST | Log In</title>
+    <link rel="stylesheet" href="/src/output.css" />
+    <link rel="stylesheet" href="/src/validation.css" />
+  </head>
+  <body class="flex justify-center items-center min-h-screen bg-gray-200 px-4 sm:px-6 md:px-0">
+    <div class="relative w-110 h-130 bg-white rounded-2xl md:rounded-r-none shadow-2xl">
+
+      <div class="absolute top-4 left-4 sm:top-5 sm:left-5 flex items-center gap-80">
+        <a
+          href="../pages/homepage.html"
+          aria-label="Back to homepage"
+          class="flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+          </svg>
+        </a>
+
+        <a
+          href="/auth/supadL.html"
+          aria-label="Staff access"
+          class="flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-200"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33" />
+          </svg>
+        </a>
+      </div>
+
+      <h1 class="text-center text-4xl font-poppins font-black mt-20">
+        WELCOME
+      </h1>
+      <p
+        class="text-center text-sm opacity-50 mb-10 font-thin italic font-jakarta"
+      >
+        Log in to your account
+      </p>
+
+      <form
+        class="flex justify-center items-center flex-col space-y-1"
+        onsubmit="Login(event)"
+      >
+        <div class="w-90 mb-2.5">
+          <label for="" class="px-3 font-dm">Email</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="JuanDelaCruz@gmail.com"
+            class="border border-gray-200 bg-gray-100 w-full py-2 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm"
+          />
+        </div>
+
+        <div class="w-90">
+          <div class="flex justify-between items-center mb-1">
+          <label for="" class="px-3 font-dm">Password</label>
+           <a
+            class="text-sm font-dm hover:underline transition- duration-300 text-gray-500"
+            href="#"
+            >Forgot password?</a>
+          </div>
+          <div class="relative">
+            <input
+              type="password"
+              id="password"
+              placeholder="•••••••••••••"
+              class="border border-gray-200 bg-gray-100 w-full py-2 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm mb-1 text-sm"
+            />
+
+           <svg
+  id="eyecon"
+  onclick="eye(event)"
+  xmlns="http://www.w3.org/2000/svg"
+  fill="none"
+  viewBox="0 0 24 24"
+  stroke-width="1.5"
+  stroke="currentColor"
+  class="size-4 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
+>
+  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg>
+          </div>
+        </div>
+
+
+        <p id="message" class="font-dm font-light h-5"></p>
+
+        <div class="flex justify-center items-center">
+          <!-- flex + items-center + justify-center keep the loader centered in the button -->
+          <button
+            id="submit"
+            type="submit"
+            class="flex items-center justify-center bg-green-600 text-white w-90 h-10 rounded-md hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-90 transition duration-300 font-poppins text-md font-bold"
+          >
+            Log In
+          </button>
+        </div>
+        <p class="text-center font-dm text-sm mb-17">
+          Don't have an account?
+
+          <a class="text-blue-500" href="/auth/SignUp.html">Sign up here.</a>
+        </p>
+
+        <p class="text-center text-sm font-dm">© 2026</p>
+      </form>
+    </div>
+
+    <div
+      class="bg-black w-110 h-130 rounded-r-2xl relative p-3.5 shadow-2xl md:block hidden"
+    >
+      <video
+        autoplay
+        muted
+        loop
+        class="w-100 absolute rounded-2xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      >
+        <source src="/assets/moGraph (login).mp4" />
+        <source src="/assets/moGraph (login).webm" />
+      </video>
+    </div>
+
+    <!-- ldrs: registers the <l-mirage> loader (must come before Login.js is used) -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/mirage.js"></script>
+    <script type="module" src="/auth/Login.js" defer></script>
+
+    <!--kaiser was here-->
+    
+  </body>
+</html>

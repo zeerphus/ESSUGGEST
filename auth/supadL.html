@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Staff Access</title>
+<link rel="stylesheet" href="/src/output.css" />
+<style>
+  body { font-family: 'DM Sans', sans-serif; }
+  .font-dm-mono { font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-gray-100 p-5">
+
+  <div class="relative w-full max-w-md bg-white rounded-2xl shadow-xl px-7 pt-9 pb-8 text-center">
+     <a
+        href="/auth/LogIn.html"
+        aria-label="Back to homepage"
+        class="absolute top-4 left-4 sm:top-5 sm:left-5 flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-200"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+        </svg>
+      </a>
+
+    <p class="text-[#E22214] text-sm font-dm font-semibold mb-1">For Human Resources Management Office only!</p>
+    <h2 class="text-gray-900 font-semibold font-dm text-lg leading-snug mb-6">Enter the passcode given to your Office</h2>
+
+    <form id="staff-access-form">
+      <input
+        type="text"
+        name="username"
+        id="staff-username"
+        class="w-full mb-4 text-gray-500 placeholder:text-gray-400 bg-gray-200 border border-transparent rounded-lg py-3.5 px-4 font-dm focus:outline-none focus:border-green-600 focus:ring-4 focus:ring-green-600/15 focus:bg-white transition-colors duration-200"
+        placeholder="JuanDelaCruz"
+        inputmode="text"
+        autocomplete="off"
+        aria-label="Office username"
+      />
+
+      <input
+        type="password"
+        name="passcode"
+        id="staff-passcode"
+        class="w-full text-gray-500 mb-4 placeholder:text-gray-400 bg-gray-200 border border-transparent rounded-lg py-3.5 px-4 font-dm-mono focus:outline-none focus:border-green-600 focus:ring-4 focus:ring-green-600/15 focus:bg-white transition-colors duration-200"
+        placeholder="•••••••••••••"
+        maxlength="20"
+        inputmode="text"
+        autocomplete="off"
+        aria-label="Office passcode"
+      />
+
+      <p id="message" class="font-dm font-light text-sm h-5 mb-1"></p>
+
+      <div class="flex justify-center items-center">
+        <button
+          id="submit"
+          type="submit"
+          class="bg-green-600 text-white w-full h-10 rounded-md hover:bg-green-700 transition duration-300 font-poppins text-md font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          Log In
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script type="module" src="/auth/supadL.js" defer></script>
+</body>
+</html>
