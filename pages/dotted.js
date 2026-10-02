@@ -5,9 +5,7 @@
  *   1. Magnetic dot-grid background canvas (#dots-canvas)
  *   2. Shrink-on-scroll masthead (#site-header)
  *   3. Hero image float + tilt (essuggest.png)
- *   4. Team gallery expanding panels (aboutus.html, #team-gallery)
- *   (Staff access panel — HR passcode gate, fingerprint trigger — is not
- *   part of this file's current contents.)
+ *   4. Staff access panel (HR passcode gate, fingerprint trigger)
  */
 
 /* =========================================================================
@@ -457,28 +455,4 @@
   wrap.addEventListener("mouseleave", onLeave);
 })();
 
-/* =========================================================================
-   4) TEAM GALLERY (aboutus.html)
-   ---------------------------------------------------------------------
-   Expanding-panel gallery. The hovered / focused / tapped card gets
-   .is-active (CSS in animationLp.css does the actual expand). The last
-   active card stays open when the pointer leaves, so one panel is
-   always expanded. On touch devices, tapping a card opens it.
-========================================================================= */
-(function teamGallery() {
-  const gallery = document.getElementById("team-gallery");
-  if (!gallery) return;
 
-  const cards = Array.from(gallery.querySelectorAll(".team-card"));
-
-  function activate(card) {
-    if (card.classList.contains("is-active")) return;
-    cards.forEach((c) => c.classList.toggle("is-active", c === card));
-  }
-
-  cards.forEach((card) => {
-    card.addEventListener("mouseenter", () => activate(card));
-    card.addEventListener("focus", () => activate(card));
-    card.addEventListener("click", () => activate(card));
-  });
-})();
