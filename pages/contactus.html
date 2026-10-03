@@ -15,21 +15,20 @@
   <!-- =========================================================
        TOP UTILITY BAR
   ========================================================== -->
-  <div class="bg-green-950 text-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 h-11 flex items-center gap-3 sm:gap-5 text-sm">
+ <div class="bg-green-950 text-white">
+  <div class="mx-auto max-w-7xl w-full px-4 sm:px-6 h-11 flex items-center justify-between gap-4 sm:gap-8 text-sm">
 
-      <a href="/pages/homepage.html#hero" aria-label="Go to home section" class="shrink-0 flex items-center">
-        <img src="/assets/ESSU LOGO no bg.png" alt="ESSU seal" class="w-6 h-6 sm:w-9 sm:h-9 shrink-0 object-contain">
-      </a>
+    <nav class="flex items-center gap-3 sm:gap-8 text-white/90 text-xs sm:text-sm whitespace-nowrap">
+      <a href="/pages/aboutus.html" class="hover:text-white transition-colors duration-200 font-dm">About Us</a>
+      <a href="/pages/contactus.html" class="hover:text-white transition-colors duration-200 font-dm">Contact Us</a>
+    </nav>
 
-      <span class="h-5 sm:h-6 w-px bg-white/30" aria-hidden="true"></span>
+    <p class="max-[359px]:hidden font-dm font-bold text-green-600 text-[10px] sm:text-sm tracking-wide whitespace-nowrap">
+      SUGGEST · UPVOTE · IMPROVE
+    </p>
 
-      <nav class="flex items-center gap-3 sm:gap-8 text-white/90 text-xs sm:text-sm whitespace-nowrap">
-        <a href="/pages/aboutus.html" class="text-white font-dm">About Us</a>
-        <a href="/pages/contactus.html" class="hover:text-white transition-colors duration-200 font-dm">Contact Us</a>
-      </nav>
-    </div>
   </div>
+</div>
   <!-- =========================================================
        MAIN NAVBAR / MASTHEAD
        Now the sticky nav. #site-header + the site-* classes below
@@ -41,7 +40,7 @@
    <div class="site-header-bar bg-green-700">
     <div class="site-header-inner mx-auto max-w-7xl px-4 sm:px-6 h-20 flex items-center justify-between">
 
-      <a href="#" class="flex items-center gap-2 sm:gap-3" aria-label="ESSUGGEST home">
+      <a href="/pages/homepage.html" class="flex items-center gap-2 sm:gap-3" aria-label="ESSUGGEST home">
   <div class="site-logo-box w-11 h-11 sm:w-14 sm:h-14 flex justify-center items-center rounded-xl bg-green-800 shadow-2xl  shrink-0">
     <img src="/assets/LOGO.png" alt="ESSUGGEST logo" class="site-logo-img w-8 h-8 sm:w-10 sm:h-10 object-contain">
   </div>
@@ -140,11 +139,11 @@
   <footer class="bg-green-700 text-white z-20 relative">
     <div class="mx-auto max-w-7xl px-6 py-16 grid sm:grid-cols-3 gap-10">
       <div class="scroll-reveal">
-        <h4 class="font-dm font-bold mb-4">Downloads</h4>
+        <h4 class="font-dm font-bold mb-4">Guides</h4>
         <ul class="space-y-2 text-white/85 text-sm">
-          <li><a href="/assets/pdfs/ESSUGGEST-User-Guide.pdf" target="_blank" rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">User Guide (PDF)</a></li>
-          <li><a href="/assets/pdfs/ESSUGGEST-Community-Guidelines.pdf" target="_blank" rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">Community Guidelines</a></li>
-          <li><a href="/assets/pdfs/ESSUGGEST-Reporting-Handbook.pdf" target="_blank" rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">Reporting Handbook</a></li>
+          <li><a href="/pages/UserGuides.html"  rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">User Guide</a></li>
+          <li><a href="/pages/ComGuide.html" " rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">Community Guidelines</a></li>
+          <li><a href="/pages/ReportHandB.html"  rel="noopener noreferrer" class="font-dm font-light hover:text-white transition-colors duration-200">Reporting Handbook</a></li>
         </ul>
       </div>
       <div class="scroll-reveal scroll-reveal-delay-1">
@@ -181,15 +180,16 @@
 
         <nav class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/80">
           <a href="https://main.essu.edu.ph/" target="_blank" rel="noopener" class="font-dm hover:text-white transition-colors duration-200">ESSU Official Website</a>
-         <a href="/assets/pdfs/ESSUGGEST-Data-Privacy-Policy.pdf" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">Data Privacy Policy</a>
-          <a href="/assets/pdfs/ESSUGGEST-Security-Policy.pdf" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">Security Policy</a>
-          <a href="/assets/pdfs/ESSUGGEST-IP-Rights-Policy.pdf" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">IP Rights Policy</a>
+         <a href="/pages/PrivacyPolicy.html" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">Data Privacy Policy</a>
+          <a href="/pages/SecurityPolicy.html" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">Security Policy</a>
+          <a href="/pages/IPRightsPolicy.html" target="_blank" rel="noopener noreferrer" class="font-dm hover:text-white transition-colors duration-200">IP Rights Policy</a>
+          <a href="/pages/TermsofUse.html" class="font-dm hover:text-white transition-colors duration-200">Terms of Use</a>
         </nav>
       </div>
 
       <div class="border-t border-white/10">
         <p class="mx-auto text-center px-6 py-5 text-xs text-white/60 font-dm font-extralight">
-          © 2026 Eastern Samar State University. All content is public domain unless otherwise stated.
+          © 2026 Eastern Samar State University. All rights reserved.
         </p>
       </div>
     </div>

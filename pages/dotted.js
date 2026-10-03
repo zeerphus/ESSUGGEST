@@ -6,6 +6,7 @@
  *   2. Shrink-on-scroll masthead (#site-header)
  *   3. Hero image float + tilt (essuggest.png)
  *   4. Staff access panel (HR passcode gate, fingerprint trigger)
+ *   5. Hero video sound controls (#hero-video: mute toggle + volume)
  */
 
 /* =========================================================================
@@ -61,7 +62,7 @@
 
   const SPACING = 30;   // px between dots — lower = denser grid
   const BASE_RADIUS = 1.4;  // dot size at idle
-  const MAX_RADIUS = 6;    // dot size when cursor is on it (was 6 — bigger bulge)
+  const MAX_RADIUS = 4;    // dot size when cursor is on it (was 6 — bigger bulge)
   const BULGE_INFLUENCE = 220;  // px radius around cursor where dots grow/pull/shake
   const COLOR_INFLUENCE = 100;  // px radius around cursor where dots tint green (smaller than bulge)
   const MAX_PULL = 26;   // max px a dot can be dragged toward cursor (was 16 — bigger bulge)
@@ -455,4 +456,70 @@
   wrap.addEventListener("mouseleave", onLeave);
 })();
 
+/* =========================================================================
+   5) HERO VIDEO SOUND CONTROLS
+   ---------------------------------------------------------------------
+   Video stays autoplay + muted + loop (browsers only allow autoplay when
+   muted). The only things the user can change are mute/unmute and volume.
+   Clicking the button or dragging the slider counts as a user gesture,
+   so unmuting is allowed.
+========================================================================= */
+(function videoSoundControls() {
+  const video  = document.getElementById("hero-video");
+  const toggle = document.getElementById("vc-toggle");
+  const slider = document.getElementById("vc-volume");
+  if (!video || !toggle || !slider) return;
 
+  const iconOn  = toggle.querySelector(".vc-icon-on");
+  const iconOff = toggle.querySelector(".vc-icon-off");
+
+  const DEFAULT_VOLUME = 0.5;
+  let lastVolume = DEFAULT_VOLUME;
+
+  // iOS Safari ignores video.volume (always reads 1), so a slider would do
+  // nothing there. Detect that and keep just the mute button.
+  video.volume = DEFAULT_VOLUME;
+  if (Math.abs(video.volume - DEFAULT_VOLUME) > 0.01) {
+    slider.hidden = true;
+  }
+
+  function render() {
+    const silent = video.muted || video.volume === 0;
+    const pct = silent ? 0 : Math.round(video.volume * 100);
+
+    // SVG elements have no .hidden property (only HTML elements do), so
+    // assigning it does nothing. Toggle the attribute instead; the CSS rule
+    // `.vc-btn svg[hidden] { display: none }` handles the rest.
+    iconOn.toggleAttribute("hidden", silent);
+    iconOff.toggleAttribute("hidden", !silent);
+    toggle.setAttribute("aria-label", silent ? "Unmute video" : "Mute video");
+
+    slider.value = pct;
+    slider.style.setProperty("--vol", pct + "%");
+    slider.setAttribute("aria-valuetext", pct + " percent");
+  }
+
+  toggle.addEventListener("click", () => {
+    if (video.muted || video.volume === 0) {
+      video.muted = false;
+      if (video.volume === 0) video.volume = lastVolume;
+    } else {
+      video.muted = true;
+    }
+  });
+
+  slider.addEventListener("input", () => {
+    const v = slider.value / 100;
+    video.volume = v;
+    video.muted = v === 0;
+    if (v > 0) lastVolume = v;
+  });
+
+  video.addEventListener("volumechange", render);
+
+  // Belt and braces for autoplay (e.g. if the tab loaded in the background)
+  const p = video.play();
+  if (p && p.catch) p.catch(() => {});
+
+  render();
+})();

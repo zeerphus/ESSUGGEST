@@ -439,3 +439,108 @@ summary:focus-visible {
 .faq-chevron {
   display: inline-block;
 }
+
+/* -----------------------------------------------------------------------
+   VIDEO SOUND CONTROLS (hero motion graphic)
+   Pill sits bottom-left over the video. On devices with hover, the slider
+   slides out when the pill is hovered or focused; on touch devices it is
+   always visible since there is no hover.
+----------------------------------------------------------------------- */
+.video-controls {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(5, 46, 22, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.vc-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 999px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.2s ease;
+}
+
+.vc-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.vc-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.vc-btn svg[hidden] {
+  display: none;
+}
+
+.vc-volume {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0;
+  height: 4px;
+  margin: 0;
+  opacity: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  /* --vol is set from JS so the filled part follows the thumb */
+  background: linear-gradient(
+    to right,
+    #fef08a var(--vol, 0%),
+    rgba(255, 255, 255, 0.3) var(--vol, 0%)
+  );
+  transition: width 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+}
+
+.vc-volume[hidden] {
+  display: none;
+}
+
+.video-controls:hover .vc-volume,
+.video-controls:focus-within .vc-volume {
+  width: 96px;
+  opacity: 1;
+  margin: 0 10px 0 4px;
+}
+
+@media (hover: none) {
+  .vc-volume {
+    width: 96px;
+    opacity: 1;
+    margin: 0 10px 0 4px;
+  }
+}
+
+.vc-volume::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fef08a;
+  border: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.vc-volume::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fef08a;
+  border: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
