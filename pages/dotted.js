@@ -523,3 +523,408 @@
 
   render();
 })();
+
+/* =========================================================================
+   6) SITE SEARCH (utility bar)
+   ---------------------------------------------------------------------
+   Append this to the end of dotted.js (every page already loads it), or
+   save it as /pages/search.js and add a <script> tag after dotted.js.
+
+   How it works: on first focus it fetches every page listed in PAGES,
+   reads the visible content (headings, paragraphs, list items, FAQ
+   questions) and builds an in-memory index. Because it reads the real
+   HTML, there is no separate index to keep in sync — edit a page and the
+   search follows. Clicking a result opens the page, scrolls to the
+   matching block and highlights the matched words.
+
+   Needs to run from a web server (Vite dev server / Netlify), not from
+   a file:// URL, because it uses fetch().
+========================================================================= */
+(function siteSearch() {
+  const input = document.getElementById("site-search-input");
+  const panel = document.getElementById("site-search-results");
+  const status = document.getElementById("site-search-status");
+  if (!input || !panel) return;
+  const wrap = input.closest(".site-search");
+
+  // Every page that should be searchable. Add new pages here.
+  const PAGES = [
+    "/pages/homepage.html",
+    "/pages/aboutus.html",
+    "/pages/contactus.html",
+    "/pages/faq.html",
+    "/pages/UserGuides.html",
+    "/pages/ComGuide.html",
+    "/pages/ReportHandB.html",
+    "/pages/PrivacyPolicy.html",
+    "/pages/SecurityPolicy.html",
+    "/pages/IPrightsPolicy.html",
+    "/pages/TermsofUse.html",
+  ];
+
+  const BLOCKS = "h1,h2,h3,h4,summary,p,li,address";
+  const SKIP_IDS = new Set(["dots-area", "policy-content"]);
+  const HL_KEY = "essuggest:search-highlight";
+  const MAX_RESULTS = 8;
+  const MAX_PER_PAGE = 3;
+  const MIN_QUERY = 2;
+
+  let index = null;
+  let loading = null;
+  let current = [];
+  let active = -1;
+  let hitTimer = null;
+
+  /* ----------------------------- helpers ------------------------------ */
+  const norm = (s) => s.replace(/\s+/g, " ").trim();
+  const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const samePath = (a, b) =>
+    a.replace(/\/$/, "").toLowerCase() === b.replace(/\/$/, "").toLowerCase();
+
+  function appendMarked(el, text, terms) {
+    if (!terms.length) {
+      el.appendChild(document.createTextNode(text));
+      return;
+    }
+    const re = new RegExp(
+      "(" + terms.map(escapeRe).sort((a, b) => b.length - a.length).join("|") + ")",
+      "gi"
+    );
+    text.split(re).forEach((part, i) => {
+      if (!part) return;
+      if (i % 2) {
+        const m = document.createElement("mark");
+        m.textContent = part;
+        el.appendChild(m);
+      } else {
+        el.appendChild(document.createTextNode(part));
+      }
+    });
+  }
+
+  function snippet(text, terms) {
+    const lower = text.toLowerCase();
+    let at = -1;
+    for (const t of terms) {
+      const i = lower.indexOf(t);
+      if (i !== -1 && (at === -1 || i < at)) at = i;
+    }
+    const start = Math.max(0, at - 50);
+    const end = Math.min(text.length, start + 150);
+    return (start > 0 ? "…" : "") + text.slice(start, end) + (end < text.length ? "…" : "");
+  }
+
+  /* ----------------------------- indexing ----------------------------- */
+  function extract(html, url) {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const page = (doc.title || url).replace(/^ESSUGGEST\s*\|\s*/i, "").trim();
+
+    // Chrome that repeats on every page, plus decorative/duplicate nodes
+    // (aria-hidden removes the marquee copies and arrow dividers).
+    doc
+      .querySelectorAll("script,style,canvas,svg,video,footer,header,aside,nav,[aria-hidden='true']")
+      .forEach((n) => n.remove());
+
+    // <main> where a page has one, plus the title band (#dots-area) on the
+    // policy pages. Skip roots nested inside another root.
+    const roots = [...doc.querySelectorAll("main, #dots-area")].filter(
+      (el, _, all) => !all.some((o) => o !== el && o.contains(el))
+    );
+
+    const out = [];
+    roots.forEach((root) => {
+      let heading = page;
+      root.querySelectorAll(BLOCKS).forEach((el) => {
+        const text = norm(el.textContent).replace(/\s*[▾▸]\s*$/, "");
+        if (!text) return;
+        const isHead = /^(H[1-4]|SUMMARY)$/.test(el.tagName);
+        if (isHead) heading = text.replace(/^\d+\.\s*/, "");
+        const idEl = el.closest("[id]");
+        const anchor = idEl && !SKIP_IDS.has(idEl.id) ? "#" + idEl.id : "";
+        out.push({ url, page, anchor, heading, text, isHead });
+      });
+    });
+    return out;
+  }
+
+  function load() {
+    if (loading) return loading;
+    loading = Promise.allSettled(
+      PAGES.map((url) =>
+        fetch(url)
+          .then((r) => {
+            if (!r.ok) throw new Error(url + " " + r.status);
+            return r.text();
+          })
+          .then((html) => extract(html, url))
+      )
+    ).then((results) => {
+      const all = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+
+      // Drop text that shows up on 2+ pages (policy "Keep reading" cards,
+      // "Questions about this policy?" boxes, etc.) so it doesn't flood results.
+      const seen = new Map();
+      all.forEach((e) => {
+        if (!seen.has(e.text)) seen.set(e.text, new Set());
+        seen.get(e.text).add(e.url);
+      });
+
+      index = all
+        .filter((e) => seen.get(e.text).size < 2)
+        .map((e) => ({ ...e, hay: (e.page + " " + e.heading + " " + e.text).toLowerCase() }));
+    });
+    return loading;
+  }
+
+  /* ------------------------------ ranking ----------------------------- */
+  function search(q) {
+    const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    const phrase = terms.join(" ");
+    const scored = [];
+
+    for (const e of index) {
+      if (!terms.every((t) => e.hay.includes(t))) continue;
+      const text = e.text.toLowerCase();
+      const head = e.heading.toLowerCase();
+      let score = e.isHead ? 4 : 0;
+      if (text.includes(phrase)) score += 5;
+      terms.forEach((t) => {
+        if (text.includes(t)) score += 2;
+        if (head.includes(t)) score += 1;
+      });
+      scored.push({ e, score });
+    }
+
+    scored.sort((a, b) => b.score - a.score);
+
+    const perPage = {};
+    const picked = [];
+    for (const s of scored) {
+      perPage[s.e.url] = (perPage[s.e.url] || 0) + 1;
+      if (perPage[s.e.url] > MAX_PER_PAGE) continue;
+      picked.push(s.e);
+      if (picked.length === MAX_RESULTS) break;
+    }
+    return { terms, results: picked };
+  }
+
+  /* ------------------------------ rendering --------------------------- */
+  function open() {
+    panel.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+  }
+
+  function close() {
+    panel.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    input.removeAttribute("aria-activedescendant");
+    active = -1;
+  }
+
+  function showMessage(text) {
+    panel.replaceChildren();
+    const d = document.createElement("p");
+    d.className = "site-search-empty";
+    d.textContent = text;
+    panel.appendChild(d);
+    current = [];
+    status.textContent = text;
+    open();
+  }
+
+  function render({ terms, results }, q) {
+    if (!results.length) {
+      showMessage("No results for “" + q + "”. Try a different word.");
+      return;
+    }
+    panel.replaceChildren();
+    current = results;
+    active = -1;
+
+    results.forEach((e, i) => {
+      const a = document.createElement("a");
+      a.id = "site-search-opt-" + i;
+      a.className = "site-search-item";
+      a.setAttribute("role", "option");
+      a.tabIndex = -1;
+      a.href = e.url + e.anchor;
+
+      const title = document.createElement("div");
+      title.className = "site-search-title";
+      const name = document.createElement("span");
+      appendMarked(name, e.heading, terms);
+      const pill = document.createElement("span");
+      pill.className = "site-search-page";
+      pill.textContent = e.page;
+      title.append(name, pill);
+      a.appendChild(title);
+
+      if (!e.isHead) {
+        const sn = document.createElement("p");
+        sn.className = "site-search-snippet";
+        appendMarked(sn, snippet(e.text, terms), terms);
+        a.appendChild(sn);
+      }
+
+      a.addEventListener("click", (ev) => go(ev, e, terms));
+      panel.appendChild(a);
+    });
+
+    status.textContent = results.length + (results.length === 1 ? " result" : " results");
+    open();
+  }
+
+  function setActive(i) {
+    const items = panel.querySelectorAll(".site-search-item");
+    if (!items.length) return;
+    active = (i + items.length) % items.length;
+    items.forEach((el, n) => el.classList.toggle("is-active", n === active));
+    input.setAttribute("aria-activedescendant", items[active].id);
+    items[active].scrollIntoView({ block: "nearest" });
+  }
+
+  async function run() {
+    const q = input.value.trim();
+    if (q.length < MIN_QUERY) {
+      close();
+      return;
+    }
+    if (!index) {
+      showMessage("Searching…");
+      await load();
+      if (input.value.trim() !== q) return; // a newer keystroke will re-run
+    }
+    render(search(q), q);
+  }
+
+  /* ----------------------- navigate + highlight ----------------------- */
+  function clearHits() {
+    clearTimeout(hitTimer);
+    document.querySelectorAll("mark.search-hit").forEach((m) => {
+      const p = m.parentNode;
+      m.replaceWith(document.createTextNode(m.textContent));
+      p.normalize();
+    });
+  }
+
+  function applyHighlight({ sig, terms }) {
+    const el = [...document.querySelectorAll(BLOCKS)].find(
+      (n) => !n.closest("footer,header,aside,nav") && norm(n.textContent).includes(sig)
+    );
+    if (!el) return;
+
+    clearHits();
+    const details = el.closest("details");
+    if (details) details.open = true;
+
+    const re = new RegExp(
+      "(" + terms.map(escapeRe).sort((a, b) => b.length - a.length).join("|") + ")",
+      "gi"
+    );
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+
+    nodes.forEach((n) => {
+      if (!re.test(n.nodeValue)) return;
+      re.lastIndex = 0;
+      const frag = document.createDocumentFragment();
+      n.nodeValue.split(re).forEach((part, i) => {
+        if (!part) return;
+        if (i % 2) {
+          const m = document.createElement("mark");
+          m.className = "search-hit";
+          m.textContent = part;
+          frag.appendChild(m);
+        } else {
+          frag.appendChild(document.createTextNode(part));
+        }
+      });
+      n.replaceWith(frag);
+    });
+
+    el.scrollIntoView({ block: "center" });
+    hitTimer = setTimeout(() => {
+      document.querySelectorAll("mark.search-hit").forEach((m) => m.classList.add("is-fading"));
+      hitTimer = setTimeout(clearHits, 700);
+    }, 6000);
+  }
+
+  function go(ev, entry, terms) {
+    const payload = { sig: entry.text.slice(0, 60), terms };
+    const target = new URL(entry.url, location.href);
+
+    if (samePath(location.pathname, target.pathname)) {
+      ev.preventDefault();
+      close();
+      history.replaceState(null, "", target.pathname + entry.anchor);
+      applyHighlight(payload);
+      return;
+    }
+    try {
+      sessionStorage.setItem(HL_KEY, JSON.stringify(payload));
+    } catch (_) {
+      /* storage blocked: the link still opens the page, just without highlight */
+    }
+  }
+
+  function applyPending() {
+    let raw = null;
+    try {
+      raw = sessionStorage.getItem(HL_KEY);
+      sessionStorage.removeItem(HL_KEY);
+    } catch (_) {}
+    if (!raw) return;
+    try {
+      // short delay so fonts/layout settle before we scroll
+      setTimeout(() => applyHighlight(JSON.parse(raw)), 150);
+    } catch (_) {}
+  }
+
+  if (document.readyState === "complete") applyPending();
+  else window.addEventListener("load", applyPending);
+
+  /* ------------------------------- events ----------------------------- */
+  input.addEventListener("focus", load);
+  input.addEventListener("input", run);
+  input.addEventListener("click", () => {
+    if (panel.hidden && input.value.trim().length >= MIN_QUERY) run();
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (panel.hidden) run();
+      else setActive(active + 1);
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!panel.hidden) setActive(active - 1);
+    } else if (e.key === "Enter") {
+      const items = panel.querySelectorAll(".site-search-item");
+      if (items.length) {
+        e.preventDefault();
+        items[active >= 0 ? active : 0].click();
+      }
+    } else if (e.key === "Escape") {
+      if (!panel.hidden) close();
+      else input.blur();
+    }
+  });
+
+  // Close when clicking elsewhere or tabbing out of the widget.
+  document.addEventListener("pointerdown", (e) => {
+    if (!wrap.contains(e.target)) close();
+  });
+  wrap.addEventListener("focusout", (e) => {
+    if (e.relatedTarget && !wrap.contains(e.relatedTarget)) close();
+  });
+
+  // "/" focuses the search box (unless you're already typing somewhere).
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = document.activeElement;
+    if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+    e.preventDefault();
+    input.focus();
+  });
+})();

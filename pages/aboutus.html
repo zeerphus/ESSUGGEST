@@ -7,6 +7,8 @@
 <title>ESSUGGEST | About Us</title>
 <link rel="stylesheet" href="/src/output.css" />
 <link rel="stylesheet" href="/pages/animationLp.css" />
+<link rel="stylesheet" href="/pages/Teamgallery.css" />
+</head>
 <body class="font-body text-gray-900 antialiased">
 
   <a href="#dots-area" class="skip-link">Skip to main content</a>
@@ -22,9 +24,26 @@
       <a href="/pages/contactus.html" class="hover:text-white transition-colors duration-200 font-dm">Contact Us</a>
     </nav>
 
-    <p class="max-[359px]:hidden font-dm font-bold text-green-600 text-[10px] sm:text-sm tracking-wide whitespace-nowrap">
-      SUGGEST · UPVOTE · IMPROVE
-    </p>
+    <div class="site-search font-dm" role="search">
+  <svg class="site-search-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+  </svg>
+  <input
+    id="site-search-input"
+    class="site-search-input"
+    type="search"
+    placeholder="Search ESSUGGEST"
+    aria-label="Search all ESSUGGEST pages"
+    autocomplete="off"
+    spellcheck="false"
+    role="combobox"
+    aria-expanded="false"
+    aria-controls="site-search-results"
+    aria-autocomplete="list"
+  />
+  <div id="site-search-results" class="site-search-results" role="listbox" aria-label="Search results" hidden></div>
+  <p id="site-search-status" class="sr-only" aria-live="polite"></p>
+</div>
 
   </div>
 </div>
@@ -108,7 +127,7 @@
         </p>
       </div>
       <div class="scroll-reveal scroll-reveal-delay-1">
-        <div class="w-full aspect-4/3 rounded-3xl bg-gray-200 flex items-center justify-center text-gray-400 text-sm font-mono">
+        <div class="w-full aspect-4/3 rounded-3xl shadow-2xl bg-gray-200 flex items-center justify-center text-gray-400 text-sm font-mono hover:scale-105 transition-transform duration-300">
           <video muted autoplay loop class="rounded-2xl shadow-2xl">
             <source src="/assets/box logo.mp4">
             <source src="/assets/box logo.webm">
@@ -120,6 +139,8 @@
 
   <!-- =========================================================
        THE TEAM BEHIND ESSUGGEST
+       data-team-gallery turns the cards into an interactive gallery
+       (see /pages/team-gallery.js).
   ========================================================== -->
   <section>
     <div class="mx-auto max-w-5xl px-6 py-20 z-10 relative">
@@ -130,7 +151,7 @@
         </h2>
       </div>
 
-      <div class="flex flex-wrap justify-center gap-6 z-10 relative">
+      <div data-team-gallery class="flex flex-wrap justify-center gap-6 z-10 relative">
         <div class="scroll-reveal bg-white rounded-2xl p-6 shadow-md w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]">
           <div class="w-16 h-24 mx-auto flex justify-center items-center rounded-full overflow-hidden mb-4">
             <img src="/assets/Alcido.jpg" alt="Alcido, Jay Anne E." class="w-full h-full object-cover">
@@ -177,12 +198,12 @@
        FOOTER
   ========================================================== -->
   <footer class="bg-green-700 text-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16 grid sm:grid-cols-3 gap-8 sm:gap-10">
+   <div class="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16 grid sm:grid-cols-3 gap-8 sm:gap-10 text-center">
       <div class="scroll-reveal">
         <h3 class="font-dm font-bold mb-4">Guides</h3>
         <ul class="space-y-2 text-white/85 text-sm">
           <li><a href="/pages/UserGuides.html"   class="font-dm font-light hover:text-white transition-colors duration-200">User Guide</a></li>
-          <li><a href="/pages/ComGuide.html" "  class="font-dm font-light hover:text-white transition-colors duration-200">Community Guidelines</a></li>
+          <li><a href="/pages/ComGuide.html"   class="font-dm font-light hover:text-white transition-colors duration-200">Community Guidelines</a></li>
           <li><a href="/pages/ReportHandB.html"  class="font-dm font-light hover:text-white transition-colors duration-200">Reporting Handbook</a></li>
         </ul>
       </div>
@@ -236,6 +257,6 @@
   </footer>
 
   <script src="/pages/dotted.js"></script>
+  <script src="/pages/Teamgallery.js"></script>
 </body>
 </html>
-  

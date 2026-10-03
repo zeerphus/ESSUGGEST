@@ -26,9 +26,26 @@
       <a href="/pages/contactus.html" class="hover:text-white transition-colors duration-200 font-dm">Contact Us</a>
     </nav>
 
-    <p class="max-[359px]:hidden font-dm font-bold text-green-600 text-[10px] sm:text-sm tracking-wide whitespace-nowrap">
-      SUGGEST · UPVOTE · IMPROVE
-    </p>
+    <div class="site-search font-dm" role="search">
+  <svg class="site-search-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+  </svg>
+  <input
+    id="site-search-input"
+    class="site-search-input"
+    type="search"
+    placeholder="Search ESSUGGEST"
+    aria-label="Search all ESSUGGEST pages"
+    autocomplete="off"
+    spellcheck="false"
+    role="combobox"
+    aria-expanded="false"
+    aria-controls="site-search-results"
+    aria-autocomplete="list"
+  />
+  <div id="site-search-results" class="site-search-results" role="listbox" aria-label="Search results" hidden></div>
+  <p id="site-search-status" class="sr-only" aria-live="polite"></p>
+</div>
 
   </div>
 </div>
@@ -258,7 +275,7 @@
        FOOTER
   ========================================================== -->
   <footer class="bg-green-700 text-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16 grid sm:grid-cols-3 gap-8 sm:gap-10">
+   <div class="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16 grid sm:grid-cols-3 gap-8 sm:gap-10 text-center">
       <div class="scroll-reveal">
         <h3 class="font-dm font-bold mb-4">Guides</h3>
         <ul class="space-y-2 text-white/85 text-sm">
