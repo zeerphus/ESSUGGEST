@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="/assets/LOGO.png" />
+<title>ESSUGGEST</title>
+<link rel="stylesheet" href="/src/output.css" />
+<link rel="stylesheet" href="/app/main.css" />
+</head>
+<body class="min-h-dvh">
+
+  <!-- HEADER -->
+  <header class="max-sm:fixed max-sm:bottom-0 max-sm:inset-x-0 max-sm:rounded-t-2xl sm:sticky sm:top-0 z-30 flex items-center gap-2 sm:gap-4 px-2 sm:px-6 py-1.5 sm:py-3 bg-green-700 shadow-[0_-4px_16px_rgba(0,0,0,0.18)] sm:shadow-sm">
+    <!-- LOGO BUTTON — click to refresh the feed (or, from the profile view, go back to the feed) -->
+<button type="button" id="logo-refresh"
+        class="shrink-0 w-10 h-10 rounded-lg bg-green-800 hover:bg-green-900 active:scale-95 flex items-center justify-center shadow-sm transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 max-sm:order-1 max-sm:flex-1 max-sm:w-auto max-sm:h-auto max-sm:flex-col max-sm:gap-0.5 max-sm:py-1 max-sm:bg-transparent max-sm:hover:bg-transparent max-sm:shadow-none"
+        title="Refresh feed" aria-label="Refresh feed"
+        onclick="if (window.essuGoFeed && window.essuGoFeed()) return; window.scrollTo({ top: 0 }); window.location.reload();">
+  <img src="/assets/LOGO.png" alt="" class="w-6 h-6 pointer-events-none">
+  <span class="sm:hidden text-[10px] leading-none text-white/95 font-dm">Home</span>
+</button>
+
+    <div class="hidden sm:block flex-1 min-w-0 max-w-md">
+      <label class="flex items-center gap-2 bg-white/90 rounded-full px-3 sm:px-4 py-2 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" placeholder="Find anything" class="w-full min-w-0 bg-transparent text-sm text-gray-600 placeholder-gray-400 outline-none font-dm" />
+      </label>
+    </div>
+
+    <!-- Search tab (phones only): goes back to the feed, scrolls up and focuses the search box -->
+    <button type="button" id="bottom-search" aria-label="Search"
+            class="sm:hidden max-sm:order-2 flex-1 flex flex-col items-center gap-0.5 py-1 text-white/95 cursor-pointer"
+            onclick="window.essuGoFeed && window.essuGoFeed(); window.scrollTo({ top: 0, behavior: 'smooth' }); document.getElementById('mobile-search').focus({ preventScroll: true });">
+      <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"></line>
+      </svg>
+      <span class="text-[10px] leading-none font-dm">Search</span>
+    </button>
+
+    <div class="flex items-center gap-3 sm:gap-4 ml-auto shrink-0 max-sm:contents">
+      <!-- SUGGEST BUTTON — opens the panel via main.js (id="suggest-toggle"
+           is what the suggest panel script looks for). Icon-only on phones. -->
+      <button type="button" id="suggest-toggle" aria-label="Suggest" class="flex items-center gap-1.5 bg-white/90 hover:bg-white text-sm font-semibold px-3 sm:px-3.5 py-2 rounded-full shadow-sm transition text-green-700 font-dm cursor-pointer max-sm:order-3 max-sm:flex-none max-sm:justify-center max-sm:w-12 max-sm:h-12 max-sm:p-0 max-sm:mx-1 max-sm:-translate-y-4 max-sm:shadow-lg max-sm:ring-4 max-sm:ring-green-600">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        <span class="hidden sm:inline">Suggest</span>
+      </button>
+
+      <!-- NOTIFICATIONS — dropdown panel anchored to the bell (see main.js).
+           Opens under the bell on sm+, above the bottom bar on phones
+           (same spot as the settings menu). -->
+      <div class="sm:relative max-sm:order-4 max-sm:flex-1 max-sm:flex max-sm:justify-center" id="notif-wrap">
+        <button type="button" id="nav-notifications" aria-haspopup="dialog" aria-expanded="false" aria-controls="notif-panel"
+                class="p-1.5 -m-1.5 text-white/95 hover:text-white transition cursor-pointer max-sm:w-full max-sm:flex max-sm:flex-col max-sm:items-center max-sm:gap-0.5 max-sm:p-0 max-sm:m-0 max-sm:py-1"
+                title="Notifications" aria-label="Notifications">
+          <span class="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+            </svg>
+            <span id="notif-badge" class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[9px] flex items-center justify-center font-bold text-white bg-amber-700 font-jakarta">3</span>
+          </span>
+          <span class="sm:hidden text-[10px] leading-none font-dm">Alerts</span>
+        </button>
+
+        <div id="notif-panel" role="dialog" aria-labelledby="notif-heading"
+             class="hidden absolute z-40 max-sm:right-3 max-sm:bottom-[calc(100%+0.75rem)] sm:right-0 sm:top-12 w-[calc(100vw-1.5rem)] sm:w-96 overflow-hidden bg-white rounded-3xl border border-gray-200 shadow-2xl font-dm origin-top-right max-sm:origin-bottom-right opacity-0 scale-95 transition duration-150 motion-reduce:transition-none">
+
+          <div class="flex items-center justify-between gap-3 px-5 pt-4 pb-3">
+            <h2 id="notif-heading" class="text-lg font-bold text-black font-poppins">Notifications</h2>
+            <button type="button" id="notif-mark-all" class="text-xs font-semibold text-green-700 hover:text-green-800 hover:underline disabled:opacity-40 disabled:no-underline disabled:cursor-default transition cursor-pointer font-dm">Mark all as read</button>
+          </div>
+
+          <div class="flex items-center gap-2 px-5 pb-3">
+            <button type="button" data-notif-tab="all" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-green-700 text-white transition cursor-pointer font-dm">All</button>
+            <button type="button" data-notif-tab="unread" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition cursor-pointer font-dm">
+              Unread <span id="notif-unread-count" class="ml-0.5"></span>
+            </button>
+          </div>
+
+          <div class="border-t border-gray-200"></div>
+
+          <!-- List (rendered by main.js) -->
+          <div id="notif-list" class="max-h-[min(60dvh,24rem)] overflow-y-auto divide-y divide-gray-100"></div>
+        </div>
+      </div>
+
+      <div class="hidden sm:block w-px h-6 bg-white/40"></div>
+
+      <!-- SETTINGS MENU — toggled by main.js (#nav-toggle / #nav-menu) -->
+      <div class="sm:relative max-sm:order-5 max-sm:flex-1 max-sm:flex max-sm:justify-center" id="nav-menu-wrap">
+        <button type="button" id="nav-toggle" class="text-white/95 hover:text-white transition cursor-pointer p-1.5 -m-1.5 max-sm:w-full max-sm:flex max-sm:flex-col max-sm:items-center max-sm:gap-0.5 max-sm:p-0 max-sm:m-0 max-sm:py-1"
+                title="Open Settings" aria-label="Open settings" aria-haspopup="true" aria-expanded="false">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg>
+          <span class="sm:hidden text-[10px] leading-none font-dm">Menu</span>
+        </button>
+
+        <div id="nav-menu" role="menu" class="hidden absolute z-40 max-sm:right-3 max-sm:bottom-[calc(100%+0.75rem)] sm:right-0 sm:top-12 w-[calc(100vw-1.5rem)] max-w-80 py-3 bg-white rounded-3xl border border-gray-200 shadow-2xl">
+
+          <!-- Signed-in user -->
+          <div class="px-6 pb-4 mb-2 border-b border-gray-100">
+            <p id="nav-user-name" class="text-base font-semibold text-gray-900 truncate font-inter">Guest</p>
+            <p id="nav-user-email" class="text-sm text-gray-400 truncate font-dm"></p>
+          </div>
+
+          <!-- PROFILE — href="#profile" swaps the feed for the profile view (see main.js) -->
+           <a href="#profile" id="nav-profile" role="menuitem" class="flex items-center gap-4 px-6 py-3.5 text-base text-gray-700 hover:bg-gray-50 font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+</svg>
+
+
+            Profile
+          </a>
+
+    
+
+          <a href="#" id="nav-security" role="menuitem" class="flex items-center gap-4 px-6 py-3.5 text-base text-gray-700 hover:bg-gray-50 font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+</svg>
+
+            Password &amp; Security
+          </a>
+
+          <a href="#" id="nav-activity" role="menuitem" class="flex items-center gap-4 px-6 py-3.5 text-base text-gray-700 hover:bg-gray-50 font-dm">
+           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+
+
+            Recent Activity
+          </a>
+
+          <div class="my-2 border-t border-gray-100"></div>
+
+          <!-- Shown when signed in -->
+          <button type="button" id="nav-logout" role="menuitem" class="hidden w-full text-left flex items-center gap-4 px-6 py-3.5 text-base text-red-600 hover:bg-red-50 font-dm cursor-pointer">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            <span id="nav-logout-label">Log out</span>
+          </button>
+
+          <!-- Shown when not signed in -->
+          <a href="/auth/LogIn.html" id="nav-login" role="menuitem" class="hidden flex items-center gap-4 px-6 py-3.5 text-base text-green-700 hover:bg-green-50 font-dm">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4M10 17l-5-5 5-5M5 12h12"/></svg>
+            Log in
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <div class="flex max-w-350 mx-auto">
+
+    <!-- MAIN COLUMN: shows either the feed (#feed-view) or the profile (#profile-view) -->
+    <main class="flex-1 min-w-0 px-3 sm:px-6 md:px-10 pt-5 pb-28 sm:py-8">
+
+     <div id="feed-view">
+
+      <!-- Search box (phones only; on larger screens search lives in the top bar) -->
+      <label class="sm:hidden mb-4 flex items-center gap-2 bg-white rounded-full border border-gray-200 px-4 py-2.5 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="mobile-search" placeholder="Find anything" class="w-full min-w-0 bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none font-dm" />
+      </label>
+
+      <!-- Mobile-only verify notice (the sidebar is hidden below lg).
+           Its button is wired by main.js through [data-verify-open]. -->
+      <div class="lg:hidden mb-5 flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-3">
+        <p class="flex items-start gap-1.5 text-xs leading-snug text-red-500 font-dm">
+          <svg class="w-3.5 h-3.5 mt-px shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5M12 16.5h.01"/></svg>
+          You currently can't interact in your Feed.
+        </p>
+        <button type="button" data-verify-open class="shrink-0 rounded-lg bg-[#efe47f] hover:bg-[#e8dc6a] px-2.5 py-1.5 text-[11px] font-medium text-green-800 shadow-md transition font-dm cursor-pointer">
+          Verify first
+        </button>
+      </div>
+
+      <!-- Mobile/tablet-only CCS faculty list (the sidebar is hidden below lg).
+           Collapsed by default; tap the bar to expand. -->
+      <details class="group lg:hidden mb-5 rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <summary class="flex items-center justify-between gap-3 px-4 py-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+          <span class="flex items-center gap-2 text-sm font-bold text-black font-dm">
+            CCS Faculty Members
+            <span class="text-[11px] font-medium text-gray-400">(6)</span>
+          </span>
+          <svg class="w-4 h-4 text-gray-500 transition-transform duration-200 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+        </summary>
+
+        <div class="px-3 pb-3 space-y-2 max-h-80 overflow-y-auto">
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">RS</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Prof. Ramon Santos</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor I</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">LF</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Dr. Liza Fernandez</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Dean</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">MV</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Prof. Mark Villanueva</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor II</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">KU</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Engr. Kristine Uy</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Associate Instructor IV</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">NB</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Prof. Noel Bautista</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor III</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">AR</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Dr. Anna Reyes</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor IV</p>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="flex items-end justify-between flex-wrap gap-2 sm:gap-4 mb-5 sm:mb-7">
+        <h1 class="font-display text-2xl sm:text-3xl font-800 tracking-tight font-poppins font-bold">Suggestions</h1>
+
+        <nav class="no-scrollbar flex items-center gap-5 sm:gap-6 w-full sm:w-auto overflow-x-auto sm:overflow-visible whitespace-nowrap text-sm text-gray-500 pt-1 pb-3 sm:pb-1">
+          <button type="button" class="flex items-center gap-1 hover:text-gray-700 transition font-inter">
+            Suggestion
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <button type="button" class="tab-active flex items-center gap-1 font-inter">
+            University
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <button type="button" class="hover:text-gray-700 transition font-inter">Recent</button>
+          <button type="button" class="hover:text-gray-700 transition font-inter">Popular</button>
+        </nav>
+      </div>
+
+      <!-- Cards are rendered here by main.js. Each card gets a three-dots
+           menu: Edit/Delete on your own posts, Report on everyone else's.
+
+           Until the first snapshot arrives, three skeleton cards are shown.
+           They mirror the real <article> layout (header with avatar, name,
+           date and dots > category pill > title > body > three action pills)
+           and main.js removes them by clearing the container
+           (feedContainer.innerHTML = "") when the posts load, or when the
+           empty / error message replaces them. -->
+      <div id="feedContainer" class="space-y-5">
+        <div class="space-y-5" role="status" aria-live="polite">
+          <span class="sr-only">Loading suggestions…</span>
+
+          <!-- Skeleton card 1 -->
+          <article class="bg-white rounded-2xl border p-4 sm:p-5 border-gray-200" aria-hidden="true">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div class="skeleton size-11 sm:size-14 rounded-full shrink-0"></div>
+                <div>
+                  <div class="skeleton h-4 w-36 rounded-md"></div>
+                  <div class="skeleton h-3 w-32 sm:w-52 rounded-md mt-2"></div>
+                </div>
+              </div>
+              <div class="skeleton size-5 rounded-full"></div>
+            </div>
+
+            <div class="skeleton mt-3 h-6 w-20 rounded-full"></div>
+
+            <div class="mt-2.5 h-7 flex items-center"><div class="skeleton h-5 w-3/5 rounded-md"></div></div>
+            <div class="mt-1.5">
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-full rounded"></div></div>
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-full rounded"></div></div>
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-2/3 rounded"></div></div>
+            </div>
+
+            <div class="flex items-center gap-2 mt-4">
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+            </div>
+          </article>
+
+          <!-- Skeleton card 2 -->
+          <article class="bg-white rounded-2xl border p-4 sm:p-5 border-gray-200" aria-hidden="true">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div class="skeleton size-11 sm:size-14 rounded-full shrink-0"></div>
+                <div>
+                  <div class="skeleton h-4 w-28 rounded-md"></div>
+                  <div class="skeleton h-3 w-32 sm:w-48 rounded-md mt-2"></div>
+                </div>
+              </div>
+              <div class="skeleton size-5 rounded-full"></div>
+            </div>
+
+            <div class="skeleton mt-3 h-6 w-24 rounded-full"></div>
+
+            <div class="mt-2.5 h-7 flex items-center"><div class="skeleton h-5 w-4/5 rounded-md"></div></div>
+            <div class="mt-1.5">
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-full rounded"></div></div>
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-4/5 rounded"></div></div>
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-1/2 rounded"></div></div>
+            </div>
+
+            <div class="flex items-center gap-2 mt-4">
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+            </div>
+          </article>
+
+          <!-- Skeleton card 3 -->
+          <article class="bg-white rounded-2xl border p-4 sm:p-5 border-gray-200" aria-hidden="true">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div class="skeleton size-11 sm:size-14 rounded-full shrink-0"></div>
+                <div>
+                  <div class="skeleton h-4 w-32 rounded-md"></div>
+                  <div class="skeleton h-3 w-36 sm:w-56 rounded-md mt-2"></div>
+                </div>
+              </div>
+              <div class="skeleton size-5 rounded-full"></div>
+            </div>
+
+            <div class="skeleton mt-3 h-6 w-16 rounded-full"></div>
+
+            <div class="mt-2.5 h-7 flex items-center"><div class="skeleton h-5 w-2/3 rounded-md"></div></div>
+            <div class="mt-1.5">
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-full rounded"></div></div>
+              <div class="h-[22.75px] flex items-center"><div class="skeleton h-3.5 w-3/4 rounded"></div></div>
+            </div>
+
+            <div class="flex items-center gap-2 mt-4">
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+              <div class="skeleton h-7 w-12 rounded-full"></div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+     </div><!-- /#feed-view -->
+
+     <!-- =========================================================
+          PROFILE VIEW (UI only)
+          Not a popup: shown in place of the feed when the URL hash is
+          #profile (the "Profile" link in the settings menu). Handled by
+          main.js, which also fills in the name / initials / email from the
+          signed-in user. The header and the CCS sidebar stay on screen.
+     ========================================================== -->
+     <section id="profile-view" class="hidden font-dm" aria-labelledby="profile-heading">
+
+       <a href="#feed" id="profile-back" class="inline-flex items-center gap-1.5 mb-5 text-sm font-medium text-gray-600 hover:text-green-700 transition">
+         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+         Back to feed
+       </a>
+
+       <!-- ===== Profile header ===== -->
+       <header class="flex flex-col xl:flex-row xl:items-center gap-4 xl:gap-6 pb-5 border-b border-gray-200">
+         <div class="flex items-center gap-3 sm:gap-5 min-w-0">
+           <div id="profile-panel-avatar" class="w-16 h-16 sm:w-28 sm:h-28 rounded-full flex items-center justify-center text-white text-2xl sm:text-4xl font-poppins font-extrabold shrink-0 bg-[#a63f3f]">JC</div>
+           <div class="min-w-0">
+             <h1 id="profile-heading" class="flex items-center gap-2 text-2xl sm:text-3xl font-semibold text-black font-dm">
+               <span id="profile-panel-name" class="truncate">JuanDelaCruz</span>
+               <!-- verified badge -->
+               <svg class="w-6 h-6 shrink-0 text-green-600" viewBox="0 0 24 24" fill="currentColor" aria-label="Verified">
+                 <circle cx="12" cy="12" r="11"/>
+                 <path d="M7.5 12.3l3 3 6-6.3" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+               </svg>
+             </h1>
+             <p class="mt-0.5 text-sm text-black font-dm"><span id="profile-panel-program">BSIT 3A</span> <span class="mx-1">●</span> <span id="profile-panel-college">College of Computer Studies</span></p>
+             <p id="profile-panel-email" class="text-sm text-gray-400 font-dm truncate">JuanDelaCruz@gmail.com</p>
+           </div>
+         </div>
+
+         <!-- vertical divider (wide screens only) -->
+         <div class="hidden xl:block w-px h-16 bg-black shrink-0"></div>
+
+         <!-- Stats: 2x2 on phones, 4 equal columns from sm, evenly spread to the right of the divider on xl+ -->
+         <dl class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full pt-4 border-t border-gray-200 xl:flex xl:flex-1 xl:w-auto xl:justify-evenly xl:gap-0 xl:pt-0 xl:border-t-0 font-dm">
+           <div class="flex flex-col-reverse items-center text-center">
+             <dt class="mt-1.5 text-xs leading-none text-gray-500 whitespace-nowrap">Suggested</dt>
+             <dd class="text-2xl font-bold leading-none text-black tabular-nums" data-stat="suggested">76</dd>
+           </div>
+           <div class="flex flex-col-reverse items-center text-center">
+             <dt class="mt-1.5 text-xs leading-none text-gray-500 whitespace-nowrap">Polls Created</dt>
+             <dd class="text-2xl font-bold leading-none text-black tabular-nums" data-stat="polls">14</dd>
+           </div>
+           <div class="flex flex-col-reverse items-center text-center">
+             <dt class="mt-1.5 text-xs leading-none text-gray-500 whitespace-nowrap">Upvotes</dt>
+             <dd class="text-2xl font-bold leading-none text-black tabular-nums" data-stat="upvotes">342</dd>
+           </div>
+           <div class="flex flex-col-reverse items-center text-center">
+             <dt class="mt-1.5 text-xs leading-none text-gray-500 whitespace-nowrap">Downvotes</dt>
+             <dd class="text-2xl font-bold leading-none text-black tabular-nums" data-stat="downvotes">71</dd>
+           </div>
+         </dl>
+       </header>
+
+       <!-- ===== Tabs ===== -->
+       <nav class="no-scrollbar flex items-center justify-center gap-x-6 mt-5 mb-5 overflow-x-auto whitespace-nowrap text-sm text-gray-500 font-inter">
+         <button type="button" class="flex items-center gap-1.5 hover:text-gray-700 transition cursor-pointer">
+           Suggestion
+           <svg class="w-3 h-2 text-gray-300" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0h10L5 6z"/></svg>
+         </button>
+         <button type="button" class="tab-active flex items-center gap-1.5 cursor-pointer">
+           University
+           <svg class="w-3 h-2" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0h10L5 6z"/></svg>
+         </button>
+         <button type="button" class="hover:text-gray-700 transition cursor-pointer">Recent</button>
+         <button type="button" class="hover:text-gray-700 transition cursor-pointer">Popular</button>
+       </nav>
+
+       <!-- ===== Posts list ===== -->
+       <div class="space-y-5">
+
+         <!-- Post card (sample, UI only — duplicate this <article> for more) -->
+         <article class="bg-white rounded-2xl p-5 shadow-[0_6px_20px_rgba(0,0,0,0.12)] border border-gray-100">
+           <div class="flex items-start justify-between">
+             <div class="flex items-center gap-3">
+               <div class="w-11 h-11 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">SJ</div>
+               <div>
+                 <p class="text-sm font-semibold text-black leading-tight font-dm">SkittleJam24</p>
+                 <p class="text-[10px] text-gray-400 leading-tight mt-0.5 font-dm">Posted Thu, Oct. 01, 2026 | 9:28 AM</p>
+               </div>
+             </div>
+             <button type="button" class="text-gray-400 hover:text-gray-600 transition cursor-pointer" title="More options" aria-label="More options">
+               <svg class="w-5 h-5 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+             </button>
+           </div>
+
+           <span class="inline-block mt-3 text-[9px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700 font-mono">Utilities</span>
+
+           <h3 class="mt-2 text-base font-extrabold text-black uppercase font-inter break-words">Mabaho CR sa Comlab ang panghe !</h3>
+           <p class="mt-1.5 text-xs text-gray-600 font-dm break-words">dapat pati cr isama sa classwork</p>
+
+           <div class="flex items-center gap-1.5 mt-4 font-dm">
+             <div class="flex items-center gap-1.5 bg-yellow-100 rounded-full px-3 py-1 text-[10px] text-gray-600">
+               <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>290
+             </div>
+             <div class="flex items-center gap-1.5 bg-gray-200 rounded-full px-3 py-1 text-[10px] text-gray-600">
+               <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>13
+             </div>
+             <div class="flex items-center gap-1.5 bg-gray-200 rounded-full px-3 py-1 text-[10px] text-gray-600">
+               <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>78
+             </div>
+           </div>
+         </article>
+
+       </div>
+     </section>
+
+    </main>
+
+    <!-- SIDEBAR -->
+    <aside class="hidden lg:block w-92 shrink-0 py-18 pr-6">
+      <div class="sticky top-20 rounded-3xl p-5 bg-white border border-gray-200 shadow-lg">
+
+        <!-- Profile — filled in by main.js from the signed-in user -->
+        <div class="flex items-center gap-3 pb-4 mb-4 border-b border-black/20">
+          <div id="profile-avatar" class="w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-poppins font-extrabold shrink-0 bg-[#a63f3f]">?</div>
+          <div class="min-w-0">
+            <p id="profile-name" class="text-base font-bold leading-tight truncate font-dm text-black">Loading...</p>
+            <p id="profile-email" class="text-xs leading-tight mt-0.5 truncate text-gray-500 font-dm"></p>
+
+            <!-- Verification notice (UI only, not wired to any check yet) -->
+            <div id="profile-verify-wrap">
+              <p class="flex items-start gap-1 mt-1 text-[11px] leading-tight text-red-500 font-dm">
+                <svg class="w-3 h-3 mt-px shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5M12 16.5h.01"/></svg>
+                You currently can't interact in your Feed.
+              </p>
+              <button type="button" id="profile-verify" class="mt-1.5 flex items-center gap-1 rounded-lg bg-[#efe47f] hover:bg-[#e8dc6a] px-2 py-1 text-[11px] font-medium text-green-800 shadow-md transition font-dm cursor-pointer">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
+                Verify first
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <h2 class="text-center text-xl font-black text-black font-dm">CCS</h2>
+        <p class="text-center text-sm text-gray-500 font-dm mt-0.5 mb-3">Faculty Members</p>
+
+        <div class="space-y-2.5 max-h-130 overflow-y-auto scrollbar-thin">
+
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">RS</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Prof. Ramon Santos</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor I</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">LF</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Dr. Liza Fernandez</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Dean</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">MV</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Prof. Mark Villanueva</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor II</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">KU</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Engr. Kristine Uy</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Associate Instructor IV</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">NB</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Prof. Noel Bautista</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor III</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 bg-green-700 rounded-2xl p-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-poppins font-extrabold shrink-0 bg-[#a63f3f]">AR</div>
+            <div class="min-w-0">
+              <p class="text-sm leading-tight truncate font-dm text-white">Dr. Anna Reyes</p>
+              <p class="text-xs mt-0.5 truncate font-mono text-white">Instructor IV</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- =========================================================
+       SUGGEST PANEL
+       Plain JS-toggled modal, controlled by /pages/main.js. Starts
+       hidden (Tailwind's "hidden" class = display:none).
+       #suggest-overlay is a full-screen fixed layer that centers
+       #suggest-panel with flex — that's what keeps the panel
+       centered to the page regardless of scroll position or
+       viewport size. Styling/animation lives in main.css.
+  ========================================================== -->
+  <div id="suggest-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+
+    <!-- Dimmed background — click to close (see CLOSE_ON_BACKDROP_CLICK
+         in main.js if you want to turn this off). -->
+    <div id="suggest-backdrop" class="absolute inset-0"></div>
+
+    <div id="suggest-panel" class="relative w-[92vw] max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl bg-white shadow-2xl border border-gray-100">
+
+      <!-- Panel header -->
+      <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+        <h2 class="font-poppins font-bold text-lg text-gray-900">Go on, suggest something!</h2>
+        <button type="button" id="suggest-close" class="text-gray-400 hover:text-gray-600 transition" aria-label="Close">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Form fields -->
+      <div class="px-6 py-5 space-y-4">
+        <div>
+          <label for="suggest-category" class="block text-xs font-semibold text-gray-500 mb-1.5 font-dm uppercase tracking-wide">Category</label>
+          <select id="suggest-category" class="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-700 font-dm focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600">
+            <option>Facilities</option>
+            <option>Academics</option>
+            <option>Utilities</option>
+            <option>Organization</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <!-- "Other" category field — hidden by default. main.js shows
+             this (adds .is-visible) only when "Other" is picked above. -->
+        <div id="suggest-category-other-wrap" class="grid-rows-collapse">
+          <div class="grid-rows-collapse-inner">
+            <label for="suggest-category-other" class="block text-xs font-semibold text-gray-500 mb-1.5 font-dm uppercase tracking-wide">Specify category</label>
+            <input type="text" id="suggest-category-other" placeholder="Tell us what this suggestion is about" class="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 font-dm focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600" />
+          </div>
+        </div>
+
+        <div>
+          <label for="suggest-title" class="block text-xs font-semibold text-gray-500 mb-1.5 font-dm uppercase tracking-wide">Title</label>
+          <input type="text" id="suggest-title" maxlength="150" placeholder="Sum up your suggestion in one line" class="w-full rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 font-dm focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600" />
+        </div>
+
+        <div>
+          <label for="suggest-details" class="block text-xs font-semibold text-gray-500 mb-1.5 font-dm uppercase tracking-wide">Details</label>
+          <textarea rows="4" id="suggest-details" placeholder="Explain the problem and what you'd like to see changed..." class="w-full resize-none rounded-xl border border-gray-200 px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 font-dm focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600"></textarea>
+        </div>
+
+        <p id="suggest-status" class="text-xs font-dm"></p>
+      </div>
+
+      <!-- Footer: anonymity toggle + Post button.
+           The toggle is a real checkbox (visually hidden via sr-only) —
+           Tailwind's peer-checked: variant styles the pill/knob purely
+           in CSS, no JS needed for this part. -->
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 px-4 sm:px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-3xl">
+        <label class="flex items-center gap-2.5 cursor-pointer select-none">
+          <input type="checkbox" id="suggest-anonymous" checked class="peer sr-only" />
+          <span class="relative w-10 h-6 rounded-full bg-gray-300 peer-checked:bg-green-600 transition-colors duration-200 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:w-5 after:h-5 after:rounded-full after:bg-white after:shadow after:transition-transform after:duration-200 peer-checked:after:translate-x-4"></span>
+          <span class="text-sm text-gray-600 font-dm">Post anonymously</span>
+        </label>
+
+        <button type="button" id="suggest-submit" class="bg-green-700 hover:bg-green-800 text-white text-sm font-semibold px-6 py-2.5 rounded-full transition-colors duration-200 font-dm cursor-pointer">
+          Suggest
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       VERIFY PANEL — STUDENTS ONLY (Tailwind classes only)
+       Opened by the sidebar's "Verify first" button (#profile-verify)
+       and the mobile banner button ([data-verify-open]).
+       Faculty accounts are created by the super admin, so there is no
+       role picker and no faculty form here.
+       Open/close animation = Tailwind classes toggled by main.js
+       (opacity-0 <-> opacity-100 on the overlay, scale-95 <-> scale-100
+       on the panel), so there is no custom CSS for it.
+  ========================================================== -->
+  <div id="verify-overlay" class="hidden pointer-events-none fixed inset-0 z-60 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 motion-reduce:transition-none font-dm" role="dialog" aria-modal="true" aria-labelledby="verify-heading">
+    <div id="verify-backdrop" class="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]"></div>
+
+    <div id="verify-panel" class="relative w-[92vw] max-w-[420px] bg-white rounded-[28px] shadow-2xl scale-95 translate-y-1.5 transition-all duration-200 motion-reduce:transition-none">
+
+      <!-- EXIT BUTTON — top-left corner of the panel -->
+      <button type="button" id="verify-close" title="Close" aria-label="Close"
+        class="absolute -top-2.5 -left-2.5 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 border border-gray-200 shadow-lg hover:bg-gray-100 hover:text-gray-900 transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="w-4 h-4 pointer-events-none">
+          <path d="M6 6l12 12M18 6L6 18"/>
+        </svg>
+      </button>
+
+      <div data-verify-scroll class="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[28px] px-5 sm:px-7 pt-6 pb-6">
+
+        <!-- ================= STUDENT VERIFICATION FORM ================= -->
+        <form id="verify-student-form" novalidate data-role="student">
+          <header class="flex items-center gap-3 mb-4">
+            <div class="w-11 h-11 shrink-0 flex items-center justify-center rounded-[10px] bg-[#2f5d34] text-white">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-6.5 h-6.5"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></svg>
+            </div>
+            <div>
+              <h2 id="verify-heading" class="text-lg font-bold font-dm text-black leading-tight">Verify your account <span class="font-dom font-black text-green-600">ESSUDYANTE!</span></h2>
+              <p class="text-[11px] italic text-gray-500 mt-px font-dm">For better experience and communication.</p>
+            </div>
+          </header>
+
+          <h3 class="flex items-center font-dm gap-2.5 mt-3.5 mb-2 text-xs font-semibold text-black after:content-[''] after:flex-1 after:h-px after:bg-gray-400">Personal Information</h3>
+          <div class="grid grid-cols-12 gap-x-2.5 gap-y-2 pl-3">
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-12 sm:col-span-6"><span class="text-[11px] font-dm font-medium text-black">First Name</span>
+              <input class="w-full h-8 px-2.5 rounded-md border border-transparent bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3]" type="text" name="firstName" placeholder="Juan" autocomplete="given-name" required></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-9 sm:col-span-4"><span class="text-[11px] font-dm font-medium text-black">Last Name</span>
+              <input class="w-full h-8 px-2.5 rounded-md border border-transparent bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3]" type="text" name="lastName" placeholder="Dela Cruz" autocomplete="family-name" required></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-3 sm:col-span-2"><span class="text-[11px] font-dm  font-medium text-black">M.I</span>
+              <input class="w-full h-8 px-2.5 rounded-md border border-transparent bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3]" type="text" name="middleInitial" placeholder="A" maxlength="2"></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-12 sm:col-span-8"><span class="text-[11px] font-dm font-medium text-black">Email</span>
+              <input class="w-full h-8 px-2.5 rounded-md border border-transparent font-dm bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3]" type="email" name="email" placeholder="JuanDelaCruz@gmail.com" autocomplete="email" required></label>
+          </div>
+
+          <h3 class="flex items-center font-dm gap-2.5 mt-3.5 mb-2 text-xs font-semibold text-black after:content-[''] after:flex-1 after:h-px after:bg-gray-400">ESSU Credentials</h3>
+          <div class="grid grid-cols-12 gap-x-2.5 gap-y-2 pl-3">
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-12 sm:col-span-5"><span class="text-[11px] font-dm font-medium text-black">Student #</span>
+              <input class="w-full h-8 px-2.5 rounded-md border border-transparent font-dm bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3]" type="text" name="studentNumber" placeholder="24-12345" inputmode="numeric" maxlength="8" required></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-6 sm:col-span-3"><span class="text-[11px] font-dm font-medium text-black">College</span>
+              <span class="relative block"><select class="w-full h-8 px-2.5 rounded-md font-dm border border-transparent bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3] appearance-none pr-6 cursor-pointer" name="college" data-options="colleges" required></select>
+                <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-2 h-1.5 text-[#4c9a52]" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0h10L5 6z"/></svg></span></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-6 sm:col-span-4"><span class="text-[11px] font-dm font-medium text-black">Program</span>
+              <span class="relative block"><select class="w-full h-8 px-2.5 rounded-md font-dm border border-transparent bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3] appearance-none pr-6 cursor-pointer" name="program" data-options="programs" required></select>
+                <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-2 h-1.5 text-[#4c9a52]" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0h10L5 6z"/></svg></span></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-6 sm:col-span-5"><span class="text-[11px] font-dm font-medium text-black">Year</span>
+              <span class="relative block"><select class="w-full h-8 px-2.5 rounded-md font-dm border border-transparent bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3] appearance-none pr-6 cursor-pointer" name="year" data-options="years" required></select>
+                <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-2 h-1.5 text-[#4c9a52]" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0h10L5 6z"/></svg></span></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-6 sm:col-span-3"><span class="text-[11px] font-dm font-medium text-black">Section</span>
+              <span class="relative block"><select class="w-full h-8 px-2.5 rounded-md font-dm border border-transparent bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3] appearance-none pr-6 cursor-pointer" name="section" data-options="sections" required></select>
+                <svg class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-2 h-1.5 text-[#4c9a52]" viewBox="0 0 10 6" fill="currentColor" aria-hidden="true"><path d="M0 0h10L5 6z"/></svg></span></label>
+            <label class="flex flex-col gap-0.5 min-w-0 col-span-12 sm:col-span-8"><span class="text-[11px] font-dm font-medium text-black">Alias Name <small class="text-[8px] italic font-normal text-gray-400">(For anonymity purposes)</small></span>
+              <input class="w-full h-8 px-2.5 rounded-md border border-transparent font-dm bg-gray-100 text-[11px] text-gray-700 placeholder:text-[#8a8f98] outline-none transition focus:border-[#4c9a52] focus:bg-[#e3e3e3]" type="text" name="alias" placeholder="SkittleJam24" maxlength="24" required></label>
+          </div>
+
+          <p data-status role="status" aria-live="polite" class="min-h-4 mt-2.5 text-[11px] text-red-600"></p>
+          <div class="h-px bg-gray-300 mt-1.5 mb-3.5"></div>
+          <button type="submit" class="block w-full py-2.5 px-3 rounded-[9px] bg-[#4c9a52] hover:bg-[#3f8645] active:scale-[0.99] disabled:opacity-70 disabled:cursor-default text-white text-[13px] font-bold transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4c9a52]">Submit</button>
+        </form>
+
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- =========================================================
+       PASSWORD & SECURITY PANEL (UI only)
+       Opened by the "Password & Security" link in the settings dropdown
+       (#nav-security). Same pattern as the Verify panel:
+       Tailwind classes toggled by main.js. The requirements list is
+       copied from the sign up page.
+  ========================================================== -->
+  <div id="security-overlay" class="hidden pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 motion-reduce:transition-none font-dm" role="dialog" aria-modal="true" aria-labelledby="security-heading">
+    <div id="security-backdrop" class="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]"></div>
+
+    <div id="security-panel" class="relative w-[92vw] max-w-md bg-white rounded-[28px] shadow-2xl scale-95 translate-y-1.5 transition-all duration-200 motion-reduce:transition-none">
+
+      <!-- EXIT BUTTON -->
+      <button type="button" id="security-close" title="Close" aria-label="Close"
+        class="absolute -top-2.5 -left-2.5 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white text-gray-600 border border-gray-200 shadow-lg hover:bg-gray-100 hover:text-gray-900 transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-600">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" class="w-4 h-4 pointer-events-none"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <div data-security-scroll class="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[28px] px-6 sm:px-7 pt-6 pb-6">
+        <form id="security-form" novalidate>
+
+          <h2 id="security-heading" class="text-lg font-bold text-black font-poppins">Password &amp; Security</h2>
+
+          <!-- Username (read-only) -->
+          <div class="mt-4">
+            <label for="security-username" class="block text-sm font-medium text-black mb-1.5">Username</label>
+            <input type="text" id="security-username" value="Juan Dela Cruz" readonly
+              class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-400 outline-none cursor-default" />
+          </div>
+
+          <div class="my-4 border-t border-gray-200"></div>
+
+          <!-- Current password -->
+          <div>
+            <label for="security-current" class="block text-sm font-medium text-black mb-1.5">Current password</label>
+            <input type="password" id="security-current" placeholder="Enter current password" autocomplete="current-password"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600" />
+          </div>
+
+          <!-- New password -->
+          <div class="mt-3.5">
+            <label for="security-new" class="block text-sm font-medium text-black mb-1.5">New Password</label>
+            <input type="password" id="security-new" placeholder="Enter new password" autocomplete="new-password"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600" />
+          </div>
+
+          <!-- Confirm new password -->
+          <div class="mt-3.5">
+            <label for="security-confirm" class="block text-sm font-medium text-black mb-1.5">Confirm new password</label>
+            <input type="password" id="security-confirm" placeholder="Re-enter new password" autocomplete="new-password"
+              class="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-600/30 focus:border-green-600" />
+          </div>
+
+          <p class="mt-2 text-right text-[10px] text-gray-500">Password last changed: <span data-password-changed>Oct 3, 2026</span></p>
+
+          <!-- Requirements + actions (stacked on phones, side by side from sm) -->
+          <div class="mt-1 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-x-4 gap-y-4 items-start">
+
+            <!-- Requirements — copied from the sign up page -->
+            <ul id="security-reqs" class="space-y-1.5 font-dm">
+              <li data-rule="len" class="flex items-center gap-2 text-xs text-gray-600">
+                <span class="req-dot w-2 h-2 rounded-full border border-gray-500 shrink-0"></span>
+                At least 8 characters
+              </li>
+              <li data-rule="upper" class="flex items-center gap-2 text-xs text-gray-600">
+                <span class="req-dot w-2 h-2 rounded-full border border-gray-500 shrink-0"></span>
+                One upper case letter <span class="italic text-gray-400">(A-Z)</span>
+              </li>
+              <li data-rule="lower" class="flex items-center gap-2 text-xs text-gray-600">
+                <span class="req-dot w-2 h-2 rounded-full border border-gray-500 shrink-0"></span>
+                One lower case letter <span class="italic text-gray-400">(a-z)</span>
+              </li>
+              <li data-rule="num" class="flex items-center gap-2 text-xs text-gray-600">
+                <span class="req-dot w-2 h-2 rounded-full border border-gray-500 shrink-0"></span>
+                One number <span class="italic text-gray-400">(0-9)</span>
+              </li>
+              <li data-rule="special" class="flex items-center gap-2 text-xs text-gray-600">
+                <span class="req-dot w-2 h-2 rounded-full border border-gray-500 shrink-0"></span>
+                One special character <span class="italic text-gray-400">(!@#$%^&amp;*()-+...)</span>
+              </li>
+            </ul>
+
+            <div class="flex flex-col items-center w-full sm:w-36 pt-1">
+              <button type="submit" id="security-save"
+                class="w-full py-2 px-3 rounded-lg bg-green-700 hover:bg-green-800 active:scale-[0.99] disabled:opacity-70 disabled:cursor-default text-white text-sm font-semibold font-dm transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-700">
+                Save Changes
+              </button>
+              <a href="#" id="security-forgot" class="mt-1.5 text-[10px] text-gray-500 underline hover:text-gray-700">Forgot password?</a>
+            </div>
+          </div>
+
+          <p id="security-status" role="status" aria-live="polite" class="min-h-4 mt-3 text-xs font-dm text-red-600"></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       RECENT ACTIVITY PANEL (UI only)
+       Opened by the "Recent Activity" link in the settings dropdown
+       (#nav-activity). One modal with six views, switched by main.js:
+         menu -> polls | suggestions | upvotes | downvotes | comments
+       The list views are rendered by main.js from sample data (see the
+       SAMPLE DATA block there). Same Tailwind-class-toggle animation as
+       the Verify panel.
+  ========================================================== -->
+  <div id="activity-overlay" class="hidden pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 transition-opacity duration-200 motion-reduce:transition-none font-dm" role="dialog" aria-modal="true" aria-labelledby="activity-heading">
+    <div id="activity-backdrop" class="absolute inset-0 bg-slate-900/45 backdrop-blur-[2px]"></div>
+
+    <div id="activity-panel" class="relative w-[92vw] max-w-xs bg-white rounded-3xl shadow-2xl scale-95 translate-y-1.5 transition-all duration-200 motion-reduce:transition-none">
+
+      <div data-activity-scroll class="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-3xl">
+
+        <!-- ===== Menu ===== -->
+        <section data-activity-view="menu">
+          <h2 id="activity-heading" class="px-6 pt-5 pb-3 text-sm font-bold text-black font-poppins">Recent Activity</h2>
+          <nav role="menu" class="pb-1">
+          <button type="button" data-activity-open="polls" role="menuitem" class="w-full text-left flex items-center gap-4 px-6 py-3 text-sm text-gray-800 hover:bg-gray-50 transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" /></svg>
+            My Polls
+          </button>
+          <button type="button" data-activity-open="suggestions" role="menuitem" class="w-full text-left flex items-center gap-4 px-6 py-3 text-sm text-gray-800 hover:bg-gray-50 transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" /></svg>
+            My Suggestions
+          </button>
+          <button type="button" data-activity-open="upvotes" role="menuitem" class="w-full text-left flex items-center gap-4 px-6 py-3 text-sm text-gray-800 hover:bg-gray-50 transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" /></svg>
+            Upvote History
+          </button>
+          <button type="button" data-activity-open="downvotes" role="menuitem" class="w-full text-left flex items-center gap-4 px-6 py-3 text-sm text-gray-800 hover:bg-gray-50 transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" /></svg>
+            Downvote History
+          </button>
+          <button type="button" data-activity-open="comments" role="menuitem" class="w-full text-left flex items-center gap-4 px-6 py-3 text-sm text-gray-800 hover:bg-gray-50 transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" /></svg>
+            Comment History
+          </button>
+          </nav>
+          <div class="mx-6 mt-2 border-t border-gray-200"></div>
+          <button type="button" data-activity-close class="w-full text-left flex items-center gap-3 px-6 py-3.5 text-sm text-red-500 hover:bg-red-50 rounded-b-3xl transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            Back
+          </button>
+        </section>
+
+        <!-- ===== My Polls ===== -->
+        <section data-activity-view="polls" class="hidden">
+          <div class="px-6 pt-5 pb-3">
+            <h2 class="text-sm font-bold text-black font-poppins">My Polls</h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 font-dm">Polls you created</p>
+          </div>
+          <div data-activity-list="polls" class="px-5 pb-3 space-y-3 max-h-[min(60vh,26rem)] overflow-y-auto"></div>
+          <div class="mx-6 mt-1 border-t border-gray-200"></div>
+          <button type="button" data-activity-back class="w-full text-left flex items-center gap-3 px-6 py-3.5 text-sm text-red-500 hover:bg-red-50 rounded-b-3xl transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            Back
+          </button>
+        </section>
+
+        <!-- ===== My Suggestions ===== -->
+        <section data-activity-view="suggestions" class="hidden">
+          <div class="px-6 pt-5 pb-3">
+            <h2 class="text-sm font-bold text-black font-poppins">My Suggestions</h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 font-dm">Suggestions you posted</p>
+          </div>
+          <div data-activity-list="suggestions" class="px-5 pb-3 space-y-3 max-h-[min(60vh,26rem)] overflow-y-auto"></div>
+          <div class="mx-6 mt-1 border-t border-gray-200"></div>
+          <button type="button" data-activity-back class="w-full text-left flex items-center gap-3 px-6 py-3.5 text-sm text-red-500 hover:bg-red-50 rounded-b-3xl transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            Back
+          </button>
+        </section>
+
+        <!-- ===== Upvote History ===== -->
+        <section data-activity-view="upvotes" class="hidden">
+          <div class="px-6 pt-5 pb-3">
+            <h2 class="text-sm font-bold text-black font-poppins">Upvote History</h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 font-dm">Suggestions you upvoted</p>
+          </div>
+          <div data-activity-list="upvotes" class="px-5 pb-3 space-y-3 max-h-[min(60vh,26rem)] overflow-y-auto"></div>
+          <div class="mx-6 mt-1 border-t border-gray-200"></div>
+          <button type="button" data-activity-back class="w-full text-left flex items-center gap-3 px-6 py-3.5 text-sm text-red-500 hover:bg-red-50 rounded-b-3xl transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            Back
+          </button>
+        </section>
+
+        <!-- ===== Downvote History ===== -->
+        <section data-activity-view="downvotes" class="hidden">
+          <div class="px-6 pt-5 pb-3">
+            <h2 class="text-sm font-bold text-black font-poppins">Downvote History</h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 font-dm">Suggestions you downvoted</p>
+          </div>
+          <div data-activity-list="downvotes" class="px-5 pb-3 space-y-3 max-h-[min(60vh,26rem)] overflow-y-auto"></div>
+          <div class="mx-6 mt-1 border-t border-gray-200"></div>
+          <button type="button" data-activity-back class="w-full text-left flex items-center gap-3 px-6 py-3.5 text-sm text-red-500 hover:bg-red-50 rounded-b-3xl transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            Back
+          </button>
+        </section>
+
+        <!-- ===== Comment History ===== -->
+        <section data-activity-view="comments" class="hidden">
+          <div class="px-6 pt-5 pb-3">
+            <h2 class="text-sm font-bold text-black font-poppins">Comment History</h2>
+            <p class="mt-0.5 text-[11px] text-gray-500 font-dm">Comments you left on suggestions</p>
+          </div>
+          <div data-activity-list="comments" class="px-5 pb-3 space-y-3 max-h-[min(60vh,26rem)] overflow-y-auto"></div>
+          <div class="mx-6 mt-1 border-t border-gray-200"></div>
+          <button type="button" data-activity-back class="w-full text-left flex items-center gap-3 px-6 py-3.5 text-sm text-red-500 hover:bg-red-50 rounded-b-3xl transition cursor-pointer font-dm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5 shrink-0 pointer-events-none"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            Back
+          </button>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- main.js loads Firestore/Auth itself via dynamic imports, so a plain
+       (non-module) deferred script is all it needs. -->
+  <script src="/app/main.js" defer></script>
+</body>
+</html>

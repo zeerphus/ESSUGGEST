@@ -1,0 +1,185 @@
+/* =======================================================================
+   ESSUGGEST — feed page styles
+   Loaded after /src/output.css.
+   ======================================================================= */
+
+/* -----------------------------------------------------------------------
+   Feed filter tabs (Suggestion / University / Recent / Popular) — the
+   active tab gets green text with a thin underline under the word only
+   (text-decoration, so the arrow isn't underlined), and a gray filled
+   triangle instead of the thin chevron.
+----------------------------------------------------------------------- */
+.tab-active {
+  color: var(--color-green-600);
+  font-weight: 400;
+  text-decoration: underline;
+  text-decoration-color: var(--color-green-600);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 8px;
+}
+
+.tab-active svg {
+  color: #9ca3af; /* gray-400 */
+  fill: currentColor;
+  stroke-linejoin: round;
+}
+
+/* -----------------------------------------------------------------------
+   Suggest panel — plain JS-toggled modal (see /panel.js).
+   Markup shape in feed.html:
+
+     #suggest-overlay   full-screen fixed wrapper, centers the panel,
+                        toggled visible/hidden by panel.js
+       #suggest-backdrop  dimmed layer behind the panel, click to close
+       #suggest-panel     the actual white card
+
+   panel.js does two things with classes on #suggest-overlay:
+     1. removes/adds "hidden" (Tailwind's display:none utility) to take
+        it in/out of layout entirely
+     2. removes/adds "is-open" one frame later, which is what the
+        transitions below actually animate off of
+
+   Tune the numbers below freely — just make sure ANIMATION_MS in
+   panel.js still roughly matches whatever duration you set here, since
+   panel.js waits that long before re-hiding the overlay after a close.
+----------------------------------------------------------------------- */
+
+/* Backdrop dim + fade. Starts invisible; .is-open fades it in. */
+#suggest-overlay {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+#suggest-overlay.is-open {
+  opacity: 1;
+}
+
+/* While closed/closing, let clicks pass through instead of the
+   (still-present-for-a-moment) overlay blocking the page underneath. */
+#suggest-overlay:not(.is-open) {
+  pointer-events: none;
+}
+
+#suggest-backdrop {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+}
+
+/* Panel itself gets a small scale + rise on top of the overlay's fade,
+   so it feels like it's landing rather than just appearing. Adjust the
+   translateY/scale numbers for a bigger or smaller "pop". */
+#suggest-panel {
+  transform: scale(0.96) translateY(6px);
+  transition: transform 180ms ease;
+}
+
+#suggest-overlay.is-open #suggest-panel {
+  transform: scale(1) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #suggest-overlay,
+  #suggest-panel {
+    transition-duration: 0.001ms;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   "Other" category field — CSS-only expand/collapse.
+   panel.js only ever toggles one class (.is-visible) on the outer
+   #suggest-category-other-wrap; the animation itself is pure CSS via
+   the "grid-rows trick":
+     - the outer element is display:grid with grid-template-rows: 0fr
+       (collapsed) or 1fr (expanded) — transitioning grid-template-rows
+       is what lets you animate to/from a height you never hardcoded.
+     - the inner element needs overflow:hidden + min-height:0, because
+       a 0fr row still tries to size to its content's natural height
+       unless something inside clips it.
+   This needs no JS-side height measurement (unlike the FAQ accordion
+   in animationLp.css, which animates a native <details> element and
+   can't use this trick).
+----------------------------------------------------------------------- */
+.grid-rows-collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.grid-rows-collapse.is-visible {
+  grid-template-rows: 1fr;
+}
+
+.grid-rows-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* -----------------------------------------------------------------------
+   Skeleton loading blocks (feed placeholder cards, see #feedContainer
+   in feed.html). main.js replaces them with the real cards on the first
+   snapshot. The shimmer is a light band sliding across a gray block; it
+   is turned off for people who prefer reduced motion.
+----------------------------------------------------------------------- */
+.skeleton {
+  background-color: #e5e7eb; /* gray-200 */
+  background-image: linear-gradient(
+    90deg,
+    #e5e7eb 25%,
+    #f3f4f6 50%,
+    #e5e7eb 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* Dark mode (html.dark) */
+.dark .skeleton {
+  background-color: #2a332d;
+  background-image: linear-gradient(
+    90deg,
+    #2a332d 25%,
+    #344039 50%,
+    #2a332d 75%
+  );
+  background-size: 200% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
+
+/* =======================================================================
+   Mobile / responsive
+   ======================================================================= */
+
+/* Hide scrollbar on the horizontally scrolling filter tabs */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Faster taps (no 300ms delay / double-tap zoom on controls) */
+button,
+a,
+select,
+label {
+  touch-action: manipulation;
+}
+
+/* iOS Safari zooms the page when a focused field is under 16px.
+   !important so it beats Tailwind's text-sm / text-[11px] utilities. */
+@media (max-width: 639px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
