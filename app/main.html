@@ -3,6 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="color-scheme" content="light dark" />
+<!-- Apply the saved theme before first paint (prevents a white flash in dark mode) -->
+<script>
+  try {
+    var t = localStorage.getItem('essuggest-theme');
+    if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches))
+      document.documentElement.classList.add('dark');
+  } catch (e) {}
+</script>
 <link rel="icon" type="image/png" href="/assets/LOGO.png" />
 <title>ESSUGGEST</title>
 <link rel="stylesheet" href="/src/output.css" />
@@ -11,22 +20,19 @@
 <body class="min-h-dvh">
 
   <!-- HEADER -->
-  <header class="max-sm:fixed max-sm:bottom-0 max-sm:inset-x-0 max-sm:rounded-t-2xl sm:sticky sm:top-0 z-30 flex items-center gap-2 sm:gap-4 px-2 sm:px-6 py-1.5 sm:py-3 bg-green-700 shadow-[0_-4px_16px_rgba(0,0,0,0.18)] sm:shadow-sm">
+  <header class="max-sm:fixed max-sm:bottom-0 max-sm:inset-x-0 max-sm:rounded-t-2xl sm:sticky sm:top-0 z-30 flex items-center gap-2 sm:gap-4 px-2 sm:px-6 py-1.5 sm:py-3 bg-white shadow-[0_-4px_16px_rgba(0,0,0,0.18)] sm:shadow-sm">
     <!-- LOGO BUTTON — click to refresh the feed (or, from the profile view, go back to the feed) -->
 <button type="button" id="logo-refresh"
         class="shrink-0 w-10 h-10 rounded-lg bg-green-800 hover:bg-green-900 active:scale-95 flex items-center justify-center shadow-sm transition cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 max-sm:order-1 max-sm:flex-1 max-sm:w-auto max-sm:h-auto max-sm:flex-col max-sm:gap-0.5 max-sm:py-1 max-sm:bg-transparent max-sm:hover:bg-transparent max-sm:shadow-none"
         title="Refresh feed" aria-label="Refresh feed"
         onclick="if (window.essuGoFeed && window.essuGoFeed()) return; window.scrollTo({ top: 0 }); window.location.reload();">
   <img src="/assets/LOGO.png" alt="" class="w-6 h-6 pointer-events-none">
-  <span class="sm:hidden text-[10px] leading-none text-white/95 font-dm">Home</span>
+  
 </button>
 
     <div class="hidden sm:block flex-1 min-w-0 max-w-md">
       <label class="flex items-center gap-2 bg-white/90 rounded-full px-3 sm:px-4 py-2 shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-rounded-magnifier-bold-duotone w-5 h-5"><circle cx="11" cy="11" r="9" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M20.2832 18.2568C20.5014 18.2749 20.7702 18.3599 21.0586 18.4463C21.3222 18.5253 21.5732 18.5955 21.7578 18.6943C22.7333 19.217 23.0484 20.4659 22.4375 21.3887C22.3218 21.5634 22.1343 21.7446 21.9395 21.9395C21.7446 22.1343 21.5634 22.3218 21.3887 22.4375C20.4659 23.0484 19.217 22.7333 18.6943 21.7578C18.5955 21.5732 18.5253 21.3222 18.4463 21.0586C18.3599 20.7702 18.2749 20.5014 18.2568 20.2832C18.1617 19.1267 19.1267 18.1617 20.2832 18.2568Z" fill="currentColor"/></svg>
         <input type="text" placeholder="Find anything" class="w-full min-w-0 bg-transparent text-sm text-gray-600 placeholder-gray-400 outline-none font-dm" />
       </label>
     </div>
@@ -35,22 +41,32 @@
     <button type="button" id="bottom-search" aria-label="Search"
             class="sm:hidden max-sm:order-2 flex-1 flex flex-col items-center gap-0.5 py-1 text-white/95 cursor-pointer"
             onclick="window.essuGoFeed && window.essuGoFeed(); window.scrollTo({ top: 0, behavior: 'smooth' }); document.getElementById('mobile-search').focus({ preventScroll: true });">
-      <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-        <circle cx="11" cy="11" r="7"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65" stroke-linecap="round"></line>
-      </svg>
-      <span class="text-[10px] leading-none font-dm">Search</span>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-rounded-magnifier-bold-duotone w-5 h-5"><circle cx="11" cy="11" r="9" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M20.2832 18.2568C20.5014 18.2749 20.7702 18.3599 21.0586 18.4463C21.3222 18.5253 21.5732 18.5955 21.7578 18.6943C22.7333 19.217 23.0484 20.4659 22.4375 21.3887C22.3218 21.5634 22.1343 21.7446 21.9395 21.9395C21.7446 22.1343 21.5634 22.3218 21.3887 22.4375C20.4659 23.0484 19.217 22.7333 18.6943 21.7578C18.5955 21.5732 18.5253 21.3222 18.4463 21.0586C18.3599 20.7702 18.2749 20.5014 18.2568 20.2832C18.1617 19.1267 19.1267 18.1617 20.2832 18.2568Z" fill="currentColor"/></svg>
+      
     </button>
 
     <div class="flex items-center gap-3 sm:gap-4 ml-auto shrink-0 max-sm:contents">
       <!-- SUGGEST BUTTON — opens the panel via main.js (id="suggest-toggle"
            is what the suggest panel script looks for). Icon-only on phones. -->
       <button type="button" id="suggest-toggle" aria-label="Suggest" class="flex items-center gap-1.5 bg-white/90 hover:bg-white text-sm font-semibold px-3 sm:px-3.5 py-2 rounded-full shadow-sm transition text-green-700 font-dm cursor-pointer max-sm:order-3 max-sm:flex-none max-sm:justify-center max-sm:w-12 max-sm:h-12 max-sm:p-0 max-sm:mx-1 max-sm:-translate-y-4 max-sm:shadow-lg max-sm:ring-4 max-sm:ring-green-600">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-pen-new-round-bold-duotone w-5 h-5"><circle cx="12" cy="12" r="10" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M13.9261 14.3018C14.1711 14.1107 14.3933 13.8885 14.8377 13.4441L20.378 7.90374C20.512 7.7698 20.4507 7.53909 20.2717 7.477C19.6178 7.25011 18.767 6.82414 17.9713 6.02835C17.1755 5.23257 16.7495 4.38186 16.5226 3.72788C16.4605 3.54892 16.2298 3.48761 16.0959 3.62156L10.5555 9.16192C10.1111 9.60634 9.88888 9.82854 9.69778 10.0736C9.47235 10.3626 9.27908 10.6753 9.12139 11.0062C8.98771 11.2867 8.88834 11.5848 8.68959 12.181L8.43278 12.9515L8.02443 14.1765L7.64153 15.3252C7.54373 15.6186 7.6201 15.9421 7.8388 16.1608C8.0575 16.3795 8.38099 16.4559 8.67441 16.3581L9.82308 15.9752L11.0481 15.5668L11.8186 15.31L11.8186 15.31C12.4148 15.1113 12.7129 15.0119 12.9934 14.8782C13.3243 14.7205 13.637 14.5273 13.9261 14.3018Z" fill="currentColor"/>
+<path d="M22.1127 6.16905C23.2952 4.98656 23.2952 3.06936 22.1127 1.88687C20.9302 0.704377 19.013 0.704377 17.8306 1.88687L17.6524 2.06499C17.4806 2.23687 17.4027 2.47695 17.4456 2.7162C17.4726 2.8667 17.5227 3.08674 17.6138 3.3493C17.796 3.87439 18.14 4.56368 18.788 5.21165C19.4359 5.85961 20.1252 6.20364 20.6503 6.38581C20.9129 6.4769 21.1329 6.52697 21.2834 6.55399C21.5227 6.59693 21.7627 6.51905 21.9346 6.34717L22.1127 6.16905Z" fill="currentColor"/></svg>
         <span class="hidden sm:inline">Suggest</span>
+      </button>
+
+      <!-- DARK MODE TOGGLE (tablet + desktop only — on phones it lives in the settings menu).
+           Handled by main.js ("Dark mode toggle"). -->
+      <button type="button" id="theme-toggle-nav" role="switch" aria-checked="false"
+              class="theme-toggle hidden sm:block p-1.5 -m-1.5 cursor-pointer transition hover:opacity-75 active:scale-95"
+              title="Toggle dark mode" aria-label="Toggle dark mode">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="theme-icon-moon solar solar-moon-bold-duotone w-5 h-5"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 12.0004C22 17.5232 17.5228 22.0004 12 22.0004C10.8358 22.0004 9.71801 21.8014 8.67887 21.4357C8.24138 20.3772 8 19.217 8 18.0004C8 15.7792 8.80467 13.7459 10.1384 12.1762C11.31 13.8818 13.2744 15.0004 15.5 15.0004C17.8615 15.0004 19.9289 13.741 21.0672 11.8572C21.3065 11.4612 22 11.5377 22 12.0004Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M2 12C2 16.3586 4.78852 20.0659 8.67887 21.4353C8.24138 20.3768 8 19.2166 8 18C8 15.7788 8.80467 13.7455 10.1384 12.1758C9.42027 11.1303 9 9.86422 9 8.5C9 6.13845 10.2594 4.07105 12.1432 2.93276C12.5392 2.69347 12.4627 2 12 2C6.47715 2 2 6.47715 2 12Z" fill="currentColor"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="theme-icon-sun solar solar-sun-bold-duotone w-5 h-5"><g style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)">
+<path d="M4.39838 4.39838C4.69127 4.10549 5.16615 4.10549 5.45904 4.39838L5.85188 4.79122C6.14477 5.08411 6.14477 5.55898 5.85188 5.85188C5.55898 6.14477 5.08411 6.14477 4.79122 5.85188L4.39838 5.45904C4.10549 5.16615 4.10549 4.69127 4.39838 4.39838Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M19.6009 4.39864C19.8938 4.69153 19.8938 5.16641 19.6009 5.4593L19.2081 5.85214C18.9152 6.14503 18.4403 6.14503 18.1474 5.85214C17.8545 5.55924 17.8545 5.08437 18.1474 4.79148L18.5402 4.39864C18.8331 4.10575 19.308 4.10575 19.6009 4.39864Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M18.1474 18.1474C18.4403 17.8545 18.9152 17.8545 19.2081 18.1474L19.6009 18.5402C19.8938 18.8331 19.8938 19.308 19.6009 19.6009C19.308 19.8938 18.8331 19.8938 18.5402 19.6009L18.1474 19.2081C17.8545 18.9152 17.8545 18.4403 18.1474 18.1474Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M5.85188 18.1477C6.14477 18.4406 6.14477 18.9154 5.85188 19.2083L5.45904 19.6012C5.16615 19.8941 4.69127 19.8941 4.39838 19.6012C4.10549 19.3083 4.10549 18.8334 4.39838 18.5405L4.79122 18.1477C5.08411 17.8548 5.55898 17.8548 5.85188 18.1477Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+</g><path d="M18 12C18 15.3137 15.3137 18 12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12Z" fill="currentColor"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C12.4142 1.25 12.75 1.58579 12.75 2V3C12.75 3.41421 12.4142 3.75 12 3.75C11.5858 3.75 11.25 3.41421 11.25 3V2C11.25 1.58579 11.5858 1.25 12 1.25ZM1.25 12C1.25 11.5858 1.58579 11.25 2 11.25H3C3.41421 11.25 3.75 11.5858 3.75 12C3.75 12.4142 3.41421 12.75 3 12.75H2C1.58579 12.75 1.25 12.4142 1.25 12ZM20.25 12C20.25 11.5858 20.5858 11.25 21 11.25H22C22.4142 11.25 22.75 11.5858 22.75 12C22.75 12.4142 22.4142 12.75 22 12.75H21C20.5858 12.75 20.25 12.4142 20.25 12ZM12 20.25C12.4142 20.25 12.75 20.5858 12.75 21V22C12.75 22.4142 12.4142 22.75 12 22.75C11.5858 22.75 11.25 22.4142 11.25 22V21C11.25 20.5858 11.5858 20.25 12 20.25Z" fill="currentColor"/></svg>
       </button>
 
       <!-- NOTIFICATIONS — dropdown panel anchored to the bell (see main.js).
@@ -61,12 +77,9 @@
                 class="p-1.5 -m-1.5 text-white/95 hover:text-white transition cursor-pointer max-sm:w-full max-sm:flex max-sm:flex-col max-sm:items-center max-sm:gap-0.5 max-sm:p-0 max-sm:m-0 max-sm:py-1"
                 title="Notifications" aria-label="Notifications">
           <span class="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-            </svg>
+            <svg xmlns="http://www.w3.org/2000/svg"viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-bell-bold-duotone w-5 h-5"><path d="M18.7491 9V9.7041C18.7491 10.5491 18.9903 11.3752 19.4422 12.0782L20.5496 13.8012C21.5612 15.3749 20.789 17.5139 19.0296 18.0116C14.4273 19.3134 9.57274 19.3134 4.97036 18.0116C3.21105 17.5139 2.43882 15.3749 3.45036 13.8012L4.5578 12.0782C5.00972 11.3752 5.25087 10.5491 5.25087 9.7041V9C5.25087 5.13401 8.27256 2 12 2C15.7274 2 18.7491 5.13401 18.7491 9Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M7.24316 18.5454C7.8941 20.5506 9.77767 22.0002 11.9998 22.0002C14.222 22.0002 16.1055 20.5506 16.7565 18.5454C13.611 19.1357 10.3886 19.1357 7.24316 18.5454Z" fill="currentColor"/></svg>
             <span id="notif-badge" class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full text-[9px] flex items-center justify-center font-bold text-white bg-amber-700 font-jakarta">3</span>
           </span>
-          <span class="sm:hidden text-[10px] leading-none font-dm">Alerts</span>
         </button>
 
         <div id="notif-panel" role="dialog" aria-labelledby="notif-heading"
@@ -97,11 +110,12 @@
       <div class="sm:relative max-sm:order-5 max-sm:flex-1 max-sm:flex max-sm:justify-center" id="nav-menu-wrap">
         <button type="button" id="nav-toggle" class="text-white/95 hover:text-white transition cursor-pointer p-1.5 -m-1.5 max-sm:w-full max-sm:flex max-sm:flex-col max-sm:items-center max-sm:gap-0.5 max-sm:p-0 max-sm:m-0 max-sm:py-1"
                 title="Open Settings" aria-label="Open settings" aria-haspopup="true" aria-expanded="false">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
-  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-</svg>
-          <span class="sm:hidden text-[10px] leading-none font-dm">Menu</span>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-widget-6-bold-duotone w-5 h-5"><g style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)">
+<path d="M2 6.5C2 4.01472 4.01472 2 6.5 2C8.98528 2 11 4.01472 11 6.5V9.5C11 9.84874 11 10.0231 10.9617 10.1662C10.8576 10.5544 10.5544 10.8576 10.1662 10.9617C10.0231 11 9.84874 11 9.5 11H6.5C4.01472 11 2 8.98528 2 6.5Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M13 14.5C13 14.1513 13 13.9769 13.0383 13.8338C13.1424 13.4456 13.4456 13.1424 13.8338 13.0383C13.9769 13 14.1513 13 14.5 13H17.5C19.9853 13 22 15.0147 22 17.5C22 19.9853 19.9853 22 17.5 22C15.0147 22 13 19.9853 13 17.5V14.5Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+</g><path d="M2 17.5C2 15.0147 4.01472 13 6.5 13H9.2C9.83006 13 10.1451 13 10.3857 13.1226C10.5974 13.2305 10.7695 13.4026 10.8774 13.6143C11 13.8549 11 14.1699 11 14.8V17.5C11 19.9853 8.98528 22 6.5 22C4.01472 22 2 19.9853 2 17.5Z" fill="currentColor"/>
+<path d="M13 6.5C13 4.01472 15.0147 2 17.5 2C19.9853 2 22 4.01472 22 6.5C22 8.98528 19.9853 11 17.5 11H14.2857C14.1365 11 14.0618 11 13.999 10.9929C13.4775 10.9342 13.0658 10.5225 13.0071 10.001C13 9.93818 13 9.86355 13 9.71429V6.5Z" fill="currentColor"/></svg>
+          
         </button>
 
         <div id="nav-menu" role="menu" class="hidden absolute z-40 max-sm:right-3 max-sm:bottom-[calc(100%+0.75rem)] sm:right-0 sm:top-12 w-[calc(100vw-1.5rem)] max-w-80 py-3 bg-white rounded-3xl border border-gray-200 shadow-2xl">
@@ -114,9 +128,7 @@
 
           <!-- PROFILE — href="#profile" swaps the feed for the profile view (see main.js) -->
            <a href="#profile" id="nav-profile" role="menuitem" class="flex items-center gap-4 px-6 py-3.5 text-base text-gray-700 hover:bg-gray-50 font-dm">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-</svg>
+           <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-user-rounded-bold-duotone w-5 h-5"><ellipse cx="12" cy="17" rx="7" ry="4" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><circle cx="12" cy="6" r="4" fill="currentColor"/></svg>
 
 
             Profile
@@ -125,27 +137,47 @@
     
 
           <a href="#" id="nav-security" role="menuitem" class="flex items-center gap-4 px-6 py-3.5 text-base text-gray-700 hover:bg-gray-50 font-dm">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-</svg>
+   <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-lock-keyhole-bold-duotone w-5 h-5"><path d="M2 16C2 13.1716 2 11.7574 2.87868 10.8787C3.75736 10 5.17157 10 8 10H16C18.8284 10 20.2426 10 21.1213 10.8787C22 11.7574 22 13.1716 22 16C22 18.8284 22 20.2426 21.1213 21.1213C20.2426 22 18.8284 22 16 22H8C5.17157 22 3.75736 22 2.87868 21.1213C2 20.2426 2 18.8284 2 16Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M12 14C13.1046 14 14 14.8954 14 16C14 17.1046 13.1046 18 12 18C10.8954 18 10 17.1046 10 16C10 14.8954 10.8954 14 12 14Z" fill="currentColor"/>
+<path d="M12 1.25C15.7279 1.25 18.75 4.27208 18.75 8V10.0547C18.3135 10.0221 17.8174 10.0092 17.25 10.0039V8C17.25 5.10051 14.8995 2.75 12 2.75C9.10051 2.75 6.75 5.10051 6.75 8V10.0039C6.18264 10.0092 5.68651 10.0221 5.25 10.0547V8C5.25 4.27208 8.27208 1.25 12 1.25Z" fill="currentColor"/></svg>
 
             Password &amp; Security
           </a>
 
           <a href="#" id="nav-activity" role="menuitem" class="flex items-center gap-4 px-6 py-3.5 text-base text-gray-700 hover:bg-gray-50 font-dm">
-           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-</svg>
+          <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-history-2-bold-duotone w-5 h-5"><g style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)">
+<path d="M11.9997 8.24973C12.4139 8.24973 12.7497 8.58551 12.7497 8.99973V12.2497H15.9997C16.4139 12.2497 16.7497 12.5855 16.7497 12.9997C16.7497 13.4139 16.4139 13.7497 15.9997 13.7497H11.9997C11.5855 13.7497 11.2497 13.4139 11.2497 12.9997V8.99973C11.2497 8.58551 11.5855 8.24973 11.9997 8.24973Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M2.17063 7.64231C2.33872 7.26392 2.78141 7.09358 3.15988 7.26145C3.53833 7.42945 3.70948 7.87221 3.54172 8.2507C3.48046 8.3887 3.42249 8.52919 3.36789 8.67063C3.21871 9.05675 2.7844 9.24912 2.39817 9.10031C2.01174 8.95115 1.81931 8.51603 1.96848 8.12961C2.03194 7.96523 2.09944 7.80265 2.17063 7.64231Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M4.58762 4.21457C4.88757 3.92895 5.36252 3.941 5.64817 4.24094C5.93352 4.5409 5.92162 5.01494 5.6218 5.30051C5.51213 5.40495 5.40495 5.51213 5.30051 5.6218C5.01494 5.92162 4.5409 5.93352 4.24094 5.64817C3.941 5.36252 3.92895 4.88757 4.21457 4.58762C4.33584 4.46028 4.46028 4.33584 4.58762 4.21457Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M8.12961 1.96848C8.51603 1.81931 8.95115 2.01174 9.10031 2.39817C9.24912 2.7844 9.05675 3.21871 8.67063 3.36789C8.52919 3.42249 8.3887 3.48046 8.2507 3.54172C7.87221 3.70948 7.42945 3.53833 7.26145 3.15988C7.09358 2.78141 7.26392 2.33872 7.64231 2.17063C7.80265 2.09944 7.96523 2.03194 8.12961 1.96848Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+</g><path fill-rule="evenodd" clip-rule="evenodd" d="M11.25 2C11.25 1.58579 11.5858 1.25 12 1.25C17.9371 1.25 22.75 6.06294 22.75 12C22.75 17.9371 17.9371 22.75 12 22.75C6.06294 22.75 1.25 17.9371 1.25 12C1.25 11.5858 1.58579 11.25 2 11.25C2.41421 11.25 2.75 11.5858 2.75 12C2.75 17.1086 6.89137 21.25 12 21.25C17.1086 21.25 21.25 17.1086 21.25 12C21.25 6.89137 17.1086 2.75 12 2.75C11.5858 2.75 11.25 2.41421 11.25 2Z" fill="currentColor"/></svg>
 
 
             Recent Activity
           </a>
 
+          <!-- DARK MODE TOGGLE (phones only — on tablet/desktop it lives in the top bar).
+               Handled by main.js ("Dark mode toggle"). Stays open on click so the
+               reveal animation plays from the switch. -->
+          <button type="button" id="theme-toggle-menu" role="menuitemcheckbox" aria-checked="false"
+                  class="theme-toggle flex sm:hidden w-full text-left items-center gap-4 px-6 py-3.5 text-base text-gray-700 hover:bg-gray-50 font-dm cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="theme-icon-moon solar solar-moon-bold-duotone w-5 h-5"><path fill-rule="evenodd" clip-rule="evenodd" d="M22 12.0004C22 17.5232 17.5228 22.0004 12 22.0004C10.8358 22.0004 9.71801 21.8014 8.67887 21.4357C8.24138 20.3772 8 19.217 8 18.0004C8 15.7792 8.80467 13.7459 10.1384 12.1762C11.31 13.8818 13.2744 15.0004 15.5 15.0004C17.8615 15.0004 19.9289 13.741 21.0672 11.8572C21.3065 11.4612 22 11.5377 22 12.0004Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M2 12C2 16.3586 4.78852 20.0659 8.67887 21.4353C8.24138 20.3768 8 19.2166 8 18C8 15.7788 8.80467 13.7455 10.1384 12.1758C9.42027 11.1303 9 9.86422 9 8.5C9 6.13845 10.2594 4.07105 12.1432 2.93276C12.5392 2.69347 12.4627 2 12 2C6.47715 2 2 6.47715 2 12Z" fill="currentColor"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="theme-icon-sun solar solar-sun-bold-duotone w-5 h-5"><g style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)">
+<path d="M4.39838 4.39838C4.69127 4.10549 5.16615 4.10549 5.45904 4.39838L5.85188 4.79122C6.14477 5.08411 6.14477 5.55898 5.85188 5.85188C5.55898 6.14477 5.08411 6.14477 4.79122 5.85188L4.39838 5.45904C4.10549 5.16615 4.10549 4.69127 4.39838 4.39838Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M19.6009 4.39864C19.8938 4.69153 19.8938 5.16641 19.6009 5.4593L19.2081 5.85214C18.9152 6.14503 18.4403 6.14503 18.1474 5.85214C17.8545 5.55924 17.8545 5.08437 18.1474 4.79148L18.5402 4.39864C18.8331 4.10575 19.308 4.10575 19.6009 4.39864Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M18.1474 18.1474C18.4403 17.8545 18.9152 17.8545 19.2081 18.1474L19.6009 18.5402C19.8938 18.8331 19.8938 19.308 19.6009 19.6009C19.308 19.8938 18.8331 19.8938 18.5402 19.6009L18.1474 19.2081C17.8545 18.9152 17.8545 18.4403 18.1474 18.1474Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+<path d="M5.85188 18.1477C6.14477 18.4406 6.14477 18.9154 5.85188 19.2083L5.45904 19.6012C5.16615 19.8941 4.69127 19.8941 4.39838 19.6012C4.10549 19.3083 4.10549 18.8334 4.39838 18.5405L4.79122 18.1477C5.08411 17.8548 5.55898 17.8548 5.85188 18.1477Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/>
+</g><path d="M18 12C18 15.3137 15.3137 18 12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12Z" fill="currentColor"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M12 1.25C12.4142 1.25 12.75 1.58579 12.75 2V3C12.75 3.41421 12.4142 3.75 12 3.75C11.5858 3.75 11.25 3.41421 11.25 3V2C11.25 1.58579 11.5858 1.25 12 1.25ZM1.25 12C1.25 11.5858 1.58579 11.25 2 11.25H3C3.41421 11.25 3.75 11.5858 3.75 12C3.75 12.4142 3.41421 12.75 3 12.75H2C1.58579 12.75 1.25 12.4142 1.25 12ZM20.25 12C20.25 11.5858 20.5858 11.25 21 11.25H22C22.4142 11.25 22.75 11.5858 22.75 12C22.75 12.4142 22.4142 12.75 22 12.75H21C20.5858 12.75 20.25 12.4142 20.25 12ZM12 20.25C12.4142 20.25 12.75 20.5858 12.75 21V22C12.75 22.4142 12.4142 22.75 12 22.75C11.5858 22.75 11.25 22.4142 11.25 22V21C11.25 20.5858 11.5858 20.25 12 20.25Z" fill="currentColor"/></svg>
+            <span class="flex-1">Dark mode</span>
+            <span class="theme-switch" aria-hidden="true"></span>
+          </button>
+
           <div class="my-2 border-t border-gray-100"></div>
 
           <!-- Shown when signed in -->
           <button type="button" id="nav-logout" role="menuitem" class="hidden w-full text-left flex items-center gap-4 px-6 py-3.5 text-base text-red-600 hover:bg-red-50 font-dm cursor-pointer">
-            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-logout-3-outline w-5 h-5 "><path d="M5.46967 12.5303C5.17678 12.2374 5.17678 11.7626 5.46967 11.4697L7.46967 9.46967C7.76257 9.17678 8.23744 9.17678 8.53033 9.46967C8.82323 9.76256 8.82323 10.2374 8.53033 10.5303L7.81066 11.25L15 11.25C15.4142 11.25 15.75 11.5858 15.75 12C15.75 12.4142 15.4142 12.75 15 12.75L7.81066 12.75L8.53033 13.4697C8.82323 13.7626 8.82323 14.2374 8.53033 14.5303C8.23744 14.8232 7.76257 14.8232 7.46967 14.5303L5.46967 12.5303Z" fill="currentColor"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M13.9453 1.25H15.0551C16.4227 1.24998 17.525 1.24996 18.392 1.36652C19.2921 1.48754 20.05 1.74643 20.6519 2.34835C21.2538 2.95027 21.5127 3.70814 21.6337 4.60825C21.7503 5.47522 21.7502 6.57754 21.7502 7.94513V16.0549C21.7502 17.4225 21.7503 18.5248 21.6337 19.3918C21.5127 20.2919 21.2538 21.0497 20.6519 21.6517C20.05 22.2536 19.2921 22.5125 18.392 22.6335C17.525 22.75 16.4227 22.75 15.0551 22.75H13.9453C12.5778 22.75 11.4754 22.75 10.6085 22.6335C9.70836 22.5125 8.95048 22.2536 8.34857 21.6517C7.94963 21.2527 7.70068 20.7844 7.54305 20.2498C6.59168 20.2486 5.79906 20.2381 5.15689 20.1518C4.39294 20.0491 3.7306 19.8268 3.20191 19.2981C2.67321 18.7694 2.45093 18.1071 2.34822 17.3431C2.24996 16.6123 2.24998 15.6865 2.25 14.5537V9.44631C2.24998 8.31349 2.24996 7.38774 2.34822 6.65689C2.45093 5.89294 2.67321 5.2306 3.20191 4.7019C3.7306 4.17321 4.39294 3.95093 5.15689 3.84822C5.79906 3.76188 6.59168 3.75142 7.54305 3.75017C7.70068 3.21562 7.94963 2.74729 8.34857 2.34835C8.95048 1.74643 9.70836 1.48754 10.6085 1.36652C11.4754 1.24996 12.5778 1.24998 13.9453 1.25ZM7.25197 17.0042C7.25555 17.6487 7.2662 18.2293 7.30285 18.7491C6.46836 18.7459 5.848 18.7312 5.35676 18.6652C4.75914 18.5848 4.46611 18.441 4.26257 18.2374C4.05903 18.0339 3.91519 17.7409 3.83484 17.1432C3.7516 16.5241 3.75 15.6997 3.75 14.5V9.5C3.75 8.30029 3.7516 7.47595 3.83484 6.85676C3.91519 6.25914 4.05903 5.9661 4.26257 5.76256C4.46611 5.55902 4.75914 5.41519 5.35676 5.33484C5.848 5.2688 6.46836 5.25415 7.30285 5.25091C7.2662 5.77073 7.25555 6.35129 7.25197 6.99583C7.24966 7.41003 7.58357 7.74768 7.99778 7.74999C8.41199 7.7523 8.74964 7.41838 8.75194 7.00418C8.75803 5.91068 8.78643 5.1356 8.89448 4.54735C8.9986 3.98054 9.16577 3.65246 9.40923 3.40901C9.68599 3.13225 10.0746 2.9518 10.8083 2.85315C11.5637 2.75159 12.5648 2.75 14.0002 2.75H15.0002C16.4356 2.75 17.4367 2.75159 18.1921 2.85315C18.9259 2.9518 19.3144 3.13225 19.5912 3.40901C19.868 3.68577 20.0484 4.07435 20.1471 4.80812C20.2486 5.56347 20.2502 6.56459 20.2502 8V16C20.2502 17.4354 20.2486 18.4365 20.1471 19.1919C20.0484 19.9257 19.868 20.3142 19.5912 20.591C19.3144 20.8678 18.9259 21.0482 18.1921 21.1469C17.4367 21.2484 16.4356 21.25 15.0002 21.25H14.0002C12.5648 21.25 11.5637 21.2484 10.8083 21.1469C10.0746 21.0482 9.68599 20.8678 9.40923 20.591C9.16577 20.3475 8.9986 20.0195 8.89448 19.4527C8.78643 18.8644 8.75803 18.0893 8.75194 16.9958C8.74964 16.5816 8.41199 16.2477 7.99778 16.25C7.58357 16.2523 7.24966 16.59 7.25197 17.0042Z" fill="currentColor"/></svg>
             <span id="nav-logout-label">Log out</span>
           </button>
 
@@ -169,23 +201,25 @@
 
       <!-- Search box (phones only; on larger screens search lives in the top bar) -->
       <label class="sm:hidden mb-4 flex items-center gap-2 bg-white rounded-full border border-gray-200 px-4 py-2.5 shadow-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
+       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-rounded-magnifier-bold-duotone w-5 h-5"><circle cx="11" cy="11" r="9" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M20.2832 18.2568C20.5014 18.2749 20.7702 18.3599 21.0586 18.4463C21.3222 18.5253 21.5732 18.5955 21.7578 18.6943C22.7333 19.217 23.0484 20.4659 22.4375 21.3887C22.3218 21.5634 22.1343 21.7446 21.9395 21.9395C21.7446 22.1343 21.5634 22.3218 21.3887 22.4375C20.4659 23.0484 19.217 22.7333 18.6943 21.7578C18.5955 21.5732 18.5253 21.3222 18.4463 21.0586C18.3599 20.7702 18.2749 20.5014 18.2568 20.2832C18.1617 19.1267 19.1267 18.1617 20.2832 18.2568Z" fill="currentColor"/></svg>
         <input type="text" id="mobile-search" placeholder="Find anything" class="w-full min-w-0 bg-transparent text-sm text-gray-700 placeholder-gray-400 outline-none font-dm" />
       </label>
 
       <!-- Mobile-only verify notice (the sidebar is hidden below lg).
            Its button is wired by main.js through [data-verify-open]. -->
-      <div class="lg:hidden mb-5 flex items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-3">
-        <p class="flex items-start gap-1.5 text-xs leading-snug text-red-500 font-dm">
-          <svg class="w-3.5 h-3.5 mt-px shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5M12 16.5h.01"/></svg>
+      <div class="lg:hidden mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-3">
+        <p class="flex items-start justify-center gap-1.5 text-center text-[11px] leading-snug text-red-500 font-dm">
+          <svg class="w-3 h-3 mt-px shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5M12 16.5h.01"/></svg>
           You currently can't interact in your Feed.
         </p>
-        <button type="button" data-verify-open class="shrink-0 rounded-lg bg-[#efe47f] hover:bg-[#e8dc6a] px-2.5 py-1.5 text-[11px] font-medium text-green-800 shadow-md transition font-dm cursor-pointer">
-          Verify first
-        </button>
+        <div class="mt-2 mx-auto w-[85%] flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-user-circle-bold-duotone w-5 h-5 shrink-0" aria-hidden="true"><path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M16.807 19.0112C15.4398 19.9504 13.7841 20.5 12 20.5C10.2159 20.5 8.56023 19.9503 7.193 19.0111C6.58915 18.5963 6.33109 17.8062 6.68219 17.1632C7.41001 15.8302 8.90973 15 12 15C15.0903 15 16.59 15.8303 17.3178 17.1632C17.6689 17.8062 17.4108 18.5964 16.807 19.0112Z" fill="currentColor"/><path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3432 6 9.00004 7.34315 9.00004 9C9.00004 10.6569 10.3432 12 12 12Z" fill="currentColor"/></svg>
+                <div class="flex-1 h-[3px] rounded-full bg-gray-300 overflow-hidden" role="progressbar" aria-label="Account setup" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
+                  <div class="h-full w-2/5 rounded-full bg-green-700 transition-all duration-300"></div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-star-circle-bold-duotone w-5 h-5 shrink-0" style="color: #9ca3af; --solar-secondary-color: currentColor; --solar-secondary-opacity: 0.35" aria-hidden="true"><path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M10.4127 8.49812L10.5766 8.20419C11.2099 7.06807 11.5266 6.5 12 6.5C12.4734 6.5 12.7901 7.06806 13.4234 8.20419L13.5873 8.49813C13.7672 8.82097 13.8572 8.98239 13.9975 9.0889C14.1378 9.19541 14.3126 9.23495 14.6621 9.31402L14.9802 9.38601C16.2101 9.66428 16.825 9.80341 16.9713 10.2739C17.1176 10.7443 16.6984 11.2345 15.86 12.215L15.643 12.4686C15.4048 12.7472 15.2857 12.8865 15.2321 13.0589C15.1785 13.2312 15.1965 13.4171 15.2325 13.7888L15.2653 14.1272C15.3921 15.4353 15.4554 16.0894 15.0724 16.3801C14.6894 16.6709 14.1137 16.4058 12.9622 15.8756L12.6643 15.7384C12.337 15.5878 12.1734 15.5124 12 15.5124C11.8266 15.5124 11.663 15.5878 11.3357 15.7384L11.0378 15.8756C9.88633 16.4058 9.31059 16.6709 8.92757 16.3801C8.54456 16.0894 8.60794 15.4353 8.7347 14.1272L8.76749 13.7888C8.80351 13.4171 8.82152 13.2312 8.76793 13.0589C8.71434 12.8865 8.59521 12.7472 8.35696 12.4686L8.14005 12.215C7.30162 11.2345 6.88241 10.7443 7.02871 10.2739C7.17501 9.80341 7.78994 9.66427 9.01977 9.38601L9.33794 9.31402C9.68743 9.23495 9.86217 9.19541 10.0025 9.0889C10.1428 8.98239 10.2328 8.82097 10.4127 8.49812Z" fill="currentColor"/></svg>
+              </div>
+              <button type="button" data-verify-open class="mt-1.5 block mx-auto text-[11px] font-medium text-green-700 underline underline-offset-2 hover:text-green-800 font-dm cursor-pointer">Claim your badge now to continue</button>
       </div>
 
       <!-- Mobile/tablet-only CCS faculty list (the sidebar is hidden below lg).
@@ -245,17 +279,19 @@
         </div>
       </details>
 
+
+      <!-- Feed breadcrumbs -->
       <div class="flex items-end justify-between flex-wrap gap-2 sm:gap-4 mb-5 sm:mb-7">
         <h1 class="font-display text-2xl sm:text-3xl font-800 tracking-tight font-poppins font-bold">Suggestions</h1>
 
         <nav class="no-scrollbar flex items-center gap-5 sm:gap-6 w-full sm:w-auto overflow-x-auto sm:overflow-visible whitespace-nowrap text-sm text-gray-500 pt-1 pb-3 sm:pb-1">
           <button type="button" class="flex items-center gap-1 hover:text-gray-700 transition font-inter">
             Suggestion
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-alt-arrow-down-outline w-5 h-5 text-black/50"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.43057 8.51192C4.70014 8.19743 5.17361 8.161 5.48811 8.43057L12 14.0122L18.5119 8.43057C18.8264 8.16101 19.2999 8.19743 19.5695 8.51192C19.839 8.82642 19.8026 9.29989 19.4881 9.56946L12.4881 15.5695C12.2072 15.8102 11.7928 15.8102 11.5119 15.5695L4.51192 9.56946C4.19743 9.29989 4.161 8.82641 4.43057 8.51192Z" fill="currentColor"/></svg>
           </button>
           <button type="button" class="tab-active flex items-center gap-1 font-inter">
             University
-            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-alt-arrow-down-outline w-5 h-5 text-black/50"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.43057 8.51192C4.70014 8.19743 5.17361 8.161 5.48811 8.43057L12 14.0122L18.5119 8.43057C18.8264 8.16101 19.2999 8.19743 19.5695 8.51192C19.839 8.82642 19.8026 9.29989 19.4881 9.56946L12.4881 15.5695C12.2072 15.8102 11.7928 15.8102 11.5119 15.5695L4.51192 9.56946C4.19743 9.29989 4.161 8.82641 4.43057 8.51192Z" fill="currentColor"/></svg>
           </button>
           <button type="button" class="hover:text-gray-700 transition font-inter">Recent</button>
           <button type="button" class="hover:text-gray-700 transition font-inter">Popular</button>
@@ -481,27 +517,33 @@
       <div class="sticky top-20 rounded-3xl p-5 bg-white border border-gray-200 shadow-lg">
 
         <!-- Profile — filled in by main.js from the signed-in user -->
-        <div class="flex items-center gap-3 pb-4 mb-4 border-b border-black/20">
-          <div id="profile-avatar" class="w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-poppins font-extrabold shrink-0 bg-[#a63f3f]">?</div>
-          <div class="min-w-0">
-            <p id="profile-name" class="text-base font-bold leading-tight truncate font-dm text-black">Loading...</p>
-            <p id="profile-email" class="text-xs leading-tight mt-0.5 truncate text-gray-500 font-dm"></p>
+        <div class="pb-5 border-b border-black/20">
+          <div class="flex items-center gap-3">
+            <div id="profile-avatar" class="w-14 h-14 rounded-full flex items-center justify-center text-white text-lg font-poppins font-extrabold shrink-0 bg-[#a63f3f]">?</div>
+            <div class="min-w-0 flex-1">
+              <p id="profile-name" class="text-base font-bold leading-tight truncate font-dm text-black">Loading...</p>
+              <p id="profile-email" class="text-xs leading-tight mt-0.5 truncate text-gray-500 font-dm"></p>
+            </div>
+          </div>
 
-            <!-- Verification notice (UI only, not wired to any check yet) -->
-            <div id="profile-verify-wrap">
-              <p class="flex items-start gap-1 mt-1 text-[11px] leading-tight text-red-500 font-dm">
+          <!-- Verification notice + badge progress (UI only, not wired to any check yet), centered under the profile row -->
+          <div id="profile-verify-wrap" class="mt-3">
+              <p class="flex items-start justify-center gap-1 text-center text-[11px] leading-tight text-red-500 font-dm">
                 <svg class="w-3 h-3 mt-px shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 8v5M12 16.5h.01"/></svg>
                 You currently can't interact in your Feed.
               </p>
-              <button type="button" id="profile-verify" class="mt-1.5 flex items-center gap-1 rounded-lg bg-[#efe47f] hover:bg-[#e8dc6a] px-2 py-1 text-[11px] font-medium text-green-800 shadow-md transition font-dm cursor-pointer">
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"/></svg>
-                Verify first
-              </button>
-            </div>
+              <div class="mt-2 mx-auto w-[85%] flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-user-circle-bold-duotone w-5 h-5 shrink-0" aria-hidden="true"><path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M16.807 19.0112C15.4398 19.9504 13.7841 20.5 12 20.5C10.2159 20.5 8.56023 19.9503 7.193 19.0111C6.58915 18.5963 6.33109 17.8062 6.68219 17.1632C7.41001 15.8302 8.90973 15 12 15C15.0903 15 16.59 15.8303 17.3178 17.1632C17.6689 17.8062 17.4108 18.5964 16.807 19.0112Z" fill="currentColor"/><path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3432 6 9.00004 7.34315 9.00004 9C9.00004 10.6569 10.3432 12 12 12Z" fill="currentColor"/></svg>
+                <div class="flex-1 h-[3px] rounded-full bg-gray-300 overflow-hidden" role="progressbar" aria-label="Account setup" aria-valuemin="0" aria-valuemax="100" aria-valuenow="40">
+                  <div id="profile-verify-fill" class="h-full w-2/5 rounded-full bg-green-700 transition-all duration-300"></div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-star-circle-bold-duotone w-5 h-5 shrink-0" style="color: #9ca3af; --solar-secondary-color: currentColor; --solar-secondary-opacity: 0.35" aria-hidden="true"><path d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M10.4127 8.49812L10.5766 8.20419C11.2099 7.06807 11.5266 6.5 12 6.5C12.4734 6.5 12.7901 7.06806 13.4234 8.20419L13.5873 8.49813C13.7672 8.82097 13.8572 8.98239 13.9975 9.0889C14.1378 9.19541 14.3126 9.23495 14.6621 9.31402L14.9802 9.38601C16.2101 9.66428 16.825 9.80341 16.9713 10.2739C17.1176 10.7443 16.6984 11.2345 15.86 12.215L15.643 12.4686C15.4048 12.7472 15.2857 12.8865 15.2321 13.0589C15.1785 13.2312 15.1965 13.4171 15.2325 13.7888L15.2653 14.1272C15.3921 15.4353 15.4554 16.0894 15.0724 16.3801C14.6894 16.6709 14.1137 16.4058 12.9622 15.8756L12.6643 15.7384C12.337 15.5878 12.1734 15.5124 12 15.5124C11.8266 15.5124 11.663 15.5878 11.3357 15.7384L11.0378 15.8756C9.88633 16.4058 9.31059 16.6709 8.92757 16.3801C8.54456 16.0894 8.60794 15.4353 8.7347 14.1272L8.76749 13.7888C8.80351 13.4171 8.82152 13.2312 8.76793 13.0589C8.71434 12.8865 8.59521 12.7472 8.35696 12.4686L8.14005 12.215C7.30162 11.2345 6.88241 10.7443 7.02871 10.2739C7.17501 9.80341 7.78994 9.66427 9.01977 9.38601L9.33794 9.31402C9.68743 9.23495 9.86217 9.19541 10.0025 9.0889C10.1428 8.98239 10.2328 8.82097 10.4127 8.49812Z" fill="currentColor"/></svg>
+              </div>
+              <button type="button" id="profile-verify" class="mt-1.5 block mx-auto text-[11px] font-medium text-green-700 underline underline-offset-2 hover:text-green-800 font-dm cursor-pointer">Claim your badge now to continue</button>
           </div>
         </div>
 
-        <h2 class="text-center text-xl font-black text-black font-dm">CCS</h2>
+        <h2 class="mt-4 text-center text-xl font-black text-black font-dm">CCS</h2>
         <p class="text-center text-sm text-gray-500 font-dm mt-0.5 mb-3">Faculty Members</p>
 
         <div class="space-y-2.5 max-h-130 overflow-y-auto scrollbar-thin">
@@ -642,7 +684,7 @@
 
   <!-- =========================================================
        VERIFY PANEL — STUDENTS ONLY (Tailwind classes only)
-       Opened by the sidebar's "Verify first" button (#profile-verify)
+       Opened by the sidebar's "Claim your badge now" button (#profile-verify)
        and the mobile banner button ([data-verify-open]).
        Faculty accounts are created by the super admin, so there is no
        role picker and no faculty form here.

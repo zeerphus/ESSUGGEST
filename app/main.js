@@ -1,4 +1,33 @@
 /**
+ * ESSUGGEST — Avatar colors
+ * =========================================================================
+ * One color per user, picked from their name. The same name always gets the
+ * same color (no flicker between reloads, and a user looks the same in the
+ * feed and in the sidebar). Every color is dark enough for white initials
+ * and comes from the brand palette (greens, a deeper red, a dark gold) plus
+ * a few matching accents.
+ *
+ * Use window.essuAvatarColor(name) anywhere you draw an avatar.
+ */
+const AVATAR_COLORS = [
+  "#16A34A", // green-600
+  "#15803D", // green-700
+  "#166534", // green-800
+  "#B91C1C", // deep red (darker take on #E22214)
+  "#A16207", // dark gold (darker take on #f7ea7a)
+  "#0F766E", // teal
+  "#4D7C0F", // olive green
+  "#9A3412", // burnt orange
+];
+
+window.essuAvatarColor = function (name) {
+  let hash = 0;
+  const str = (name || "").toLowerCase();
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
+
+/**
  * ESSUGGEST — Feed (UI only)
  * =========================================================================
  * Renders the sample suggestions below into #feedContainer. No database
@@ -22,14 +51,6 @@
     return name.trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   }
 
-  const avatarColors = ["bg-orange-600", "bg-amber-500", "bg-green-500", "bg-teal-600", "bg-blue-600", "bg-rose-500"];
-  function colorFor(name) {
-    let hash = 0;
-    const str = name || "";
-    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    return avatarColors[Math.abs(hash) % avatarColors.length];
-  }
-
   function escapeHtml(str) {
     const div = document.createElement("div");
     div.textContent = str || "";
@@ -40,7 +61,7 @@
     return `
       <div class="flex items-start justify-between gap-2">
         <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg shrink-0 ${colorFor(p.name)}">${initials(p.name)}</div>
+          <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg shrink-0" style="background-color:${window.essuAvatarColor(p.name)}">${initials(p.name)}</div>
           <div class="min-w-0">
             <p class="font-semibold text-base sm:text-lg leading-tight font-inter truncate">${escapeHtml(p.name)}</p>
             <p class="text-[11px] sm:text-xs text-gray-400 leading-tight mt-1 font-dm">Posted ${escapeHtml(p.posted)}</p>
@@ -59,13 +80,13 @@
 
       <div class="flex items-center gap-2 mt-4">
         <div class="flex items-center gap-1 bg-green-50 rounded-full px-3 py-1.5 text-xs font-semibold text-green-700 font-dm">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>${p.up}
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-arrow-to-top-right-outline w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M6.46967 10.0303C6.17678 9.73744 6.17678 9.26256 6.46967 8.96967L11.4697 3.96967C11.7626 3.67678 12.2374 3.67678 12.5303 3.96967L17.5303 8.96967C17.8232 9.26256 17.8232 9.73744 17.5303 10.0303C17.2374 10.3232 16.7626 10.3232 16.4697 10.0303L12.75 6.31066L12.75 14.5C12.75 15.2133 12.9702 16.3 13.6087 17.1868C14.2196 18.0353 15.2444 18.75 17 18.75C17.4142 18.75 17.75 19.0858 17.75 19.5C17.75 19.9142 17.4142 20.25 17 20.25C14.7556 20.25 13.2804 19.298 12.3913 18.0632C11.5298 16.8667 11.25 15.4534 11.25 14.5L11.25 6.31066L7.53033 10.0303C7.23744 10.3232 6.76256 10.3232 6.46967 10.0303Z" fill="currentColor"/></svg>${p.up}
         </div>
         <div class="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-500 font-dm">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>${p.down}
+          <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-arrow-to-down-left-outline w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M17.5303 13.9697C17.8232 14.2626 17.8232 14.7374 17.5303 15.0303L12.5303 20.0303C12.2374 20.3232 11.7626 20.3232 11.4697 20.0303L6.46967 15.0303C6.17678 14.7374 6.17678 14.2626 6.46967 13.9697C6.76256 13.6768 7.23744 13.6768 7.53033 13.9697L11.25 17.6893L11.25 9.5C11.25 8.78668 11.0298 7.70001 10.3913 6.81323C9.7804 5.96468 8.75556 5.25 7 5.25C6.58579 5.25 6.25 4.91421 6.25 4.5C6.25 4.08579 6.58579 3.75 7 3.75C9.24444 3.75 10.7196 4.70198 11.6087 5.93677C12.4702 7.13332 12.75 8.54665 12.75 9.5L12.75 17.6893L16.4697 13.9697C16.7626 13.6768 17.2374 13.6768 17.5303 13.9697Z" fill="currentColor"/></svg>${p.down}
         </div>
         <div class="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1.5 text-xs font-semibold text-gray-500 font-dm">
-          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>${p.comments}
+          <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-chat-round-outline w-4 h-4"><path fill-rule="evenodd" clip-rule="evenodd" d="M22.75 12C22.75 6.06294 17.9371 1.25 12 1.25C6.06294 1.25 1.25 6.06294 1.25 12C1.25 13.7183 1.65371 15.3445 2.37213 16.7869C2.47933 17.0021 2.50208 17.2219 2.4526 17.4068L1.857 19.6328C1.44927 21.1566 2.84337 22.5507 4.3672 22.143L6.59324 21.5474C6.77814 21.4979 6.99791 21.5207 7.21315 21.6279C8.65553 22.3463 10.2817 22.75 12 22.75C17.9371 22.75 22.75 17.9371 22.75 12ZM12 2.75C17.1086 2.75 21.25 6.89137 21.25 12C21.25 17.1086 17.1086 21.25 12 21.25C10.5189 21.25 9.12121 20.9025 7.88191 20.2852C7.38451 20.0375 6.78973 19.9421 6.20553 20.0984L3.97949 20.694C3.57066 20.8034 3.19663 20.4293 3.30602 20.0205L3.90163 17.7945C4.05794 17.2103 3.96254 16.6155 3.7148 16.1181C3.09752 14.8788 2.75 13.4811 2.75 12C2.75 6.89137 6.89137 2.75 12 2.75Z" fill="currentColor"/></svg>${p.comments}
         </div>
       </div>`;
   }
@@ -87,7 +108,8 @@
  * ESSUGGEST — Sidebar profile
  * =========================================================================
  * Fills in #profile-name / #profile-avatar with whoever is actually
- * signed in, instead of a hardcoded placeholder name.
+ * signed in, instead of a hardcoded placeholder name. The avatar color is
+ * picked from the name (see window.essuAvatarColor at the top of this file).
  */
 (function suggestProfile() {
   const nameEl = document.getElementById("profile-name");
@@ -110,6 +132,14 @@
 
       nameEl.textContent = name;
       avatarEl.textContent = initials(name);
+
+      // Inline style beats the placeholder bg-[#a63f3f] class in the HTML.
+      const color = window.essuAvatarColor(name);
+      avatarEl.style.backgroundColor = color;
+
+      // Same user, same color on the Profile panel avatar.
+      const panelAvatar = document.getElementById("profile-panel-avatar");
+      if (panelAvatar) panelAvatar.style.backgroundColor = color;
 
       const emailEl = document.getElementById("profile-email");
       if (emailEl) emailEl.textContent = (user && user.email) || "";
@@ -201,4 +231,64 @@
       }
     });
   }
+})();
+
+/**
+ * ESSUGGEST — Dark mode toggle
+ * =========================================================================
+ * Two buttons share this logic (both have the .theme-toggle class):
+ *   #theme-toggle-nav   in the top bar, tablet + desktop (sm and up)
+ *   #theme-toggle-menu  in the settings dropdown, phones only
+ * The new theme spreads out from whichever button was clicked as a growing
+ * circle (View Transitions API). Falls back to an instant swap on browsers
+ * without it, or when the user prefers reduced motion. The choice is saved
+ * in localStorage; the tiny script in <head> of the HTML applies it before
+ * first paint.
+ */
+(function themeToggle() {
+  const KEY = "essuggest-theme";
+  const root = document.documentElement;
+  const buttons = document.querySelectorAll(".theme-toggle");
+  if (!buttons.length) return;
+
+  const isDark = () => root.classList.contains("dark");
+  const sync = () =>
+    buttons.forEach((b) => b.setAttribute("aria-checked", String(isDark())));
+
+  function apply(dark) {
+    root.classList.toggle("dark", dark);
+    try { localStorage.setItem(KEY, dark ? "dark" : "light"); } catch (e) {}
+    sync();
+  }
+
+  function toggleFrom(btn) {
+    const next = !isDark();
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!document.startViewTransition || reduce) {
+      apply(next);
+      return;
+    }
+
+    // Spread from the clicked button (the switch pill, if the button has one)
+    const origin = btn.querySelector(".theme-switch") || btn;
+    const r = origin.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+    const radius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    const transition = document.startViewTransition(() => apply(next));
+    transition.ready.then(() => {
+      root.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 600, easing: "ease-in-out", pseudoElement: "::view-transition-new(root)" }
+      );
+    });
+  }
+
+  buttons.forEach((b) => b.addEventListener("click", () => toggleFrom(b)));
+  sync();
 })();

@@ -9,6 +9,16 @@
    (text-decoration, so the arrow isn't underlined), and a gray filled
    triangle instead of the thin chevron.
 ----------------------------------------------------------------------- */
+
+/* -----------------------------------------------------------------------
+   Solar icons — default colors. :where() keeps specificity at zero, so
+   any Tailwind color class placed directly on an <svg> still wins.
+----------------------------------------------------------------------- */
+:where(.solar) {
+  --solar-secondary-color: #16A34A;
+  --solar-secondary-opacity: ;
+  color: #166534;
+}
 .tab-active {
   color: var(--color-green-600);
   font-weight: 400;
@@ -183,3 +193,204 @@ label {
     font-size: 16px !important;
   }
 }
+
+/* =======================================================================
+   Dark mode (html.dark)
+   Toggled from the settings menu (#theme-toggle) — see "Dark mode toggle"
+   in main.js. These override the Tailwind utility classes the page uses.
+   ======================================================================= */
+.dark body { background: #0e1511; color: #e5e7eb; }
+
+.dark .bg-white            { background-color: #18211b; }
+.dark .bg-white\/90        { background-color: rgb(34 46 38 / 0.9); }
+.dark .bg-gray-50,
+.dark .bg-gray-100         { background-color: #222d26; }
+.dark .bg-gray-200         { background-color: #2c3a31; }
+.dark .bg-green-50         { background-color: rgb(22 163 74 / 0.16); }
+.dark .bg-green-100        { background-color: rgb(22 163 74 / 0.22); }
+.dark .bg-yellow-100       { background-color: rgb(250 204 21 / 0.18); }
+.dark .bg-amber-50         { background-color: rgb(245 158 11 / 0.12); }
+
+.dark .text-black,
+.dark .text-gray-900,
+.dark .text-gray-800       { color: #f3f4f6; }
+.dark .text-gray-700,
+.dark .text-gray-600       { color: #d1d5db; }
+.dark .text-gray-500       { color: #9ca3af; }
+.dark .text-green-700      { color: #4ade80; }
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300     { border-color: #2f3d34; }
+.dark .border-amber-200    { border-color: rgb(245 158 11 / 0.3); }
+
+.dark .hover\:bg-gray-50:hover  { background-color: #222d26; }
+.dark .hover\:bg-red-50:hover   { background-color: rgb(239 68 68 / 0.12); }
+.dark .hover\:bg-green-50:hover { background-color: rgb(22 163 74 / 0.14); }
+.dark .hover\:bg-gray-100:hover { background-color: #2c3a31; }
+
+.dark input,
+.dark select,
+.dark textarea             { color: #e5e7eb; }
+.dark input:focus,
+.dark select:focus         { background-color: #2c3a31; }
+.dark ::placeholder        { color: #6b7280; }
+
+.dark #notif-panel,
+.dark #nav-menu            { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55); }
+
+/* Solar icons: brighter green on dark (zero specificity, like the original) */
+:where(.dark .solar) { color: #4ade80; }
+
+/* Log out icon: same red as its label. Plain CSS with an ID selector, so it
+   beats the zero-specificity .solar rules above in both light and dark mode. */
+#nav-logout .solar { color: #dc2626; } /* red-600, matches text-red-600 */
+
+/* ---- Theme toggle row (in the settings menu) ---- */
+.theme-icon-sun { display: none; }
+.dark .theme-icon-moon { display: none; }
+.dark .theme-icon-sun  { display: block; }
+
+.theme-switch {
+  position: relative;
+  width: 2.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: #d1d5db;
+  transition: background-color 200ms ease;
+}
+.theme-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 200ms ease;
+}
+.dark .theme-switch { background: #16a34a; }
+.dark .theme-switch::after { transform: translateX(16px); }
+
+/* ---- Circular reveal (View Transitions API) ----
+   main.js animates clip-path on the "new" snapshot; we only turn off the
+   browser's default cross-fade so the growing circle is the only effect. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* =======================================================================
+   Sidebar color scheme (CCS faculty list)
+   Brand palette: green-600 #16A34A, green-700 #15803D, green-800 #166534,
+   yellow-green #f7ea7a, red #E22214.
+   Targets the existing markup (the .bg-green-700.rounded-2xl cards, shared
+   by the desktop sidebar and the mobile "CCS Faculty Members" list), so
+   feed.html needs no changes. The selectors are more specific than the
+   Tailwind utilities, so they win without !important.
+   ======================================================================= */
+
+/* "CCS" heading: deepest brand green (light), bright green (dark) */
+aside h2.text-center.text-black            { color: #166534; }
+.dark aside h2.text-center.text-black      { color: #4ade80; }
+
+/* ---- Faculty cards ----------------------------------------------------
+   Light mode: soft green tint card, green-600 accent bar on the left,
+   green-800 name (about 7:1 contrast on the tint), role as a yellow-green
+   pill with green-800 text (about 5:1), green-700 avatar with a yellow ring.
+   Dark mode: translucent green card, light name, same yellow role pill. */
+.bg-green-700.rounded-2xl {
+  background-color: rgb(22 163 74 / 0.08);
+  border: 1px solid rgb(22 163 74 / 0.22);
+  border-left: 4px solid #16A34A;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+.bg-green-700.rounded-2xl:hover {
+  background-color: rgb(22 163 74 / 0.16);
+  box-shadow: 0 4px 12px rgb(22 101 52 / 0.15);
+}
+
+/* The faculty lists use overflow-y-auto, which also turns on horizontal
+   scrolling. Anything that nudges a card sideways made a horizontal
+   scrollbar appear and the sidebar jitter. Lock the x axis. */
+aside .overflow-y-auto,
+details .overflow-y-auto {
+  overflow-x: hidden;
+}
+
+/* Keep the sticky sidebar card inside the screen.
+   With the taller faculty cards the card became taller than the window,
+   so there was no room left for it to stick and it slid under the nav bar
+   when the page scrolled. Cap the card to the space under the header and
+   let only the faculty list scroll inside it. (Desktop sidebar only.) */
+aside > .sticky {
+  max-height: calc(100dvh - 6rem);   /* top-20 offset + a little breathing room */
+  display: flex;
+  flex-direction: column;
+
+  /* Pin it to the screen. "sticky" only moves inside its parent, and the
+     parent here is exactly as tall as the card (the feed is short), so it
+     had no room to travel and scrolled away with the page. "fixed" stays
+     put no matter how long the feed is. Left is left alone so it keeps its
+     column; the width is the aside (w-92 = 23rem) minus its pr-6 (1.5rem). */
+  position: fixed;
+  top: 5rem;
+  width: 21.5rem;
+}
+aside > .sticky > .overflow-y-auto {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+}
+
+/* Avatar: green-700 circle, white initials, yellow-green ring */
+.bg-green-700.rounded-2xl > div:first-child {
+  background-color: #15803D;
+  color: #ffffff;
+  box-shadow: 0 0 0 2px #f7ea7a;
+}
+
+/* Name */
+.bg-green-700.rounded-2xl p.font-dm {
+  color: #166534;
+  font-weight: 600;
+}
+
+/* Role: yellow-green pill */
+.bg-green-700.rounded-2xl p.font-mono {
+  display: inline-block;
+  max-width: 100%;
+  margin-top: 4px;
+  padding: 1px 8px;
+  border-radius: 9999px;
+  background-color: #f7ea7a;
+  color: #166534;
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Dark mode */
+.dark .bg-green-700.rounded-2xl {
+  background-color: rgb(22 163 74 / 0.14);
+  border-color: rgb(74 222 128 / 0.25);
+  border-left-color: #16A34A;
+}
+.dark .bg-green-700.rounded-2xl:hover {
+  background-color: rgb(22 163 74 / 0.24);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.4);
+}
+.dark .bg-green-700.rounded-2xl > div:first-child {
+  background-color: #16A34A;
+}
+.dark .bg-green-700.rounded-2xl p.font-dm {
+  color: #f3f4f6;
+}
+
+/* Verify notice: brand red */
+#profile-verify-wrap > p,
+.lg\:hidden > p.text-red-500               { color: #E22214; }
