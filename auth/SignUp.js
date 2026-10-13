@@ -16,15 +16,15 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 // --- Firebase setup ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyCjPjZbYnaCLtSCFFc4N9_4_0mM7imJ3IY",
-    authDomain: "essuggest-f523e.firebaseapp.com",
-    projectId: "essuggest-f523e",
-    storageBucket: "essuggest-f523e.firebasestorage.app",
-    messagingSenderId: "1014289838492",
-    appId: "1:1014289838492:web:a157157f53259c29f8d859",
-    measurementId: "G-HD8PB202TN"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCjPjZbYnaCLtSCFFc4N9_4_0mM7imJ3IY",
+  authDomain: "essuggest-f523e.firebaseapp.com",
+  projectId: "essuggest-f523e",
+  storageBucket: "essuggest-f523e.firebasestorage.app",
+  messagingSenderId: "1014289838492",
+  appId: "1:1014289838492:web:a157157f53259c29f8d859",
+  measurementId: "G-HD8PB202TN"
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -38,21 +38,24 @@ const LOADER_HTML = `<l-mirage size="50" speed="2.5" color="white"></l-mirage>`;
 const MIN_LOADING_MS = 800;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/* ---------- Password visibility toggle ---------- */
+// Solar "eye-closed" icon (shown while the password is visible, click to hide)
+const EYE_CLOSED = `<path d="M12 14.0001V16.5001M15.5872 13.3288L17 15.5001M8.41281 13.3288L7 15.5001M19 11.1289L20.5 12.6289M5 11.1289L3.5 12.6289" stroke="currentColor" stroke-linecap="round" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M2 7C2 7 5 14 12 14C13.34 14 14.5334 13.7435 15.5872 13.3287C16.9547 12.7904 18.0872 11.9856 19 11.1288C21.0586 9.19661 22 7 22 7" stroke="currentColor" stroke-linecap="round"/>`;
+
+// Solar "eye" icon (shown while the password is hidden, click to show)
+const EYE_OPEN = `<path d="M3.27489 15.2957C2.42496 14.1915 2 13.6394 2 12C2 10.3606 2.42496 9.80853 3.27489 8.70433C4.97196 6.49956 7.81811 4 12 4C16.1819 4 19.028 6.49956 20.7251 8.70433C21.575 9.80853 22 10.3606 22 12C22 13.6394 21.575 14.1915 20.7251 15.2957C19.028 17.5004 16.1819 20 12 20C7.81811 20 4.97196 17.5004 3.27489 15.2957Z" stroke="currentColor" stroke-linecap="round" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-linecap="round"/>`;
+
 function eye(e) {
   const wrapper = e.target.closest(".relative");
   const input = wrapper.querySelector("input");
-  const eyeconS = e.target.closest("svg");
-
-  const eyeClosed = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />`;
-  const eyeOpen = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />`;
+  const icon = e.target.closest("svg");
 
   if (input.type === "password") {
     input.type = "text";
-    eyeconS.innerHTML = eyeClosed;
+    icon.innerHTML = EYE_CLOSED;
   } else {
     input.type = "password";
-    eyeconS.innerHTML = eyeOpen;
+    icon.innerHTML = EYE_OPEN;
   }
 }
 
@@ -73,7 +76,7 @@ function checkPassword(value) {
   const hasLower = /[a-z]/.test(value);
   const hasNumber = /[0-9]/.test(value);
   const hasSpecial = /[^A-Za-z0-9]/.test(value);
-  
+
   setRule("len", hasLength);
   setRule("upper", hasUpper);
   setRule("lower", hasLower);
@@ -101,6 +104,8 @@ function setRule(ruleName, passed) {
 const passBox = document.getElementById("password");
 const pass2Box = document.getElementById("password2");
 const emailBox = document.getElementById("email");
+const eyeconS = document.getElementById("eyeconS"); // password field icon
+const eyecon = document.getElementById("eyecon"); // confirm password field icon
 
 passBox.addEventListener("input", function () {
   clearShake(passBox);
@@ -175,7 +180,7 @@ async function SignUp(e) {
 
     // --- Step 2: Create the matching Firestore profile doc ---
     // Doc id = uid, so login.js can look it up the same way
-     await setDoc(doc(db, "users", user.uid), {
+    await setDoc(doc(db, "users", user.uid), {
       email: user.email,
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
@@ -246,7 +251,7 @@ async function googleSignUp() {
   googleBtn.disabled = true;
   googleBtn.innerHTML = `<l-mirage size="50" speed="2.5" color="#16a34a"></l-mirage>`;
 
-    try {
+  try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
     const userRef = doc(db, "users", user.uid);
@@ -292,7 +297,6 @@ async function googleSignUp() {
     message.style.color = "Green";
     googleBtn.textContent = "Redirecting...";
     setTimeout(() => (window.location.href = "/app/main.html"), 500);
-  
   } catch (error) {
     message.style.color = "Red";
     switch (error.code) {
