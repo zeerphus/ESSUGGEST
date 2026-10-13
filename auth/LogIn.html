@@ -3,19 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/jpg" href="/assets/LOGO.png" />
+    <link rel="icon" type="image/png" href="/assets/LOGO.png" />
     <title>ESSUGGEST | Log In</title>
     <link rel="stylesheet" href="/src/output.css" />
     <link rel="stylesheet" href="/src/validation.css" />
   </head>
-  <body class="flex justify-center items-center min-h-screen bg-gray-200 px-4 sm:px-6 md:px-0">
-    <div class="relative w-110 h-130 bg-white rounded-2xl md:rounded-r-none shadow-2xl">
+  <body class="flex justify-center items-center min-h-dvh bg-gray-200 px-4 py-6 sm:px-6 lg:px-0 lg:py-0">
 
-      <div class="absolute top-4 left-4 sm:top-5 sm:left-5 flex items-center gap-80">
+    <!-- CARD: fluid on mobile (max 440px), fixed 440x520 on desktop next to the video panel -->
+    <div class="relative w-full max-w-110 lg:w-110 lg:shrink-0 h-auto lg:h-130 pb-6 lg:pb-0 bg-white rounded-2xl lg:rounded-r-none shadow-2xl">
+
+      <!-- Top buttons: justify-between replaces the old gap-80 hack -->
+      <div class="absolute inset-x-4 top-4 sm:inset-x-5 sm:top-5 flex items-center justify-between">
         <a
           href="../pages/homepage.html"
           aria-label="Back to homepage"
-          class="flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-200"
+          class="flex items-center justify-center w-10 h-10 lg:w-9 lg:h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-200"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
@@ -25,7 +28,8 @@
         <a
           href="/auth/supadL.html"
           aria-label="Staff access"
-          class="flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-200"
+          class="flex items-center justify-center tooltip w-10 h-10 lg:w-9 lg:h-9 rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors duration-200"
+          title="Staff Access" data-tip="Staff Access"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M7.864 4.243A7.5 7.5 0 0 1 19.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.465 7.465 0 0 0 4.5 10.5a7.464 7.464 0 0 1-1.15 3.993m1.989 3.559A11.209 11.209 0 0 0 8.25 10.5a3.75 3.75 0 1 1 7.5 0c0 .527-.021 1.049-.064 1.565M12 10.5a14.94 14.94 0 0 1-3.6 9.75m6.633-4.596a18.666 18.666 0 0 1-2.485 5.33" />
@@ -33,96 +37,155 @@
         </a>
       </div>
 
-      <h1 class="text-center text-4xl font-poppins font-black mt-20">
+      <h1 class="text-center text-3xl sm:text-4xl font-poppins font-black mt-18 sm:mt-16">
         WELCOME
       </h1>
       <p
-        class="text-center text-sm opacity-50 mb-10 font-thin italic font-jakarta"
+        class="text-center text-sm opacity-50 mb-6 font-thin italic font-jakarta"
       >
         Log in to your account
       </p>
 
+      <!-- Form is full width with side padding; children use w-full instead of fixed w-90 -->
       <form
-        class="flex justify-center items-center flex-col space-y-1"
+        class="flex flex-col items-stretch space-y-1 w-full px-6 sm:px-10"
         onsubmit="Login(event)"
       >
-        <div class="w-90 mb-2.5">
-          <label for="" class="px-3 font-dm">Email</label>
+        <div class="w-full mb-2.5">
+          <label for="email" class="px-3 font-dm">Email</label>
+          <!-- text-base on mobile stops iOS from zooming the page on focus -->
           <input
             type="email"
             id="email"
+            autocomplete="email"
             placeholder="JuanDelaCruz@gmail.com"
-            class="border border-gray-200 bg-gray-100 w-full py-2 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-sm"
+            class="border border-gray-200 bg-gray-100 w-full py-2.5 sm:py-2 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm text-base sm:text-sm"
           />
         </div>
 
-        <div class="w-90">
-          <div class="flex justify-between items-center mb-1">
-          <label for="" class="px-3 font-dm">Password</label>
-           <a
-            class="text-sm font-dm hover:underline transition- duration-300 text-gray-500"
-            href="#"
-            >Forgot password?</a>
+        <div class="w-full">
+          <div class="flex justify-between items-center mb-1 gap-2">
+            <label for="password" class="px-3 font-dm">Password</label>
+            <a
+              class="text-sm font-dm hover:underline transition-colors duration-300 text-gray-500 py-1"
+              href="/auth/resetP.html"
+              >Forgot password?</a>
           </div>
           <div class="relative">
             <input
               type="password"
               id="password"
+              autocomplete="current-password"
               placeholder="•••••••••••••"
-              class="border border-gray-200 bg-gray-100 w-full py-2 rounded-md px-3 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm mb-1 text-sm"
+              class="border border-gray-200 bg-gray-100 w-full py-2.5 sm:py-2 rounded-md pl-3 pr-10 focus:ring-green-400 focus:outline-none focus:ring-2 font-dm mb-1 text-base sm:text-sm"
             />
 
-           <svg
-  id="eyecon"
-  onclick="eye(event)"
-  xmlns="http://www.w3.org/2000/svg"
-  fill="none"
-  viewBox="0 0 24 24"
-  stroke-width="1.5"
-  stroke="currentColor"
-  class="size-4 absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
->
-  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-</svg>
+            <!-- box-content + p-2 gives a ~32px tap area; icon sits in the same spot as before -->
+            <svg id="eyecon" onclick="eye(event)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="1.5" style="color: #14532d; --solar-secondary-color: #15803d; --solar-secondary-opacity: 1;" class="solar solar-eye-line-duotone size-4 box-content p-2 absolute right-1 top-1/2 -translate-y-1/2 cursor-pointer"><path d="M3.27489 15.2957C2.42496 14.1915 2 13.6394 2 12C2 10.3606 2.42496 9.80853 3.27489 8.70433C4.97196 6.49956 7.81811 4 12 4C16.1819 4 19.028 6.49956 20.7251 8.70433C21.575 9.80853 22 10.3606 22 12C22 13.6394 21.575 14.1915 20.7251 15.2957C19.028 17.5004 16.1819 20 12 20C7.81811 20 4.97196 17.5004 3.27489 15.2957Z" stroke="currentColor" stroke-linecap="round" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-linecap="round"/></svg>
           </div>
         </div>
 
-
-        <p id="message" class="font-dm font-light h-5"></p>
+        <!-- min-h instead of fixed h so long error messages wrap instead of overlapping -->
+        <p id="message" class="font-dm font-light min-h-5 text-sm text-center"></p>
 
         <div class="flex justify-center items-center">
           <!-- flex + items-center + justify-center keep the loader centered in the button -->
           <button
             id="submit"
             type="submit"
-            class="flex items-center justify-center bg-green-600 text-white w-90 h-10 rounded-md hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-90 transition duration-300 font-poppins text-md font-bold"
+            class="flex items-center justify-center bg-green-600 text-white w-full h-11 sm:h-10 rounded-md hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-90 transition duration-300 font-dm text-md font-bold"
           >
             Log In
           </button>
         </div>
-        <p class="text-center font-dm text-sm mb-17">
+
+        <!-- "or" divider -->
+        <div class="flex items-center gap-3 w-full my-2.5" role="separator" aria-label="or">
+          <span class="h-px flex-1 bg-gray-300"></span>
+          <span class="text-xs font-dm text-gray-400">or</span>
+          <span class="h-px flex-1 bg-gray-300"></span>
+        </div>
+
+        <!-- CONTINUE WITH GOOGLE (UI only — not wired up yet).
+             type="button" so it never submits the log in form. -->
+        <button
+          id="googleBtn"
+          type="button"
+          class="flex items-center justify-center gap-2.5 bg-white text-gray-700 w-full h-11 sm:h-10 rounded-md border border-gray-300 hover:bg-gray-50 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-90 transition duration-300 font-dm text-sm font-medium cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="size-5 shrink-0" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <p class="text-center font-dm text-xs mb-6 lg:mb-8 opacity-70 mt-2">
           Don't have an account?
 
           <a class="text-blue-500" href="/auth/SignUp.html">Sign up here.</a>
         </p>
 
-        <p class="text-center text-sm font-dm">© 2026</p>
+        <p class="text-center text-xs font-dm text-black/50">© 2026</p>
       </form>
     </div>
 
+    <!-- Video panel: only from lg (1024px) up, so two 440px panels never overflow tablets -->
     <div
-      class="bg-black w-110 h-130 rounded-r-2xl relative p-3.5 shadow-2xl md:block hidden"
+      class="bg-black w-110 h-130 shrink-0 rounded-r-2xl relative p-3.5 shadow-2xl lg:block hidden"
     >
       <video
+        id="bgVideo"
         autoplay
         muted
         loop
+        playsinline
         class="w-100 absolute rounded-2xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
       >
         <source src="/assets/moGraph (login).mp4" />
         <source src="/assets/moGraph (login).webm" />
       </video>
+
+      <!-- Volume control -->
+      <div
+        class="group absolute bottom-7 left-7 z-10 flex items-center gap-2 rounded-full bg-black/50 backdrop-blur-sm px-2.5 py-2 text-white"
+      >
+        <button
+          id="muteBtn"
+          type="button"
+          aria-label="Unmute video"
+          class="flex items-center justify-center w-6 h-6 hover:text-green-400 transition-colors duration-200"
+        >
+          <svg
+            id="volIcon"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z"
+            />
+          </svg>
+        </button>
+
+        <input
+          id="volumeSlider"
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value="0"
+          aria-label="Video volume"
+          class="w-0 opacity-0 group-hover:w-24 group-hover:opacity-100 group-focus-within:w-24 group-focus-within:opacity-100 transition-all duration-300 accent-green-500 cursor-pointer"
+        />
+      </div>
     </div>
 
     <!-- ldrs: registers the <l-mirage> loader (must come before Login.js is used) -->
@@ -130,6 +193,6 @@
     <script type="module" src="/auth/Login.js" defer></script>
 
     <!--kaiser was here-->
-    
+
   </body>
 </html>

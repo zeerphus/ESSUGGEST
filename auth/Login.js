@@ -2,6 +2,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/fireba
 import {
   getAuth,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
+  sendEmailVerification,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
   getFirestore,
@@ -34,15 +38,20 @@ const LOADER_HTML = `<l-mirage size="50" speed="2.5" color="white"></l-mirage>`;
 const MIN_LOADING_MS = 800;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/* ---------- Verification email cooldown ---------- */
+// Firebase rate-limits sendEmailVerification, so we only resend once per cooldown.
+const VERIFY_COOLDOWN_MS = 60000;
+const VERIFY_SENT_KEY = "verifyEmailSentAt";
+
 /* ---------- Password visibility toggle ---------- */
 function eye(e) {
   const wrapper = e.target.closest(".relative");
   const input = wrapper.querySelector("input");
   const eyecon = e.target.closest("svg");
 
-  const eyeClosed = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />`;
-  const eyeOpen = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />`;
+  // Solar duotone icons (eye-closed-line-duotone / eye-line-duotone)
+  const eyeClosed = `<path d="M12 14.0001V16.5001M15.5872 13.3288L17 15.5001M8.41281 13.3288L7 15.5001M19 11.1289L20.5 12.6289M5 11.1289L3.5 12.6289" stroke="currentColor" stroke-linecap="round" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M2 7C2 7 5 14 12 14C13.34 14 14.5334 13.7435 15.5872 13.3287C16.9547 12.7904 18.0872 11.9856 19 11.1288C21.0586 9.19661 22 7 22 7" stroke="currentColor" stroke-linecap="round"/>`;
+  const eyeOpen = `<path d="M3.27489 15.2957C2.42496 14.1915 2 13.6394 2 12C2 10.3606 2.42496 9.80853 3.27489 8.70433C4.97196 6.49956 7.81811 4 12 4C16.1819 4 19.028 6.49956 20.7251 8.70433C21.575 9.80853 22 10.3606 22 12C22 13.6394 21.575 14.1915 20.7251 15.2957C19.028 17.5004 16.1819 20 12 20C7.81811 20 4.97196 17.5004 3.27489 15.2957Z" stroke="currentColor" stroke-linecap="round" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-linecap="round"/>`;
 
   if (input.type === "password") {
     input.type = "text";
@@ -115,6 +124,26 @@ async function Login(e) {
     const user = userCredential.user;
     const userRef = doc(db, "users", user.uid);
 
+    // Get the latest verification status from Firebase, so a user who just
+    // verified in their inbox is not treated as unverified.
+    await user.reload();
+
+    if (!user.emailVerified) {
+      // Resend only if we haven't sent one within the cooldown window
+      const lastSent = Number(localStorage.getItem(VERIFY_SENT_KEY) || 0);
+      if (Date.now() - lastSent > VERIFY_COOLDOWN_MS) {
+        try {
+          await sendEmailVerification(user);
+          localStorage.setItem(VERIFY_SENT_KEY, String(Date.now()));
+        } catch (err) {
+          // Rate-limited or failed: don't block the flow, just log it
+          console.log("Verification email not sent:", err.code);
+        }
+      }
+      await signOut(auth);
+      throw { code: "app/email-not-verified" };
+    }
+
     // Only await the read — we need this data before redirecting
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
@@ -146,6 +175,9 @@ async function Login(e) {
 
     message.style.color = "Red";
     switch (error.code) {
+      case "app/email-not-verified":
+        message.textContent = "Please verify your email first.";
+        break;
       case "auth/invalid-email":
         message.textContent = "Please enter your email";
         shake(emailBox);
@@ -177,6 +209,80 @@ async function Login(e) {
     if (submitBtn) submitBtn.disabled = false;
   }
 }
+
+/* ---------- Continue with Google ---------- */
+const googleBtn = document.getElementById("googleBtn");
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
+
+async function googleLogin() {
+  const message = document.getElementById("message");
+  const originalHTML = googleBtn.innerHTML;
+  message.textContent = "";
+
+  googleBtn.disabled = true;
+  googleBtn.innerHTML = `<l-mirage size="50" speed="2.5" color="#16a34a"></l-mirage>`;
+
+  try {
+    // Must be called directly from the click handler, or the browser blocks the popup
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    const userRef = doc(db, "users", user.uid);
+
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+      // Existing user: behaves like your normal login
+      sessionStorage.setItem("userProfile", JSON.stringify(userSnap.data()));
+      setDoc(userRef, { lastLogin: serverTimestamp() }, { merge: true })
+        .catch((err) => console.log("lastLogin update failed:", err));
+    } else {
+      // First time with Google: this is the "sign up"
+      const profile = {
+        name: user.displayName || "",
+        email: user.email,
+        photoURL: user.photoURL || "",
+        provider: "google",
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+      };
+      await setDoc(userRef, profile);
+      sessionStorage.setItem("userProfile", JSON.stringify({
+        ...profile,
+        createdAt: null,
+        lastLogin: null,
+      }));
+    }
+
+    message.textContent = "Login Successful";
+    message.style.color = "Green";
+    googleBtn.textContent = "Redirecting...";
+    setTimeout(() => (window.location.href = "/app/main.html"), 300);
+  } catch (error) {
+    message.style.color = "Red";
+    switch (error.code) {
+      case "auth/popup-closed-by-user":
+      case "auth/cancelled-popup-request":
+        message.textContent = ""; // user just closed it, no error needed
+        break;
+      case "auth/popup-blocked":
+        message.textContent = "Popup blocked. Please allow popups and try again";
+        break;
+      case "auth/account-exists-with-different-credential":
+        message.textContent = "An account with this email already exists";
+        break;
+      case "auth/network-request-failed":
+        message.textContent = "Network error. Check your connection";
+        break;
+      default:
+        message.textContent = "Google sign-in failed: " + error.message;
+        console.log(error);
+    }
+    googleBtn.innerHTML = originalHTML;
+    googleBtn.disabled = false;
+  }
+}
+
+googleBtn.addEventListener("click", googleLogin);
 
 emailBox.addEventListener("input", function () {
   clearShake(emailBox);

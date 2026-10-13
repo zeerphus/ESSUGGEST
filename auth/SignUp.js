@@ -2,10 +2,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/fireba
 import {
   getAuth,
   createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signOut,
+  signInWithPopup,
+  GoogleAuthProvider,
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 import {
   getFirestore,
   doc,
+  getDoc,
   setDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
@@ -38,9 +43,9 @@ function eye(e) {
   const input = wrapper.querySelector("input");
   const eyeconS = e.target.closest("svg");
 
-  const eyeClosed = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />`;
-  const eyeOpen = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
-                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />`;
+  // Solar duotone icons (eye-closed-line-duotone / eye-line-duotone)
+  const eyeClosed = `<path d="M12 14.0001V16.5001M15.5872 13.3288L17 15.5001M8.41281 13.3288L7 15.5001M19 11.1289L20.5 12.6289M5 11.1289L3.5 12.6289" stroke="currentColor" stroke-linecap="round" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M2 7C2 7 5 14 12 14C13.34 14 14.5334 13.7435 15.5872 13.3287C16.9547 12.7904 18.0872 11.9856 19 11.1288C21.0586 9.19661 22 7 22 7" stroke="currentColor" stroke-linecap="round"/>`;
+  const eyeOpen = `<path d="M3.27489 15.2957C2.42496 14.1915 2 13.6394 2 12C2 10.3606 2.42496 9.80853 3.27489 8.70433C4.97196 6.49956 7.81811 4 12 4C16.1819 4 19.028 6.49956 20.7251 8.70433C21.575 9.80853 22 10.3606 22 12C22 13.6394 21.575 14.1915 20.7251 15.2957C19.028 17.5004 16.1819 20 12 20C7.81811 20 4.97196 17.5004 3.27489 15.2957Z" stroke="currentColor" stroke-linecap="round" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M15 12C15 13.6569 13.6569 15 12 15C10.3431 15 9 13.6569 9 12C9 10.3431 10.3431 9 12 9C13.6569 9 15 10.3431 15 12Z" stroke="currentColor" stroke-linecap="round"/>`;
 
   if (input.type === "password") {
     input.type = "text";
@@ -170,16 +175,20 @@ async function SignUp(e) {
 
     // --- Step 2: Create the matching Firestore profile doc ---
     // Doc id = uid, so login.js can look it up the same way
-    await setDoc(doc(db, "users", user.uid), {
+     await setDoc(doc(db, "users", user.uid), {
       email: user.email,
       createdAt: serverTimestamp(),
       lastLogin: serverTimestamp(),
     });
 
+    // Send the verification link, then sign out so they can't use the app yet
+    await sendEmailVerification(user);
+    await signOut(auth);
+
     // Loader finishes, THEN the result message appears
     await ensureMinLoading();
 
-    message.textContent = "Account created successfully";
+    message.textContent = "Verification email sent! Check your inbox (and spam), then log in.";
     message.style.color = "Green";
     if (submitBtn) {
       submitBtn.removeAttribute("aria-label");
@@ -187,9 +196,8 @@ async function SignUp(e) {
     }
 
     setTimeout(() => {
-      // File is named LogIn.html — casing must match exactly on Cloudflare
       window.location.href = "../auth/LogIn.html";
-    }, 500);
+    }, 3000); // a bit longer so they can read the message
   } catch (error) {
     // Loader finishes, THEN the error message appears
     await ensureMinLoading();
@@ -224,3 +232,87 @@ async function SignUp(e) {
 // Expose to global scope so it works with onsubmit="SignUp(event)" in HTML
 window.SignUp = SignUp;
 window.eye = eye;
+
+/* ---------- Continue with Google ---------- */
+const googleBtn = document.getElementById("googleBtn");
+const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: "select_account" });
+
+async function googleSignUp() {
+  const message = document.getElementById("message");
+  const originalHTML = googleBtn.innerHTML;
+  message.textContent = "";
+
+  googleBtn.disabled = true;
+  googleBtn.innerHTML = `<l-mirage size="50" speed="2.5" color="#16a34a"></l-mirage>`;
+
+    try {
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    const userRef = doc(db, "users", user.uid);
+
+    const userSnap = await getDoc(userRef);
+    let welcomeMsg;
+
+    if (userSnap.exists()) {
+      // Already registered: treat it as a login
+      const data = userSnap.data();
+      const updates = { lastLogin: serverTimestamp() };
+      if (!data.name && user.displayName) updates.name = user.displayName;
+      if (!data.photoURL && user.photoURL) updates.photoURL = user.photoURL;
+
+      sessionStorage.setItem(
+        "userProfile",
+        JSON.stringify({ ...data, ...updates, lastLogin: null })
+      );
+      setDoc(userRef, updates, { merge: true })
+        .catch((err) => console.log("profile update failed:", err));
+
+      welcomeMsg = "Welcome back! Redirecting...";
+    } else {
+      // First time with Google: create the profile
+      const profile = {
+        email: user.email,
+        name: user.displayName || "",
+        photoURL: user.photoURL || "",
+        provider: "google",
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp(),
+      };
+      await setDoc(userRef, profile);
+      sessionStorage.setItem(
+        "userProfile",
+        JSON.stringify({ ...profile, createdAt: null, lastLogin: null })
+      );
+
+      welcomeMsg = "Account created! Redirecting...";
+    }
+
+    message.textContent = welcomeMsg;
+    message.style.color = "Green";
+    googleBtn.textContent = "Redirecting...";
+    setTimeout(() => (window.location.href = "/app/main.html"), 500);
+  
+  } catch (error) {
+    message.style.color = "Red";
+    switch (error.code) {
+      case "auth/popup-closed-by-user":
+      case "auth/cancelled-popup-request":
+        message.textContent = "";
+        break;
+      case "auth/popup-blocked":
+        message.textContent = "Popup blocked. Please allow popups and try again";
+        break;
+      case "auth/network-request-failed":
+        message.textContent = "Network error. Check your connection";
+        break;
+      default:
+        message.textContent = "Google sign-in failed: " + error.message;
+        console.log(error);
+    }
+    googleBtn.innerHTML = originalHTML;
+    googleBtn.disabled = false;
+  }
+}
+
+if (googleBtn) googleBtn.addEventListener("click", googleSignUp);
