@@ -165,7 +165,7 @@ window.essuAvatarColor = function (name) {
   if (!wrap || !toggle || !menu) return;
 
   // Where to send people after logging out (your login/landing page).
-  const LOGIN_PAGE = "../auth/login.html";
+  const LOGIN_PAGE = "/auth/LogIn.html";
 
   const nameEl = document.getElementById("nav-user-name");
   const emailEl = document.getElementById("nav-user-email");
