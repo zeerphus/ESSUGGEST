@@ -2,8 +2,4 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-<<<<<<< HEAD
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-=======
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
->>>>>>> 3d0cf8cd096eba1f1f030b1e7902eb6374664d9b
