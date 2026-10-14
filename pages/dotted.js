@@ -2,52 +2,37 @@
  * ESSUGGEST — dotted.js
  * Independent pieces sharing one file since index.html only loads
  * one <script>:
- *   1. Magnetic dot-grid background canvas (#dots-canvas)
+ *   1. Magnetic dot-grid background canvas (#dots-canvas): bounce + click shockwave
  *   2. Shrink-on-scroll masthead (#site-header)
  *   3. Hero image float + tilt (essuggest.png)
  *   4. Staff access panel (HR passcode gate, fingerprint trigger)
  *   5. Hero video sound controls (#hero-video: mute toggle + volume)
+ *   6. Site search (utility bar)
  */
 
 /* =========================================================================
-   1) MAGNETIC DOT BACKGROUND
+   1) MAGNETIC DOT BACKGROUND  (+ bounce + click shockwave)
    ---------------------------------------------------------------------
-   Fix vs. the previous version: the canvas used to be sized once off
-   getBoundingClientRect() right at DOMContentLoaded. If web fonts or
-   images finished loading afterward (changing the page's height), the
-   canvas stayed shorter than the actual content — which is exactly why
-   the "Two ways to be heard" and "Three steps" sections were showing
-   flat white instead of dots. This version:
-     - sizes against #dots-area's full scrollHeight, not just the
-       initial bounding rect
-     - rebuilds after window 'load' AND after document.fonts.ready
-     - watches the area with a ResizeObserver so any later layout
-       shift (font swap, image decode, responsive breakpoint) resizes
-       the canvas automatically
+   All the original settings are unchanged: SPACING, BASE_RADIUS,
+   MAX_RADIUS, BULGE_INFLUENCE, COLOR_INFLUENCE, MAX_PULL, colours. The target for each dot (where the cursor wants it, how big,
+   how green) is computed exactly as before. Two things are new:
 
-   Bulge vs. color are now decoupled: the 3D bulge (dot size + magnetic
-   pull + shake) reacts across BULGE_INFLUENCE px, while the color glow
-   reacts across the smaller COLOR_INFLUENCE px — so the bump reads as
-   big and soft, but only the dots right under the cursor actually
-   tint green.
+   BOUNCE: dots no longer snap onto their target (EASE = 1). Position and
+   size now follow the target through a spring, so dots overshoot, wobble
+   and settle, both when the cursor moves over them and when it leaves.
+   Tune with SPRING (snappiness) and DAMPING (lower = less bounce, ~0.5
+   is no bounce at all, 0.8+ is very springy).
 
-   MOBILE PERFORMANCE: this grid can be well over a thousand dots on a
-   tall page, and the loop below used to call requestAnimationFrame
-   forever, redrawing every dot every frame even while nothing was
-   moving. That's wasted CPU/battery on phones, and the biggest source
-   of jank on lower-end devices. Now the loop stops itself once every
-   dot has eased back to rest and the pointer isn't active, and
-   restarts on the next mousemove/touchmove (with a one-frame redraw
-   forced after any resize/orientation-change rebuild, so the canvas
-   never sits blank waiting for a pointer event that may not come).
+   SHOCKWAVE: click or tap anywhere that isn't a link, button or input
+   and a wave expands from that point. Dots shove outward as it passes,
+   bounce back, and flash green. Only the dots move; no ring is drawn. Tune with WAVE_*.
 
-   ACCESSIBILITY: the pointer-reactive bulge/pull/shake is a
-   motion effect that can bother people with vestibular disorders or
-   motion sensitivity. It's already inert until someone moves a pointer
-   over it, but for anyone with the OS-level "reduce motion" setting on,
-   we skip the reactive animation entirely and just draw a still grid of
-   dots — this is checked once via prefers-reduced-motion and mirrors
-   the same guard already used for CSS animations elsewhere on the page.
+   Same as before: canvas sized to #dots-area's scrollHeight, rebuilt on
+   load / fonts.ready / ResizeObserver, loop sleeps when everything has
+   settled, and prefers-reduced-motion gets a still grid.
+
+   Performance: only rows near the viewport are simulated and drawn, and
+   resting dots are batched into a single path.
 ========================================================================= */
 (function magneticDots() {
   const area = document.getElementById("dots-area");
@@ -60,52 +45,69 @@
     ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false;
 
+  // ---- original settings (unchanged) -------------------------------------
   const SPACING = 30;   // px between dots — lower = denser grid
   const BASE_RADIUS = 1.4;  // dot size at idle
-  const MAX_RADIUS = 4;    // dot size when cursor is on it (was 6 — bigger bulge)
-  const BULGE_INFLUENCE = 220;  // px radius around cursor where dots grow/pull/shake
-  const COLOR_INFLUENCE = 100;  // px radius around cursor where dots tint green (smaller than bulge)
-  const MAX_PULL = 26;   // max px a dot can be dragged toward cursor (was 16 — bigger bulge)
-  const EASE = 0.1;    // 0-1, lower = slower/smoother motion
-  const MAX_JITTER = 2;  // px of shake at the very center of the cursor
+  const MAX_RADIUS = 4;    // dot size when cursor is on it
+  const BULGE_INFLUENCE = 220;  // px radius around cursor where dots grow/pull
+  const COLOR_INFLUENCE = 120;  // px radius around cursor where dots tint green (smaller than bulge)
+  const MAX_PULL = 16;   // max px a dot can be dragged toward cursor
+  const EASE = 1;    // 0-1, speed of the size/colour intensity (1 = instant, as before)
   const SETTLE_EPSILON = 0.02; // below this, a dot's bulge/color are close enough to 0 to call it "at rest"
-  const GLOW_COLOR = "#16A34A";  // color of dots near the cursor
-  const GLOW_RGB = [22, 163, 74]; // same color as GLOW_COLOR, as RGB for lerping
+  const GLOW_RGB = [22, 163, 74]; // color of dots near the cursor
   const DOT_RGB = [180, 186, 196];   // RGB of resting dots (alpha set below)
 
+  // ---- bounce ------------------------------------------------------------
+  const SPRING = 0.18;   // pull toward the target each frame (higher = snappier)
+  const DAMPING = 0.7;   // per-frame velocity kept at 60fps (lower = less bounce)
+
+  // ---- shockwave ---------------------------------------------------------
+  const WAVE_SPEED = 9;     // px per frame the ring travels
+  const WAVE_MAX = 560;     // ring fades out and dies at this radius
+  const WAVE_WIDTH = 50;    // thickness of the band that pushes dots
+  const WAVE_POWER = 2.6;   // how hard dots get shoved
+  const MAX_WAVES = 3;      // newest waves win if you click rapidly
+
+  const TAU = Math.PI * 2;
+  const VIEW_MARGIN = 80;
+
+  // Precomputed colour steps, so we don't build a string per dot per frame.
+  const STEPS = 24;
+  const PALETTE = [];
+  for (let i = 0; i < STEPS; i++) {
+    const t = i / (STEPS - 1);
+    const r = Math.round(DOT_RGB[0] + (GLOW_RGB[0] - DOT_RGB[0]) * t);
+    const g = Math.round(DOT_RGB[1] + (GLOW_RGB[1] - DOT_RGB[1]) * t);
+    const b = Math.round(DOT_RGB[2] + (GLOW_RGB[2] - DOT_RGB[2]) * t);
+    PALETTE.push(`rgb(${r}, ${g}, ${b})`);
+  }
+
   let dots = [];
+  let cols = 0;
+  let rows = 0;
   let width = 0;
   let height = 0;
-  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-  let pointer = { x: -9999, y: -9999, active: false };
+  // Pointer in client coordinates, so scrolling under a still cursor keeps
+  // working (the area-relative position is recomputed every frame).
+  const pointer = { x: 0, y: 0, active: false };
+  const waves = [];
+  const moving = []; // reused every frame: dots that need individual drawing
+
   let rafId = null;
+  let lastT = 0;
 
-  // Rounds the influence falloff into a soft hill instead of a linear
-  // cone — this is a big part of what makes the bump feel 3D instead
-  // of mechanical.
+  // Rounds the influence falloff into a soft hill instead of a linear cone.
   function smoothstep(edge0, edge1, x) {
     const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
     return t * t * (3 - 2 * t);
   }
 
-  // Blends resting grey toward the glow color as t goes 0 -> 1, so the
-  // color fades smoothly across the influence radius instead of
-  // switching abruptly at its edge.
-  function lerpColor(rgbA, rgbB, t) {
-    const r = Math.round(rgbA[0] + (rgbB[0] - rgbA[0]) * t);
-    const g = Math.round(rgbA[1] + (rgbB[1] - rgbA[1]) * t);
-    const b = Math.round(rgbA[2] + (rgbB[2] - rgbA[2]) * t);
-    return `rgb(${r}, ${g}, ${b})`;
-  }
-
   function buildGrid() {
-    // Use scrollHeight, not just the viewport-clipped bounding rect,
-    // so the canvas always covers the full stacked height of every
-    // section inside #dots-area — even sections below the fold.
+    // scrollHeight so the canvas covers every section, even below the fold.
     width = area.clientWidth;
     height = area.scrollHeight;
-
     if (width === 0 || height === 0) return;
 
     canvas.width = width * dpr;
@@ -114,162 +116,213 @@
     canvas.style.height = height + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    dots = [];
-    const cols = Math.ceil(width / SPACING) + 1;
-    const rows = Math.ceil(height / SPACING) + 1;
+    cols = Math.ceil(width / SPACING) + 1;
+    rows = Math.ceil(height / SPACING) + 1;
 
+    dots = new Array(cols * rows);
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         const baseX = c * SPACING;
         const baseY = r * SPACING;
-        dots.push({
+        dots[r * cols + c] = {
           baseX,
           baseY,
           x: baseX,
           y: baseY,
+          vx: 0,   // spring velocity (position)
+          vy: 0,
           r: BASE_RADIUS,
-          z: 0,       // bulge intensity (size/pull/shake)
+          vr: 0,   // spring velocity (size)
+          z: 0,       // bulge intensity (size/pull)
           colorT: 0,  // color-tint intensity (smaller radius than z)
-          // Random phase + frequency per dot so the jitter looks like
-          // independent shaking rather than every dot vibrating in sync.
-          jitterPhaseX: Math.random() * Math.PI * 2,
-          jitterPhaseY: Math.random() * Math.PI * 2,
-          jitterFreq: 0.006 + Math.random() * 0.004,
-        });
+        };
       }
     }
   }
 
-  function updatePointerFromEvent(clientX, clientY) {
+  function drawStillGrid() {
+    // Reduced-motion path: every dot once at rest, no reactivity.
+    ctx.clearRect(0, 0, width, height);
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = PALETTE[0];
+    ctx.beginPath();
+    for (let i = 0; i < dots.length; i++) {
+      const d = dots[i];
+      ctx.moveTo(d.baseX + BASE_RADIUS, d.baseY);
+      ctx.arc(d.baseX, d.baseY, BASE_RADIUS, 0, TAU);
+    }
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  }
+
+  function step(now) {
+    rafId = null;
+    const dt = Math.min(2.5, (now - lastT) / 16.667 || 1);
+    lastT = now;
+
     const rect = area.getBoundingClientRect();
-    pointer.x = clientX - rect.left;
-    pointer.y = clientY - rect.top;
-    pointer.active = true;
+    const px = pointer.x - rect.left;
+    const py = pointer.y - rect.top;
+
+    // advance + cull shockwaves
+    for (let i = waves.length - 1; i >= 0; i--) {
+      waves[i].r += WAVE_SPEED * dt;
+      if (waves[i].r > WAVE_MAX) waves.splice(i, 1);
+    }
+
+    // only rows near the viewport
+    const r0 = Math.max(0, Math.floor((-rect.top - VIEW_MARGIN) / SPACING));
+    const r1 = Math.min(rows - 1, Math.ceil((-rect.top + window.innerHeight + VIEW_MARGIN) / SPACING));
+
+    ctx.clearRect(0, 0, width, height);
+
+    const damp = Math.pow(DAMPING, dt);
+    const ease = Math.min(1, EASE * dt);
+    moving.length = 0;
+
+    // pass 1: update every dot, batch the resting ones into one path
+    ctx.beginPath();
+    for (let r = r0; r <= r1; r++) {
+      const rowStart = r * cols;
+      for (let c = 0; c < cols; c++) {
+        const d = dots[rowStart + c];
+
+        let targetX = d.baseX;
+        let targetY = d.baseY;
+        let targetR = BASE_RADIUS;
+        let targetZ = 0;       // 0-1, how "raised" this dot is (bulge)
+        let targetColorT = 0;  // 0-1, how tinted this dot is (color)
+
+        if (pointer.active) {
+          const dx = px - d.baseX;
+          const dy = py - d.baseY;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < BULGE_INFLUENCE) {
+            const falloff = smoothstep(BULGE_INFLUENCE, 0, dist);
+            const pull = Math.min(MAX_PULL, dist) * falloff;
+            const angle = Math.atan2(dy, dx);
+
+            targetX = d.baseX + Math.cos(angle) * pull;
+            targetY = d.baseY + Math.sin(angle) * pull;
+            targetR = BASE_RADIUS + (MAX_RADIUS - BASE_RADIUS) * falloff;
+            targetZ = falloff;
+          }
+
+          if (dist < COLOR_INFLUENCE) {
+            targetColorT = smoothstep(COLOR_INFLUENCE, 0, dist);
+          }
+        }
+
+        // shockwave: a moving band that shoves dots outward and flashes them
+        for (let w = 0; w < waves.length; w++) {
+          const wv = waves[w];
+          const wx = d.baseX - wv.x;
+          const wy = d.baseY - wv.y;
+          const wd = Math.sqrt(wx * wx + wy * wy) || 0.001;
+          const band = Math.abs(wd - wv.r);
+          if (band < WAVE_WIDTH) {
+            const f = 1 - band / WAVE_WIDTH;
+            const life = 1 - wv.r / WAVE_MAX;
+            const push = WAVE_POWER * f * f * life;
+            d.vx += (wx / wd) * push * dt;
+            d.vy += (wy / wd) * push * dt;
+            const flash = f * life;
+            if (flash > targetColorT) targetColorT = flash;
+          }
+        }
+
+        // spring toward the target -> overshoot, wobble, settle (the bounce)
+        d.vx = (d.vx + (targetX - d.x) * SPRING * dt) * damp;
+        d.vy = (d.vy + (targetY - d.y) * SPRING * dt) * damp;
+        d.vr = (d.vr + (targetR - d.r) * SPRING * dt) * damp;
+        d.x += d.vx * dt;
+        d.y += d.vy * dt;
+        d.r += d.vr * dt;
+        if (d.r < 0.4) d.r = 0.4;
+
+        d.z += (targetZ - d.z) * ease;
+        d.colorT += (targetColorT - d.colorT) * ease;
+
+        const ox = d.x - d.baseX;
+        const oy = d.y - d.baseY;
+        const atRest =
+          ox * ox + oy * oy < 0.0004 &&
+          d.vx * d.vx + d.vy * d.vy < 0.0001 &&
+          Math.abs(d.r - BASE_RADIUS) < 0.02 &&
+          Math.abs(d.vr) < 0.01 &&
+          d.z < SETTLE_EPSILON &&
+          d.colorT < SETTLE_EPSILON;
+
+        if (atRest) {
+          d.x = d.baseX;
+          d.y = d.baseY;
+          d.vx = d.vy = d.vr = d.z = d.colorT = 0;
+          d.r = BASE_RADIUS;
+          ctx.moveTo(d.baseX + BASE_RADIUS, d.baseY);
+          ctx.arc(d.baseX, d.baseY, BASE_RADIUS, 0, TAU);
+        } else {
+          moving.push(d);
+        }
+      }
+    }
+    ctx.globalAlpha = 0.6;
+    ctx.fillStyle = PALETTE[0];
+    ctx.fill();
+
+    // pass 2: moving / tinted dots
+    for (let i = 0; i < moving.length; i++) {
+      const d = moving[i];
+
+      ctx.globalAlpha = 0.6 + 0.4 * d.colorT;
+      ctx.fillStyle = PALETTE[Math.round(d.colorT * (STEPS - 1))];
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, TAU);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+
+    // sleep once nothing is moving and the pointer isn't over the area
+    if (moving.length === 0 && !pointer.active && waves.length === 0) return;
+    rafId = requestAnimationFrame(step);
   }
 
   function wake() {
     // Restart the draw loop if it had stopped itself after settling.
-    if (!prefersReducedMotion && !rafId) {
-      rafId = requestAnimationFrame(step);
-    }
+    if (prefersReducedMotion || rafId) return;
+    lastT = performance.now();
+    rafId = requestAnimationFrame(step);
+  }
+
+  function setPointer(x, y) {
+    pointer.x = x;
+    pointer.y = y;
+    pointer.active = true;
+    wake();
   }
 
   function onMouseMove(e) {
-    updatePointerFromEvent(e.clientX, e.clientY);
-    wake();
+    setPointer(e.clientX, e.clientY);
   }
 
   function onTouchMove(e) {
     if (!e.touches || !e.touches.length) return;
-    const t = e.touches[0];
-    updatePointerFromEvent(t.clientX, t.clientY);
-    wake();
+    setPointer(e.touches[0].clientX, e.touches[0].clientY);
   }
 
   function onLeave() {
     pointer.active = false;
-    pointer.x = -9999;
-    pointer.y = -9999;
+    wake(); // let the dots spring back home
   }
 
-  function drawStillGrid() {
-    // Reduced-motion path: draw every dot once at rest, no pointer
-    // reactivity, no per-frame redraw loop.
-    ctx.clearRect(0, 0, width, height);
-    for (let i = 0; i < dots.length; i++) {
-      const d = dots[i];
-      ctx.beginPath();
-      ctx.arc(d.baseX, d.baseY, BASE_RADIUS, 0, Math.PI * 2);
-      ctx.fillStyle = `rgb(${DOT_RGB[0]}, ${DOT_RGB[1]}, ${DOT_RGB[2]})`;
-      ctx.globalAlpha = 0.6;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-  }
-
-  // True once every dot has eased back close enough to its resting
-  // state (no bulge, no color tint, no offset) and the pointer isn't
-  // currently active over the area — i.e. nothing left to animate.
-  function allSettled() {
-    if (pointer.active) return false;
-    for (let i = 0; i < dots.length; i++) {
-      const d = dots[i];
-      if (d.z > SETTLE_EPSILON || d.colorT > SETTLE_EPSILON) return false;
-    }
-    return true;
-  }
-
-  function step(now) {
-    ctx.clearRect(0, 0, width, height);
-
-    for (let i = 0; i < dots.length; i++) {
-      const d = dots[i];
-
-      let targetX = d.baseX;
-      let targetY = d.baseY;
-      let targetR = BASE_RADIUS;
-      let targetZ = 0;       // 0-1, how "raised" this dot is (bulge)
-      let targetColorT = 0;  // 0-1, how tinted this dot is (color)
-
-      if (pointer.active) {
-        const dx = pointer.x - d.baseX;
-        const dy = pointer.y - d.baseY;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist < BULGE_INFLUENCE) {
-          const falloff = smoothstep(BULGE_INFLUENCE, 0, dist);
-          const pull = Math.min(MAX_PULL, dist) * falloff;
-          const angle = Math.atan2(dy, dx);
-
-          targetX = d.baseX + Math.cos(angle) * pull;
-          targetY = d.baseY + Math.sin(angle) * pull;
-          targetR = BASE_RADIUS + (MAX_RADIUS - BASE_RADIUS) * falloff;
-          targetZ = falloff;
-        }
-
-        if (dist < COLOR_INFLUENCE) {
-          targetColorT = smoothstep(COLOR_INFLUENCE, 0, dist);
-        }
-      }
-
-      d.x += (targetX - d.x) * EASE;
-      d.y += (targetY - d.y) * EASE;
-      d.r += (targetR - d.r) * EASE;
-      d.z += (targetZ - d.z) * EASE;
-      d.colorT += (targetColorT - d.colorT) * EASE;
-
-      // Shake: small oscillation layered on top of the eased position,
-      // strongest at the cursor's center (d.z near 1) and fading to
-      // nothing at the influence edge (d.z near 0). d.z^2 makes the
-      // falloff steeper so only dots quite close to the cursor shake.
-      const jitterAmount = MAX_JITTER * d.z * d.z;
-      const jx = Math.sin(now * d.jitterFreq + d.jitterPhaseX) * jitterAmount;
-      const jy = Math.cos(now * d.jitterFreq * 1.3 + d.jitterPhaseY) * jitterAmount;
-
-      // Flat dot, just a color shift near the cursor — no shadowBlur glow,
-      // since overlapping blurred shadows on nearby dots stack into a
-      // washed-out bright core that reads as a light source.
-      // Color uses colorT (tighter radius) while size/position use z
-      // (wider radius) — this is what makes the bulge feel bigger than
-      // the green tint around it.
-      ctx.beginPath();
-      ctx.arc(d.x + jx, d.y + jy, d.r, 0, Math.PI * 2);
-      ctx.fillStyle = lerpColor(DOT_RGB, GLOW_RGB, d.colorT);
-      ctx.globalAlpha = 0.6 + 0.4 * d.colorT;
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-
-    if (allSettled()) {
-      // Nothing left to animate — stop calling requestAnimationFrame
-      // until a pointer/touch move wakes it back up. Saves CPU/battery,
-      // most noticeably on phones where this loop would otherwise run
-      // forever untouched.
-      rafId = null;
-      return;
-    }
-
-    rafId = requestAnimationFrame(step);
+  function onPointerDown(e) {
+    // No shockwave when the click is meant for a control.
+    if (e.target.closest && e.target.closest("a,button,input,select,textarea,summary,label,video,[role='listbox'], [data-chatbot]")) return;
+    const rect = area.getBoundingClientRect();
+    waves.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, r: 0 });
+    if (waves.length > MAX_WAVES) waves.shift();
+    wake();
   }
 
   function start() {
@@ -278,7 +331,7 @@
       drawStillGrid();
       return;
     }
-    if (!rafId) rafId = requestAnimationFrame(step);
+    wake();
   }
 
   let resizeTimeout;
@@ -289,11 +342,7 @@
       if (prefersReducedMotion) {
         drawStillGrid();
       } else {
-        // The loop may have stopped itself after settling before this
-        // resize/orientation-change happened; buildGrid() just replaced
-        // `dots` with brand-new objects, so force at least one frame to
-        // draw them instead of leaving the canvas blank until the next
-        // pointer move.
+        // buildGrid() replaced `dots`; force a frame so the canvas isn't blank.
         wake();
       }
     }, 120);
@@ -302,7 +351,11 @@
   if (!prefersReducedMotion) {
     window.addEventListener("mousemove", onMouseMove, { passive: true });
     window.addEventListener("touchmove", onTouchMove, { passive: true });
-    window.addEventListener("mouseleave", onLeave);
+    window.addEventListener("touchend", onLeave);
+    window.addEventListener("touchcancel", onLeave);
+    window.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("scroll", wake, { passive: true }); // draw newly visible rows
+    document.addEventListener("mouseleave", onLeave);
     area.addEventListener("mouseleave", onLeave);
   }
   window.addEventListener("resize", scheduleRebuild);

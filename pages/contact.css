@@ -1,0 +1,309 @@
+/* =======================================================================
+   ESSUGGEST — contact.css
+   Load AFTER /src/output.css and /pages/animationLp.css.
+   Styles the redesigned Contact Us page. Same visual language as faq.css
+   (dot-grid hero, green accents, rounded cards) so the two pages feel
+   like one site.
+   ======================================================================= */
+
+/* -----------------------------------------------------------------------
+   PAGE SHELL
+   <main id="dots-area"> so dotted.js paints its dot grid here.
+   overflow: clip (not hidden) keeps things tidy without creating a
+   scroll container.
+----------------------------------------------------------------------- */
+.contact-page {
+  position: relative;
+  overflow: clip;
+  background:
+    radial-gradient(52rem 26rem at 8% -4%, #dcfce7 0%, rgba(220, 252, 231, 0) 70%),
+    #ffffff;
+}
+
+/* Dots live in the hero and fade out before the cards. */
+.contact-page #dots-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 300px, transparent 640px);
+  mask-image: linear-gradient(to bottom, #000 0, #000 300px, transparent 640px);
+}
+
+.contact-shell {
+  position: relative;
+  z-index: 1;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 3.5rem 1.25rem 5rem;
+}
+
+@media (min-width: 640px) {
+  .contact-shell {
+    padding-inline: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .contact-shell {
+    padding-top: 5.5rem;
+    padding-bottom: 7rem;
+  }
+}
+
+/* -----------------------------------------------------------------------
+   TOP: headline on the left, "post it on ESSUGGEST" note on the right
+----------------------------------------------------------------------- */
+.contact-top {
+  display: grid;
+  gap: 2rem;
+  align-items: end;
+}
+
+@media (min-width: 1024px) {
+  .contact-top {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 4.5rem;
+  }
+}
+
+.contact-lede {
+  margin-top: 1.25rem;
+  max-width: 34rem;
+  line-height: 1.7;
+  color: #4b5563;
+}
+
+/* The note answers "where does a suggestion about a post go?" so people
+   don't email what belongs on the platform. */
+.contact-note {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.35rem 1.4rem;
+  background: #fefce8;
+  border: 1px solid #fde68a;
+  border-radius: 1.5rem;
+}
+
+.contact-note-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 999px;
+  background: #fef08a;
+  color: #14532d;
+}
+
+.contact-note-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.contact-note p {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.contact-note a {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #15803d;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.contact-note a:hover {
+  color: #166534;
+}
+
+/* -----------------------------------------------------------------------
+   CONTACT CARDS
+----------------------------------------------------------------------- */
+.contact-grid {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 3rem;
+}
+
+@media (min-width: 768px) {
+  .contact-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+}
+
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1.75rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.contact-card:hover {
+  border-color: #86efac;
+  box-shadow: 0 24px 44px -30px rgba(21, 128, 61, 0.55);
+}
+
+.contact-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border-radius: 1rem;
+  background: #166534;
+  color: #ffffff;
+  transform: rotate(-6deg);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.contact-card:hover .contact-icon {
+  transform: rotate(0deg) scale(1.05);
+}
+
+.contact-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.contact-card h2 {
+  margin-top: 1.4rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: #052e16;
+}
+
+.contact-desc {
+  margin-top: 0.6rem;
+  line-height: 1.65;
+  color: #4b5563;
+}
+
+.contact-meta {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: #6b7280;
+}
+
+.contact-meta svg {
+  flex-shrink: 0;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+  color: #16a34a;
+}
+
+/* pushes the button to the bottom so both cards end level */
+.contact-action {
+  margin-top: auto;
+  padding-top: 1.75rem;
+}
+
+.contact-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.8rem 1.25rem;
+  border-radius: 999px;
+  background: #15803d;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  word-break: break-word;
+}
+
+.contact-btn:hover {
+  background: #166534;
+}
+
+/* Dark variant for the platform-support card (echoes the FAQ help card) */
+.contact-card--dark {
+  background: #14532d;
+  border-color: #14532d;
+  color: #ffffff;
+}
+
+.contact-card--dark:hover {
+  border-color: #14532d;
+  box-shadow: 0 30px 50px -30px rgba(5, 46, 22, 0.75);
+}
+
+.contact-card--dark .contact-icon {
+  background: #fef08a;
+  color: #14532d;
+}
+
+.contact-card--dark h2 {
+  color: #ffffff;
+}
+
+.contact-card--dark .contact-desc {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.contact-card--dark .contact-meta {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.contact-card--dark .contact-meta svg {
+  color: #fef08a;
+}
+
+.contact-card--dark .contact-btn {
+  background: #fef08a;
+  color: #111827;
+}
+
+.contact-card--dark .contact-btn:hover {
+  background: #fde047;
+}
+
+.contact-card--dark .contact-btn:focus-visible {
+  outline-color: #fef08a;
+}
+
+/* -----------------------------------------------------------------------
+   FAQ POINTER
+----------------------------------------------------------------------- */
+.contact-faq {
+  margin-top: 2.25rem;
+  color: #4b5563;
+  font-size: 0.9375rem;
+}
+
+.contact-faq a {
+  font-weight: 600;
+  color: #15803d;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.contact-faq a:hover {
+  color: #166534;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-icon {
+    transition: none !important;
+  }
+}

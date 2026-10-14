@@ -710,3 +710,122 @@ mark.search-hit.is-fading {
   background: transparent;
   box-shadow: 0 0 0 2px transparent;
 }
+
+/* -----------------------------------------------------------------------
+   FINAL CTA BANNER (index.html, bottom of <main>)
+   Mascot/logo left, copy center, white button right. Hover motion only
+   answers the pointer; nothing animates on its own.
+----------------------------------------------------------------------- */
+.cta-btn {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.2s ease, background-color 0.2s ease;
+  touch-action: manipulation;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  background-color: #f0fdf4; /* green-50 */
+  box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.4);
+}
+
+.cta-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* the global green focus ring is invisible on the green banner */
+.cta-btn:focus-visible {
+  outline-color: #fef08a;
+}
+
+.cta-arrow {
+  transition: transform 0.25s ease;
+}
+
+.cta-btn:hover .cta-arrow {
+  transform: translateX(4px);
+}
+
+.cta-mascot {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta-banner:hover .cta-mascot {
+  transform: rotate(-4deg) scale(1.04);
+}
+
+/* -----------------------------------------------------------------------
+   FOOTER WORDMARK (index.html footer)
+   Oversized decorative "ESSUGGEST". Sized from the viewport so the ten
+   letters fill the footer width: ~7.5em wide at Poppins Black, so
+   12.8vw lands just inside the page width on phones and desktops alike.
+   The 20rem cap only kicks in on very wide screens. The wrapper in
+   index.html has no max-width and uses overflow-hidden as a safety net
+   so it can never cause horizontal scroll. If the first/last letters
+   clip, lower 12.8vw a little (e.g. 12vw).
+----------------------------------------------------------------------- */
+.footer-wordmark {
+  font-size: clamp(2.5rem, 12.8vw, 20rem);
+  line-height: 0.85;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+/* -----------------------------------------------------------------------
+   FOOTER LOGO TOOLTIP
+   Pure-CSS tooltip: text comes from data-tooltip. Shows on hover, and on
+   keyboard focus of the parent link. Yellow pill matches the brand accent.
+----------------------------------------------------------------------- */
+.logo-tooltip {
+  position: relative;
+  display: inline-block;
+  line-height: 0; /* no stray gap under the img */
+}
+
+.logo-tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: #171717;
+  background: #f7ea7a;
+  border-radius: 999px;
+  box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 70;
+}
+
+/* little arrow under the pill */
+.logo-tooltip::before {
+  content: "";
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translate(-50%, 4px);
+  border: 6px solid transparent;
+  border-top-color: #f7ea7a;
+  border-bottom-width: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  z-index: 70;
+}
+
+.logo-tooltip:hover::after,
+.logo-tooltip:hover::before,
+a:focus-visible .logo-tooltip::after,
+a:focus-visible .logo-tooltip::before {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}

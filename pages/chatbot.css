@@ -1,0 +1,330 @@
+/* =======================================================================
+   ESSUGGEST — student help chatbot (homepage)
+   Loaded after animationLp.css. All selectors are prefixed .essu-bot so
+   nothing here can leak into the rest of the page.
+   Brand colors: green-700 #15803d, green-800 #166534, yellow #f7ea7a
+   ======================================================================= */
+
+.essu-bot {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 55; /* above content + sticky header (50), below search results (60) */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* ---------- launcher ---------- */
+.essu-bot-launch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+  border-radius: 999px;
+  color: #fff;
+  background: #15803d;
+  box-shadow: 0 14px 30px -10px rgba(5, 46, 22, 0.6);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+}
+
+.essu-bot-launch:hover {
+  background: #166534;
+  transform: translateY(-2px);
+}
+
+.essu-bot-launch:active {
+  transform: scale(0.97);
+}
+
+.essu-bot-logo {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #166534;
+}
+
+.essu-bot-logo img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.essu-bot-launch-text {
+  display: none;
+  padding-right: 14px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .essu-bot-launch-text {
+    display: block;
+  }
+}
+
+/* ---------- panel ---------- */
+.essu-bot-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(calc(100vw - 32px), 24rem);
+  height: min(75vh, 34rem);
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1.25rem;
+  box-shadow: 0 28px 56px -18px rgba(5, 46, 22, 0.5);
+  transform-origin: bottom right;
+}
+
+.essu-bot-panel[hidden] {
+  display: none;
+}
+
+.essu-bot-panel.is-opening {
+  animation: essu-bot-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes essu-bot-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.essu-bot-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px 12px 14px;
+  color: #fff;
+  background: #15803d;
+}
+
+.essu-bot-head .essu-bot-logo {
+  width: 36px;
+  height: 36px;
+}
+
+.essu-bot-head .essu-bot-logo img {
+  width: 22px;
+  height: 22px;
+}
+
+.essu-bot-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.essu-bot-sub {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.essu-bot-close {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.essu-bot-close:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.essu-bot-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------- messages ---------- */
+.essu-bot-log {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  overflow-y: auto;
+  background: #f9fafb;
+  overscroll-behavior: contain;
+}
+
+.essu-bot-msg {
+  max-width: 88%;
+  padding: 9px 12px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  white-space: pre-line;
+  border-radius: 14px;
+}
+
+.essu-bot-msg.is-bot {
+  align-self: flex-start;
+  color: #1f2937;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-bottom-left-radius: 4px;
+}
+
+.essu-bot-msg.is-user {
+  align-self: flex-end;
+  color: #fff;
+  background: #15803d;
+  border-bottom-right-radius: 4px;
+}
+
+.essu-bot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.essu-bot-link {
+  display: inline-block;
+  padding: 4px 11px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #171717;
+  text-decoration: none;
+  background: #f7ea7a;
+  border-radius: 999px;
+  transition: filter 0.2s ease;
+}
+
+.essu-bot-link:hover {
+  filter: brightness(0.95);
+}
+
+.essu-bot-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.essu-bot-chip {
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #166534;
+  background: #fff;
+  border: 1px solid #15803d;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.2s ease;
+}
+
+.essu-bot-chip:hover {
+  background: #f0fdf4;
+}
+
+/* typing indicator */
+.essu-bot-typing {
+  display: flex;
+  gap: 4px;
+  padding: 12px 14px;
+}
+
+.essu-bot-typing span {
+  width: 6px;
+  height: 6px;
+  background: #9ca3af;
+  border-radius: 50%;
+  animation: essu-bot-dot 1s ease-in-out infinite;
+}
+
+.essu-bot-typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.essu-bot-typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes essu-bot-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* ---------- input row ---------- */
+.essu-bot-form {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.essu-bot-input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 16px; /* stops iOS Safari zooming on focus */
+  color: #111827;
+  background: #f3f4f6;
+  border: 1px solid transparent;
+  border-radius: 999px;
+}
+
+.essu-bot-input::placeholder {
+  color: #6b7280;
+}
+
+.essu-bot-input:focus-visible {
+  outline: none;
+  background: #fff;
+  border-color: #15803d;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.18);
+}
+
+.essu-bot-send {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #fff;
+  background: #15803d;
+  border-radius: 999px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.2s ease;
+}
+
+.essu-bot-send:hover {
+  background: #166534;
+}
+
+.essu-bot-send svg {
+  width: 18px;
+  height: 18px;
+}

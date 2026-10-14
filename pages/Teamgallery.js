@@ -1,15 +1,15 @@
 /**
- * ESSUGGEST — team-gallery.js (aboutus.html only)
- * Makes the "The team behind ESSUGGEST" cards interactive without
- * changing their layout: hover zoom on the photo, and clicking a card
- * (or pressing Enter on its photo) opens a small viewer with a larger
- * photo, name, role, prev/next and close.
+ * ESSUGGEST — Teamgallery.js (aboutus.html only)
  *
  * Hook: put data-team-gallery on the flex container that holds the cards.
- * Each card needs an <img> and two <p> (name first, role second).
- * Add a member in the HTML and it's picked up automatically.
+ * Each card needs an <img> and two <p> (name first, role second), plus an
+ * optional data-about attribute: that text is the contribution description
+ * shown in the viewer. Add a member in the HTML and it's picked up.
  *
- * Viewer controls: ← / → keys, Esc, swipe on touch, click outside to close.
+ * - Cards tilt toward the cursor with a soft light (mouse only)
+ * - Click a card (or Enter on its photo) to open the viewer
+ * - Viewer: larger photo, name, role, contribution, prev / next / close
+ *   (← / → keys, Home / End, Esc, swipe, click outside to close)
  */
 (function teamGallery() {
   const grid = document.querySelector("[data-team-gallery]");
@@ -25,10 +25,14 @@
         img,
         name: lines[0].textContent.trim(),
         role: lines[1].textContent.trim(),
+        about: (card.dataset.about || "").trim(),
       };
     })
     .filter(Boolean);
   if (!members.length) return;
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 
   /* ------------------------------ viewer ------------------------------ */
   const ICON = {
@@ -47,7 +51,7 @@
   dlg.innerHTML =
     '<div class="team-dialog-card">' +
     '<div class="team-dialog-media">' +
-    '<img class="team-dialog-photo" alt="" />' +
+    '<img class="team-dialog-photo" alt="" draggable="false" />' +
     '<button type="button" class="team-btn team-close" aria-label="Close">' + svg(ICON.close) + "</button>" +
     '<button type="button" class="team-btn team-prev" aria-label="Previous member">' + svg(ICON.prev) + "</button>" +
     '<button type="button" class="team-btn team-next" aria-label="Next member">' + svg(ICON.next) + "</button>" +
@@ -55,14 +59,15 @@
     '<div class="team-dialog-caption" aria-live="polite">' +
     '<div id="team-dialog-name" class="team-dialog-name"></div>' +
     '<div class="team-dialog-role"></div>' +
-    '<div class="team-dialog-count"></div>' +
+    '<p class="team-dialog-about"></p>' +
     "</div></div>";
   document.body.appendChild(dlg);
 
   const photo = dlg.querySelector(".team-dialog-photo");
   const nameEl = dlg.querySelector(".team-dialog-name");
   const roleEl = dlg.querySelector(".team-dialog-role");
-  const countEl = dlg.querySelector(".team-dialog-count");
+  const aboutEl = dlg.querySelector(".team-dialog-about");
+  const captionEl = dlg.querySelector(".team-dialog-caption");
   const media = dlg.querySelector(".team-dialog-media");
   const prevBtn = dlg.querySelector(".team-prev");
   const nextBtn = dlg.querySelector(".team-next");
@@ -70,23 +75,35 @@
   let current = 0;
   let opener = null;
 
-  function show(i) {
+  function slide(el, dir, axis) {
+    if (reduceMotion || !dir || !el.animate) return;
+    const from = axis === "x" ? "translateX(" + dir * 36 + "px)" : "translateY(" + dir * 10 + "px)";
+    el.animate(
+      [{ opacity: 0, transform: from }, { opacity: 1, transform: "none" }],
+      { duration: 320, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+    );
+  }
+
+  function show(i, dir) {
     current = (i + members.length) % members.length;
     const m = members[current];
     photo.src = m.img.currentSrc || m.img.src;
     photo.alt = m.img.alt;
     nameEl.textContent = m.name;
     roleEl.textContent = m.role;
-    countEl.textContent = current + 1 + " of " + members.length;
+    aboutEl.textContent = m.about;
+    aboutEl.hidden = !m.about;
+    slide(photo, dir, "x");
+    slide(captionEl, dir, "y");
   }
 
   function open(i, from) {
     opener = from;
-    show(i);
+    show(i, 0);
     if (!dlg.open) dlg.showModal();
   }
 
-  const step = (d) => show(current + d);
+  const step = (d) => show(current + d, d);
 
   if (members.length < 2) {
     prevBtn.hidden = true;
@@ -105,6 +122,8 @@
   dlg.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") step(-1);
     else if (e.key === "ArrowRight") step(1);
+    else if (e.key === "Home") show(0, -1);
+    else if (e.key === "End") show(members.length - 1, 1);
   });
 
   // swipe left/right on touch screens
@@ -125,18 +144,46 @@
 
   /* ------------------------------ cards ------------------------------- */
   members.forEach((m, i) => {
-    m.card.classList.add("team-card", "card-float");
+    const card = m.card;
+    card.classList.add("team-card", "card-float");
+
+    // inner wrapper takes the tilt, so it never fights the scroll-reveal
+    // transform that lives on the card itself
+    const tilt = document.createElement("div");
+    tilt.className = "team-tilt";
+    while (card.firstChild) tilt.appendChild(card.firstChild);
+    card.appendChild(tilt);
 
     // wrap the photo in a button so it's reachable by keyboard
     const holder = m.img.parentElement;
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "team-photo-btn";
-    btn.setAttribute("aria-label", "View larger photo of " + m.name);
+    btn.setAttribute("aria-label", "View details for " + m.name);
     holder.appendChild(btn);
     btn.appendChild(m.img);
 
     // whole card is clickable; the button handles Enter/Space for keyboard users
-    m.card.addEventListener("click", () => open(i, btn));
+    card.addEventListener("click", () => open(i, btn));
+
+    // tilt toward the cursor, with a light that follows it
+    if (finePointer && !reduceMotion) {
+      card.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse") return;
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width;
+        const y = (e.clientY - r.top) / r.height;
+        card.style.setProperty("--ry", ((x - 0.5) * 8).toFixed(2) + "deg");
+        card.style.setProperty("--rx", ((0.5 - y) * 8).toFixed(2) + "deg");
+        card.style.setProperty("--mx", (x * 100).toFixed(1) + "%");
+        card.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+        card.classList.add("is-tilting");
+      });
+      card.addEventListener("pointerleave", () => {
+        card.classList.remove("is-tilting");
+        card.style.removeProperty("--rx");
+        card.style.removeProperty("--ry");
+      });
+    }
   });
 })();

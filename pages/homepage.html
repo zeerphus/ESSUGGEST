@@ -7,6 +7,8 @@
 <title>ESSUGGEST | Home </title>
  <link rel="stylesheet" href="/src/output.css" />
  <link rel="stylesheet" href="/pages/animationLp.css" />
+    <link rel="stylesheet" href="/pages/chatbot.css" />
+ 
 </head>
 
 <body class="font-body text-gray-900 antialiased">
@@ -27,9 +29,7 @@
     </nav>
 
     <div class="site-search font-dm" role="search">
-  <svg class="site-search-icon" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
-  </svg>
+  <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-rounded-magnifier-bold-duotone w-5 h-5 site-search-icon"><circle cx="11" cy="11" r="9" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M20.2832 18.2568C20.5014 18.2749 20.7702 18.3599 21.0586 18.4463C21.3222 18.5253 21.5732 18.5955 21.7578 18.6943C22.7333 19.217 23.0484 20.4659 22.4375 21.3887C22.3218 21.5634 22.1343 21.7446 21.9395 21.9395C21.7446 22.1343 21.5634 22.3218 21.3887 22.4375C20.4659 23.0484 19.217 22.7333 18.6943 21.7578C18.5955 21.5732 18.5253 21.3222 18.4463 21.0586C18.3599 20.7702 18.2749 20.5014 18.2568 20.2832C18.1617 19.1267 19.1267 18.1617 20.2832 18.2568Z" fill="currentColor"/></svg>
   <input
     id="site-search-input"
     class="site-search-input"
@@ -169,9 +169,8 @@
         <!--============================= POLLS card =============================-->
         <article class="scroll-reveal scroll-reveal-delay-2 bg-green-800 card-float text-white rounded-3xl p-6 sm:p-10 flex flex-col items-center text-center shadow-2xl">
           <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-[#F7EA7A] flex items-center justify-center mb-5 sm:mb-6 shadow-md">
-            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-7 sm:h-7 text-black" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
-</svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-chat-round-line-bold-duotone w-6 h-6 sm:w-7 sm:h-7 text-black"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88836 21.6244 10.4003 22 12 22Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path d="M7.825 12.85C7.36937 12.85 7 13.2194 7 13.675C7 14.1306 7.36937 14.5 7.825 14.5H13.875C14.3306 14.5 14.7 14.1306 14.7 13.675C14.7 13.2194 14.3306 12.85 13.875 12.85H7.825Z" fill="currentColor"/>
+<path d="M7.825 9C7.36937 9 7 9.36937 7 9.825C7 10.2806 7.36937 10.65 7.825 10.65H16.625C17.0806 10.65 17.45 10.2806 17.45 9.825C17.45 9.36937 17.0806 9 16.625 9H7.825Z" fill="currentColor"/></svg>
           </div>
           <h3 class="font-dm font-black text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">POLLS</h3>
           <p class="text-white/90 leading-relaxed mb-8 sm:mb-20 max-w-xs font-dm">
@@ -190,9 +189,8 @@
         <!--============================= SUGGESTIONS card =============================-->
         <article class="scroll-reveal scroll-reveal-delay-2 card-float bg-[#F7EA7A] rounded-3xl p-6 sm:p-10 flex flex-col items-center text-center shadow-2xl">
           <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-green-800 flex items-center justify-center mb-5 sm:mb-6 shadow-md">
-            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 sm:w-7 sm:h-7 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 0 1-.825-.242m9.345-8.334a2.126 2.126 0 0 0-.476-.095 48.64 48.64 0 0 0-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0 0 11.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-</svg>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="1.5" class="solar solar-chat-round-quote-bold-duotone w-6 h-6 sm:w-7 sm:h-7 text-white"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.5997 2.37562 15.1116 3.04346 16.4525C3.22094 16.8088 3.28001 17.2161 3.17712 17.6006L2.58151 19.8267C2.32295 20.793 3.20701 21.677 4.17335 21.4185L6.39939 20.8229C6.78393 20.72 7.19121 20.7791 7.54753 20.9565C8.88837 21.6244 10.4003 22 12 22Z" fill="currentColor" style="color: var(--solar-secondary-color, currentColor); opacity: var(--solar-secondary-opacity, 0.5)"/><path fill-rule="evenodd" clip-rule="evenodd" d="M8.69467 7.89454C9.13071 7.89454 9.53397 7.89279 9.85971 7.93653C10.1634 7.97741 10.4845 8.06751 10.764 8.29298L10.8812 8.39845L10.9867 8.51564C11.2126 8.79538 11.3022 9.11684 11.3431 9.42091C11.3869 9.74677 11.3851 10.1497 11.3851 10.5859C11.3851 10.8953 11.3967 11.2588 11.3851 11.5176L11.3792 11.834C11.3677 12.1146 11.3423 12.2979 11.3246 12.4649C11.3127 12.5765 11.3036 12.6499 11.2923 12.7158C11.2867 12.7487 11.2811 12.776 11.2767 12.7979C11.2722 12.8201 11.2684 12.8371 11.264 12.8604L11.2601 12.8799C11.1153 13.5441 10.8572 14.3923 10.1371 15.0557C9.40671 15.7282 8.32191 16.1045 6.75327 16.1045C6.4284 16.1043 6.13967 15.895 6.0394 15.5859C5.93931 15.277 6.05001 14.9379 6.31284 14.7471C6.53446 14.5863 6.9063 14.2247 7.25522 13.7969C7.41587 13.5999 7.5485 13.4114 7.65464 13.2471C7.55569 13.2374 7.45905 13.226 7.36753 13.208C7.06677 13.1488 6.76282 13.0281 6.50718 12.7725C6.20289 12.4679 6.09198 12.0982 6.04526 11.751C6.00146 11.4252 6.00327 11.0221 6.00327 10.5859C6.00327 10.1497 6.00148 9.74676 6.04526 9.42091C6.09197 9.07352 6.20262 8.70312 6.50718 8.39845L6.62436 8.29298C6.90395 8.06722 7.22574 7.97743 7.52964 7.93653C7.85539 7.89276 8.25859 7.89454 8.69467 7.89454ZM8.69467 9.39454C8.21652 9.39454 7.93245 9.39665 7.72983 9.42384C7.63241 9.43696 7.58641 9.45187 7.5687 9.45997C7.56057 9.47781 7.54566 9.52368 7.53257 9.6211C7.50537 9.82378 7.50327 10.1076 7.50327 10.5859C7.50327 11.0645 7.50533 11.3481 7.53257 11.5508C7.54557 11.6475 7.56053 11.6929 7.5687 11.7109C7.58051 11.7164 7.60721 11.7264 7.65757 11.7363C7.78465 11.7613 7.9772 11.7725 8.30893 11.7754C8.33084 11.7756 8.31724 11.7753 8.37827 11.7744C8.4171 11.7739 8.49352 11.7737 8.58139 11.7871C8.67625 11.8017 8.79053 11.833 8.90757 11.8984C8.9956 11.9477 9.07126 12.0083 9.1351 12.0752L9.19565 12.1436L9.29233 12.2881C9.37598 12.4376 9.41856 12.6021 9.41831 12.7744C9.41798 12.9516 9.36812 13.1136 9.35385 13.1641C9.26413 13.4809 9.07682 13.8221 8.86069 14.1455C8.96076 14.0823 9.04783 14.019 9.12046 13.9522C9.49264 13.6093 9.668 13.1395 9.79428 12.5606C9.79914 12.5356 9.80312 12.5153 9.806 12.501C9.80967 12.4829 9.81221 12.4733 9.81382 12.4639C9.81704 12.4449 9.82155 12.4085 9.83237 12.3067C9.85815 12.0639 9.88508 11.8957 9.8851 11.5176V11.4951L9.88608 11.4736C9.89813 11.2682 9.88511 11.0163 9.8851 10.5859C9.8851 10.1076 9.88398 9.82378 9.85678 9.6211C9.84361 9.52316 9.82777 9.47759 9.81967 9.45997C9.80148 9.45179 9.75587 9.4368 9.65952 9.42384C9.45688 9.39664 9.17291 9.39454 8.69467 9.39454Z" fill="currentColor"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M15.3001 7.89454C15.7362 7.89454 16.1394 7.89279 16.4652 7.93653C16.7689 7.97741 17.09 8.06751 17.3695 8.29298L17.4867 8.39845L17.5921 8.51564C17.8181 8.79538 17.9077 9.11684 17.9486 9.42091C17.9924 9.74677 17.9906 10.1497 17.9906 10.5859C17.9906 10.8953 18.0022 11.2588 17.9906 11.5176L17.9847 11.834C17.9732 12.1146 17.9478 12.2979 17.93 12.4649C17.9182 12.5765 17.909 12.6499 17.8978 12.7158C17.8922 12.7487 17.8866 12.776 17.8822 12.7979C17.8777 12.8201 17.8739 12.8371 17.8695 12.8604L17.8656 12.8799C17.7207 13.5441 17.4627 14.3923 16.7425 15.0557C16.0122 15.7282 14.9274 16.1045 13.3587 16.1045C13.0339 16.1043 12.7451 15.895 12.6449 15.5859C12.5448 15.277 12.6555 14.9379 12.9183 14.7471C13.1399 14.5863 13.5118 14.2247 13.8607 13.7969C14.0213 13.5999 14.154 13.4114 14.2601 13.2471C14.1612 13.2374 14.0645 13.226 13.973 13.208C13.6722 13.1488 13.3683 13.0281 13.1126 12.7725C12.8084 12.4679 12.6975 12.0982 12.6507 11.751C12.6069 11.4252 12.6087 11.0221 12.6087 10.5859C12.6087 10.1497 12.6069 9.74676 12.6507 9.42091C12.6974 9.07352 12.8081 8.70312 13.1126 8.39845L13.2298 8.29298C13.5094 8.06722 13.8312 7.97743 14.1351 7.93653C14.4609 7.89276 14.8641 7.89454 15.3001 7.89454ZM15.3001 9.39454C14.822 9.39454 14.5379 9.39665 14.3353 9.42384C14.2379 9.43696 14.1919 9.45187 14.1742 9.45997C14.166 9.47781 14.1511 9.52368 14.138 9.6211C14.1108 9.82378 14.1087 10.1076 14.1087 10.5859C14.1087 11.0645 14.1108 11.3481 14.138 11.5508C14.151 11.6475 14.166 11.6929 14.1742 11.7109C14.186 11.7164 14.2127 11.7264 14.263 11.7363C14.3901 11.7613 14.5827 11.7725 14.9144 11.7754C14.9363 11.7756 14.9227 11.7753 14.9837 11.7744C15.0226 11.7739 15.099 11.7737 15.1869 11.7871C15.2817 11.8017 15.396 11.833 15.513 11.8984C15.6011 11.9477 15.6767 12.0083 15.7406 12.0752L15.8011 12.1436L15.8978 12.2881C15.9814 12.4376 16.024 12.6021 16.0238 12.7744C16.0234 12.9516 15.9736 13.1136 15.9593 13.1641C15.8696 13.4809 15.6823 13.8221 15.4662 14.1455C15.5662 14.0823 15.6533 14.019 15.7259 13.9522C16.0981 13.6093 16.2735 13.1395 16.3998 12.5606C16.4046 12.5356 16.4086 12.5153 16.4115 12.501C16.4151 12.4829 16.4177 12.4733 16.4193 12.4639C16.4225 12.4449 16.427 12.4085 16.4378 12.3067C16.4636 12.0639 16.4906 11.8957 16.4906 11.5176V11.4951L16.4916 11.4736C16.5036 11.2682 16.4906 11.0163 16.4906 10.5859C16.4906 10.1076 16.4894 9.82378 16.4623 9.6211C16.4491 9.52316 16.4332 9.47759 16.4251 9.45997C16.407 9.45179 16.3613 9.4368 16.265 9.42384C16.0623 9.39664 15.7784 9.39454 15.3001 9.39454Z" fill="currentColor"/></svg>
           </div>
           <h3 class="font-dm font-black text-3xl sm:text-4xl md:text-5xl mb-4 sm:mb-6">SUGGESTIONS</h3>
           <p class="text-neutral-800/90 leading-relaxed mb-8 sm:mb-14 max-w-xs font-dm">
@@ -258,13 +256,15 @@
      </div>
     </section>
 
-    <!-- ==================== FINAL CTA ==================== -->
+    
+
+     <!-- ==================== FINAL CTA ==================== -->
     <section class="relative z-10 mx-auto max-w-3xl px-4 sm:px-6 py-16 sm:py-28 text-center scroll-reveal">
       <h2 class="font-dm font-bold text-2xl sm:text-3xl md:text-4xl mb-5 leading-tight">
         Got something to <span class="font-playfair italic text-green-700">say</span><br />
         or a side to <span class="font-playfair italic text-green-700">pick?</span>
       </h2>
-      <p class="text-gray-600 mb-10 font-dm font-light">Sign in with your ESSU credentials and get started in under a minute</p>
+      <p class="text-gray-600 mb-10 font-dm font-light">Sign in and verify with your email and ESSU credentials and get started in under a minute</p>
       <a href="/auth/SignUp.html" class="btn-pop inline-block bg-green-600 text-white font-dm px-8 py-3.5 rounded-full hover:bg-green-700 transition-colors duration-200">
         Create your Account
       </a>
@@ -274,67 +274,86 @@
   <!-- =========================================================
        FOOTER
   ========================================================== -->
-  <footer class="bg-green-700 text-white">
-   <div class="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-16 grid sm:grid-cols-3 gap-8 sm:gap-10 text-center">
-      <div class="scroll-reveal">
-        <h3 class="font-dm font-bold mb-4">Guides</h3>
-        <ul class="space-y-2 text-white/85 text-sm">
-          <li><a href="/pages/UserGuides.html" class="font-dm font-light hover:text-white transition-colors duration-200">User Guide</a></li>
-          <li><a href="/pages/ComGuide.html"  class="font-dm font-light hover:text-white transition-colors duration-200">Community Guidelines</a></li>
-          <li><a href="/pages/ReportHandB.html" class="font-dm font-light hover:text-white transition-colors duration-200">Reporting Handbook</a></li>
-        </ul>
-      </div>
-      <div class="scroll-reveal scroll-reveal-delay-1">
-        <h3 class="font-dm font-bold mb-4">Site Map</h3>
-        <ul class="space-y-2 text-white/85 text-sm">
-          <li><a href="#" class="hover:text-white transition-colors duration-200">Home</a></li>
-          <li><a href="#two-ways" class="hover:text-white transition-colors duration-200">Two ways to be heard</a></li>
-          <li><a href="#conarea" class="hover:text-white transition-colors duration-200">How it works</a></li>
-          <li><a href="/auth/SignUp.html" class="hover:text-white transition-colors duration-200">Create your Account</a></li>
-        </ul>
-      </div>
-      <div class="scroll-reveal scroll-reveal-delay-2">
-        <h3 class="font-dm font-bold mb-4">FAQ &amp; Contact</h3>
-        <ul class="space-y-2 text-white/85 text-sm">
-          <li><a href="/pages/faq.html" class="hover:text-white transition-colors duration-200">Frequently Asked Questions</a></li>
-          <li><a href="mailto:essuggest@gmail.com" class="hover:text-white transition-colors duration-200">essuggest@gmail.com</a></li>
-          <li><a href="#" class="hover:text-white transition-colors duration-200">Human Resources Management Office</a></li>
-        </ul>
-      </div>
-    </div>
+  <footer class="bg-green-900 border-t border-gray-200 text-white">
+   <div class="mx-auto max-w-7xl px-4 sm:px-6 pt-12 sm:pt-16">
 
-    <div class="bg-green-800">
-      <div class="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-        <div class="flex items-center gap-4">
-           <a href="https://main.essu.edu.ph/" target="_blank" rel="noopener" aria-label="ESSU website">
-        <!-- LOGO PLACEHOLDER — ESSU seal -->
-        <img src="/assets/ESSU LOGO no bg.png" alt="ESSU seal" class="w-10 h-10 sm:w-12 sm:h-12 shrink-0 object-contain">
-      </a>
-          <div class="text-sm text-white/85 leading-snug">
-            <p class="font-dm text-white">Eastern Samar State University</p>
-            <p class="font-dm font-extralight text-gray-300 text-sm">Brgy. Maypangdan, Borongan City, Eastern Samar, 6800</p>
+      <!-- brand + link columns -->
+      <div class="flex flex-col lg:flex-row lg:justify-between gap-10 lg:gap-16">
+
+        <div class="max-w-sm">
+  <a href="https://main.essu.edu.ph/" target="_blank" rel="noopener noreferrer"
+     class="inline-flex items-center gap-3"
+     aria-label="Eastern Samar State University official website (opens in a new tab)">
+
+    <span class="logo-tooltip" data-tooltip="ESSU Official Website">
+      <img src="/assets/ESSU LOGO no bg.png" alt="" class="w-40 h-40 object-contain">
+    </span>
+
+    <span class="font-dm font-bold text-lg sm:text-2xl text-white">Eastern Samar State University</span>
+  </a>
+</div>
+
+        <nav class="grid grid-cols-2 sm:grid-cols-3 gap-x-10 sm:gap-x-14 gap-y-10" aria-label="Footer">
+          <div>
+            <h3 class="font-dm font-semibold text-md text-white mb-5">Guides</h3>
+            <ul class="space-y-3 text-white text-sm sm:text-base">
+              <li><a href="/pages/UserGuides.html" class="font-dm text-sm hover:text-green-600 transition-colors duration-200">User Guide</a></li>
+              <li><a href="/pages/ComGuide.html" class="font-dm text-sm hover:text-green-600 transition-colors duration-200">Community Guidelines</a></li>
+              <li><a href="/pages/ReportHandB.html" class="font-dm text-sm hover:text-green-600 transition-colors duration-200">Reporting Handbook</a></li>
+            </ul>
           </div>
-        </div>
 
-        <nav class="flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-2 text-sm text-white/80">
-          <a href="https://main.essu.edu.ph/"  class="font-dm hover:text-white transition-colors duration-200">ESSU Official Website</a>
-          <a href="/pages/PrivacyPolicy.html"   class="font-dm hover:text-white transition-colors duration-200">Data Privacy Policy</a>
-          <a href="/pages/SecurityPolicy.html"  class="font-dm hover:text-white transition-colors duration-200">Security Policy</a>
-          <a href="/pages/IPrightsPolicy.html"class="font-dm hover:text-white transition-colors duration-200">IP Rights Policy</a>
-           <a href="/pages/TermsofUse.html" class="font-dm hover:text-white transition-colors duration-200">Terms of Use</a>
+          <div>
+            <h3 class="font-dm font-semibold text-md text-white mb-5">Site Map</h3>
+            <ul class="space-y-3 text-white text-xs sm:text-sm">
+              <li><a href="#" class="font-dm hover:text-green-600 transition-colors duration-200">Home</a></li>
+              <li><a href="#two-ways" class="font-dm hover:text-green-600 transition-colors duration-200">Two ways to be heard</a></li>
+              <li><a href="#conarea" class="font-dm hover:text-green-600 transition-colors duration-200">How it works</a></li>
+             
+              <li><a href="/auth/SignUp.html" class="font-dm hover:text-green-600 transition-colors duration-200">Create your Account</a></li>
+            </ul>
+          </div>
+
+          <div class="col-span-2 sm:col-span-1">
+            <h3 class="font-dm font-semibold text-md text-white mb-5">FAQ &amp; Contact</h3>
+            <ul class="space-y-3 text-white text-xs sm:text-sm">
+              <li><a href="/pages/faq.html" class="font-dm hover:text-green-600 transition-colors duration-200">Frequently Asked Questions</a></li>
+              <li><a href="mailto:essuggest@gmail.com" class="font-dm hover:text-green-600 transition-colors duration-200">essuggest@gmail.com</a></li>
+              <li><a href="#" class="font-dm hover:text-green-600 transition-colors duration-200">Human Resources Management Office</a></li>
+            </ul>
+          </div>
         </nav>
       </div>
 
-      <div class="border-t border-white/10">
-        <p class="mx-auto text-center px-4 sm:px-6 py-4 sm:py-5 text-xs text-white/60 font-dm font-extralight">
-          © 2026 Eastern Samar State University. All rights reserved.
-        </p>
+      <!-- agency + standard links -->
+      <div class="mt-12 sm:mt-14 pt-8 border-t border-gray-200 flex justify-center items-center   ">
+        
+
+        <nav class="flex flex-wrap gap-x-5 sm:gap-x-6 gap-y-2 text-sm text-white" aria-label="Policies">
+          
+          <a href="/pages/PrivacyPolicy.html" class="font-dm hover:text-green-600 transition-colors duration-200">Data Privacy Policy</a>
+          <a href="/pages/SecurityPolicy.html" class="font-dm hover:text-green-600 transition-colors duration-200">Security Policy</a>
+          <a href="/pages/IPrightsPolicy.html" class="font-dm hover:text-green-600 transition-colors duration-200">IP Rights Policy</a>
+          <a href="/pages/TermsofUse.html" class="font-dm hover:text-green-600 transition-colors duration-200">Terms of Use</a>
+        </nav>
       </div>
-    </div>
+
+      <p class="mt-8 text-center text-sm text-white font-dm font-light">
+        © 2026 Eastern Samar State University. All rights reserved.
+      </p>
+   </div>
+
+   <!-- oversized wordmark (decorative) -->
+   <div class="footer-wordmark-wrap px-2 mt-10 sm:px-4 pt-6 pb-8 sm:pb-12 overflow-hidden" aria-hidden="true">
+     <p class="footer-wordmark font-poppins font-black text-green-700 text-center select-none mb-10">ESSUGGEST</p>
+   </div>
   </footer>
 
   
 
   <script src="/pages/dotted.js"></script>
+  <script src="/pages/chatbot.js"></script>
+  
+  
 </body>
 </html>
