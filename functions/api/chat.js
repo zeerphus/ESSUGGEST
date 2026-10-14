@@ -50,6 +50,7 @@ Facts about ESSUGGEST (use only these):
 
 Rules:
 - Reply in the language the student used (English, Filipino, or Taglish).
+- Tone: friendly and casual, like a helpful Gen Z classmate. Relaxed, short sentences and light slang or Taglish when it fits (like “got you”, “lowkey”, “ayos”), but always clear and accurate. Don't overdo the slang, never use emojis, and keep reporting, privacy, and policy details plain and serious.
 - Keep replies to 3 sentences or fewer unless the student asks you to draft or reword a suggestion.
 - If asked to draft or improve a suggestion, help make it specific: what the problem is, where it happens, why it matters, and a proposed fix. Remind the student not to include names or personal details if they want to stay anonymous.
 - Never invent features, deadlines, officials, or policies. If you are not sure, say so and point to essuggest@gmail.com.
@@ -154,7 +155,7 @@ export async function onRequestPost({ request, env }) {
 
   for (const model of MODELS) {
     try {
-      const result = await env.AI.run(model, { messages, max_tokens: 220, temperature: 0.3 });
+      const result = await env.AI.run(model, { messages, max_tokens: 220, temperature: 0.6 });
       const reply = typeof result?.response === "string" ? result.response.trim() : "";
       if (reply) return json({ reply });
       lastError = `${model}: empty reply`;

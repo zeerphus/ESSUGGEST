@@ -24,73 +24,77 @@
     {
       id: "greet",
       keys: ["hi", "hello", "hey", "kumusta", "musta", "good morning", "good afternoon", "good evening"],
-      answer: "Hi! I can answer questions about signing up, posting suggestions, polls, anonymity, and reporting. What do you need?",
+      answer: [
+        "Hey! I can help with signing up, posting, polls, anonymity, and reports. What do you need?",
+        "Hi hi! Ask me anything about ESSUGGEST: accounts, posting, polls, you name it.",
+        "Yo, welcome! What can I help you with today?",
+      ],
       chips: ["How do I sign up?", "Can I post anonymously?", "How do polls work?"],
     },
     {
       id: "help",
       keys: ["help", "what can you do", "tulong", "options"],
-      answer: "I can help with:\n• Creating and verifying your account\n• Posting suggestions\n• Anonymous or named posts\n• Polls and voting\n• Upvotes and comments\n• Reporting content\n• Policies and contact info",
+      answer: "Here's what I can help with:\n• Making and verifying your account\n• Posting suggestions\n• Anonymous or named posts\n• Polls and voting\n• Upvotes and comments\n• Reporting stuff\n• Policies and contact info\nJust ask away.",
       chips: ["How do I sign up?", "How do I post a suggestion?", "How do I report a post?"],
     },
     {
       id: "signup",
       keys: ["sign up", "signup", "register", "registration", "create account", "create an account", "verify", "verification", "join", "student number", "credentials", "gumawa", "mag-sign up", "magpa-register"],
-      answer: "Sign up with your ESSU credentials: student number, course, year, section, and college. You need a verified account before you can post, comment, vote, or upvote.",
+      answer: "Easy. Sign up with your ESSU credentials: student number, course, year, section, and college. Once your account's verified, you can post, comment, vote, and upvote.",
       links: [{ label: "Create account", href: "/auth/SignUp.html" }, { label: "User Guide", href: "/pages/UserGuides.html" }],
       chips: ["I forgot my password", "Can I post anonymously?"],
     },
     {
       id: "login",
       keys: ["log in", "login", "sign in", "password", "forgot", "nakalimutan", "can't log", "cannot log"],
-      answer: "Go to the log in page and use your verified ESSUGGEST account. If you forgot your password, use the \"Forgot password?\" link on that page.",
+      answer: "Just head to the log in page with your verified account. Forgot your password? Hit the \"Forgot password?\" link on that page and you're good.",
       links: [{ label: "Log in", href: "/auth/LogIn.html" }],
       chips: ["How do I sign up?", "Contact support"],
     },
     {
       id: "post",
       keys: ["post", "suggest", "suggestion", "submit", "idea", "write", "magpost", "mag-suggest", "feedback"],
-      answer: "Log in, write up your idea, tag it, and choose whether your name shows. Other students can then upvote and comment on it. The suggestions with the most support rise to the top.",
+      answer: "Log in, write your idea, tag it, and pick if your name shows or not. Then other students can upvote and comment, and the ones with the most support rise to the top.",
       links: [{ label: "How it works", href: "#conarea" }, { label: "Community Guidelines", href: "/pages/ComGuide.html" }],
       chips: ["Can I post anonymously?", "How do upvotes work?"],
     },
     {
       id: "anonymous",
       keys: ["anonym", "identity", "hide", "hidden", "my name", "show my name", "who can see", "pangalan", "alias"],
-      answer: "When you post a suggestion, you choose whether your name shows (anonymous or named). For how your information is handled, check the Data Privacy Policy.",
+      answer: "You choose! When you post a suggestion, you decide if your name shows (anonymous or named). Wanna know how your info is handled? Check the Data Privacy Policy.",
       links: [{ label: "Data Privacy Policy", href: "/pages/PrivacyPolicy.html" }],
       chips: ["How do I post a suggestion?", "How do I report a post?"],
     },
     {
       id: "polls",
       keys: ["poll", "polls", "vote", "voting", "boto", "results"],
-      answer: "Students can post polls. Each student gets one vote, voting stays open for 24 hours, and results update live. Polls stay visible after voting ends.",
+      answer: "Students can make polls. Everyone gets one vote, voting stays open for 24 hours, results update live, and the poll stays visible after voting ends.",
       links: [{ label: "User Guide", href: "/pages/UserGuides.html" }],
       chips: ["How do upvotes work?", "How do I sign up?"],
     },
     {
       id: "upvote",
       keys: ["upvote", "upvotes", "downvote", "comment", "comments", "reply", "discussion", "thread", "threaded", "rise", "trending", "top"],
-      answer: "Students upvote suggestions they agree with and reply in threaded discussions. The suggestions with the most support rise to the top.",
+      answer: "Students upvote suggestions they agree with and reply in threaded discussions. The ones with the most support rise to the top.",
       chips: ["How do I post a suggestion?", "How do polls work?"],
     },
     {
       id: "report",
       keys: ["report", "inappropriate", "abuse", "bully", "bullying", "harass", "offensive", "spam", "flag", "guidelines", "rules", "bawal"],
-      answer: "If you see inappropriate content, you can report it. The Reporting Handbook explains how reports work, and the Community Guidelines list what is not allowed.",
+      answer: "See something not okay? You can report it. The Reporting Handbook explains how it works, and the Community Guidelines cover what's not allowed.",
       links: [{ label: "Reporting Handbook", href: "/pages/ReportHandB.html" }, { label: "Community Guidelines", href: "/pages/ComGuide.html" }],
       chips: ["Policies", "Contact support"],
     },
     {
       id: "status",
       keys: ["status", "resolved", "resolve", "answered", "response", "respond", "track", "follow up", "follow-up", "ignored", "seen by"],
-      answer: "ESSUGGEST doesn't have a resolved/unresolved status on suggestions yet. You can see how much support a suggestion has through its upvotes and discussion, and poll results are published for everyone.",
+      answer: "Real talk: there's no resolved/unresolved status on suggestions yet. You can still see how much support one has through its upvotes and discussion, and poll results get published for everyone.",
       chips: ["How do upvotes work?", "Contact support"],
     },
     {
       id: "policies",
       keys: ["privacy policy", "data privacy", "security", "secure", "terms", "ip rights", "intellectual", "policy", "policies", "safe"],
-      answer: "You can read our policies here:",
+      answer: "Here are our policies:",
       links: [
         { label: "Data Privacy", href: "/pages/PrivacyPolicy.html" },
         { label: "Security", href: "/pages/SecurityPolicy.html" },
@@ -101,27 +105,34 @@
     {
       id: "contact",
       keys: ["contact", "email", "reach", "human", "hrmo", "human resources", "gmail", "message you"],
-      answer: "You can email the ESSUGGEST team at essuggest@gmail.com or visit the Contact Us page.",
+      answer: "Need a human? Email the ESSUGGEST team at essuggest@gmail.com or check the Contact Us page.",
       links: [{ label: "Contact Us", href: "/pages/contactus.html" }, { label: "Email us", href: "mailto:essuggest@gmail.com" }],
     },
     {
       id: "about",
       keys: ["about", "team", "who made", "developers", "creator", "capstone", "who are you"],
-      answer: "ESSUGGEST is an online suggestion box for Eastern Samar State University, made by BSIT students. You can meet the team on the About Us page.",
+      answer: "ESSUGGEST is the online suggestion box of Eastern Samar State University, made by BSIT students. Meet the team on the About Us page.",
       links: [{ label: "About Us", href: "/pages/aboutus.html" }],
     },
     {
       id: "guides",
       keys: ["guide", "guides", "tutorial", "how to use", "how does", "how it works", "how it work", "steps", "faq", "question", "questions"],
-      answer: "These pages cover the basics:",
+      answer: "These pages got you covered:",
       links: [{ label: "User Guide", href: "/pages/UserGuides.html" }, { label: "FAQ", href: "/pages/faq.html" }, { label: "How it works", href: "#conarea" }],
     },
     {
       id: "thanks",
       keys: ["thanks", "thank you", "salamat", "ty"],
-      answer: "You're welcome! Ask me anything else about ESSUGGEST.",
+      answer: [
+        "You're welcome! Ask me anything else about ESSUGGEST.",
+        "No problem! I'm here if you need anything else.",
+        "Anytime! Let me know if you have more questions.",
+      ],
     },
   ];
+
+  // Some answers have several wordings; pick one at random so small talk doesn't repeat.
+  const pick = (x) => (Array.isArray(x) ? x[Math.floor(Math.random() * x.length)] : x);
 
   const STARTERS = ["How do I sign up?", "Can I post anonymously?", "How do polls work?", "How do I report a post?"];
   const MAX_LEN = 200;
@@ -227,7 +238,7 @@
   const input = el("input", "essu-bot-input");
   input.type = "text";
   input.maxLength = MAX_LEN;
-  input.placeholder = "Ask about ESSUGGEST";
+  input.placeholder = "Ask me anything about ESSUGGEST";
   input.setAttribute("aria-label", "Type your question");
   const sendBtn = el("button", "essu-bot-send");
   sendBtn.type = "submit";
@@ -235,7 +246,7 @@
   sendBtn.innerHTML = ICON_SEND;
   form.append(input, sendBtn);
 
-  const privacyNote = el("p", "essu-bot-note", "Don't share personal details. AI answers can be wrong.");
+  const privacyNote = el("p", "essu-bot-note", "Don't share personal info. AI can be wrong sometimes.");
   panel.append(head, log, form, privacyNote);
 
   const launch = el("button", "essu-bot-launch");
@@ -269,7 +280,7 @@
 
   function addBot({ answer, links, chips, searchTerm }) {
     const msg = el("div", "essu-bot-msg is-bot");
-    msg.appendChild(document.createTextNode(answer));
+    msg.appendChild(document.createTextNode(pick(answer)));
 
     const linkItems = (links || []).slice();
     if (linkItems.length || searchTerm) {
@@ -325,7 +336,7 @@
   const AI_ENDPOINT = "/api/chat";
   const AI_SESSION_CAP = 12; // soft cap per page visit; the server enforces the real limit
   const DRAFT_RE = /\b(draft|rewrite|reword|improve|polish|proofread|help me write|ayusin)\b/i;
-  const AI_NOTE = "\n\nThis answer is AI-generated, so double-check important details in the guides.";
+  const AI_NOTE = "\n\nHeads up: this one's AI-generated, so double-check the important stuff in the guides.";
   let aiCalls = 0;
   let aiNoted = false;
   const aiHistory = [];
@@ -354,7 +365,11 @@
 
   function fallbackReply(text) {
     return {
-      answer: "I'm not sure about that one. You can search the site for it, or email the team at essuggest@gmail.com.",
+      answer: [
+        "Hmm, not sure about that one. You can search the site for it or email the team at essuggest@gmail.com.",
+        "Ooh, that's beyond me. Try searching the site, or email the team at essuggest@gmail.com.",
+        "I'm blanking on that one. Search the site or email essuggest@gmail.com.",
+      ],
       links: [{ label: "Email us", href: "mailto:essuggest@gmail.com" }],
       searchTerm: text,
       chips: STARTERS.slice(0, 3),
@@ -407,7 +422,7 @@
     if (!started) {
       started = true;
       addBot({
-        answer: "Hi! I'm the ESSUGGEST helper. Ask me how things work, or pick a question below. Please don't share your name, student number, or other personal details here.",
+        answer: "Hey! I'm the ESSUGGEST helper. Ask me how things work, or tap a question below. Pls don't share your name, student number, or other personal details here.",
         links: [{ label: "Data Privacy Policy", href: "/pages/PrivacyPolicy.html" }],
         chips: STARTERS,
       });
