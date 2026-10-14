@@ -542,7 +542,9 @@
 
   const head = el("div", "essu-bot-head");
   const headText = el("div");
-  headText.append(el("p", "essu-bot-title", "Sugi"), el("p", "essu-bot-sub", "Online · usually replies instantly"));
+  const SUB_IDLE = "Online · usually replies instantly";
+  const subStatus = el("p", "essu-bot-sub", SUB_IDLE);
+  headText.append(el("p", "essu-bot-title", "Sugi"), subStatus);
   const closeBtn = el("button", "essu-bot-close");
   closeBtn.type = "button";
   closeBtn.setAttribute("aria-label", "Close chat");
@@ -839,7 +841,7 @@
      Shows the thinking orb (pages/orbs.js, a vanilla port of thinking-orbs)
      while the bot is "typing". If orbs.js didn't load, it falls back to the
      three bouncing dots, so the chat never breaks.
-     Orb sizes are only tuned for 20 (inline) and 64 (avatar).
+     Orb sizes are only tuned for 20 (inline), 32 and 64 (avatar).
 
      DYNAMIC: the label and the orb animation change together every
      THINK_SWAP_MS. Each phrase is paired with one of the orb's nine states
@@ -847,12 +849,25 @@
      breathing, shaping), so the orb visibly changes shape as Sugi "thinks".
      The phrase pool depends on the question (known / draft / ai), and after
      THINK_SLOW_AFTER_MS it switches to "thanks for waiting" lines.
+
+     INDICATORS: step pips light up one per phrase, a progress bar fills over
+     the planned think time (then becomes a "still working" sweep), the header
+     status says "Sugi is thinking…", and the input row dims while she works.
      The npm package (thinking-orbs) is NOT needed: orbs.js already contains
      all nine states for this vanilla site.
   ------------------------------------------------------------------- */
-  // Minimum time the orb stays on screen, so fast replies don't flash past.
-  // Lower it (or set to 0) when you're done demoing. 1500 ms feels natural.
-  const MIN_THINK_MS = 1500;
+  // How long the orb stays on screen before the reply shows (a random time in the range, per question kind).
+  // Real AI latency still counts: if the AI is slower than this, the reply shows when it arrives.
+  const THINK_RANGE = {
+    known: [2400, 3200],
+    draft: [3200, 4200],
+    ai: [3000, 4000],
+  };
+  const thinkTime = (kind) => {
+    const [a, b] = THINK_RANGE[kind] || THINK_RANGE.ai;
+    return Math.round(a + Math.random() * (b - a));
+  };
+  const THINK_PIPS = 5; // step dots under the label
 
   const THINK_FIRST = { state: "solving", text: "Sugi is thinking…" };
   const THINK_POOLS = {
@@ -892,7 +907,7 @@
     { state: "connecting", text: "Hang tight, ESSUdyante…" },
     { state: "working", text: "Sugi's working extra hard…" },
   ];
-  const THINK_SWAP_MS = 1300; // how often the phrase + orb change
+  const THINK_SWAP_MS = 1400; // how often the phrase + orb change
   const THINK_SLOW_AFTER_MS = 6000; // after this, switch to the "thanks for waiting" lines
 
   function shuffle(list) {
@@ -904,15 +919,30 @@
     return a;
   }
 
-  function makeTyping(kind) {
+  function makeTyping(kind, totalMs) {
     const box = el("div", "essu-bot-msg is-bot essu-bot-typing");
     box.setAttribute("aria-hidden", "true");
 
     if (window.EssuOrb) {
       box.classList.add("has-orb");
-      box._orb = window.EssuOrb.create({ state: THINK_FIRST.state, size: 20, color: "#15803d" });
+      box.style.setProperty("--think-ms", totalMs + "ms");
+      box._orb = window.EssuOrb.create({ state: THINK_FIRST.state, size: 32, color: "#15803d" });
+
+      const body = el("div", "essu-bot-typing-body");
       const label = el("p", "essu-bot-typing-text", THINK_FIRST.text);
-      box.append(box._orb, label);
+
+      const pips = el("div", "essu-bot-pips");
+      for (let i = 0; i < THINK_PIPS; i++) pips.appendChild(el("span"));
+      pips.firstChild.classList.add("is-on");
+
+      const meter = el("div", "essu-bot-meter");
+      meter.appendChild(el("span"));
+
+      body.append(label, pips, meter);
+      box.append(box._orb, body);
+
+      // after the planned time, the bar switches to a "still working" sweep
+      box._long = setTimeout(() => box.classList.add("is-long"), totalMs);
 
       // shuffled so each wait looks different; cycles without repeating back to back
       const queue = shuffle(THINK_POOLS[kind] || THINK_POOLS.ai);
@@ -920,14 +950,18 @@
       const born = Date.now();
       let qi = 0;
       let si = 0;
+      let step = 0;
 
       box._timer = setInterval(() => {
         const isSlow = Date.now() - born > THINK_SLOW_AFTER_MS;
-        const step = isSlow ? slow[si++ % slow.length] : queue[qi++ % queue.length];
+        const next = isSlow ? slow[si++ % slow.length] : queue[qi++ % queue.length];
+        step++;
+        // light up one more pip each swap (stays full once it reaches the end)
+        for (let i = 0; i < THINK_PIPS; i++) pips.children[i].classList.toggle("is-on", i <= step);
         label.classList.add("is-swapping"); // fade out, swap text + orb, fade back in
         setTimeout(() => {
-          label.textContent = step.text;
-          if (box._orb) box._orb.setState(step.state);
+          label.textContent = next.text;
+          if (box._orb) box._orb.setState(next.state);
           label.classList.remove("is-swapping");
         }, 170);
       }, THINK_SWAP_MS);
@@ -939,11 +973,20 @@
 
   function finish(typing, render) {
     clearInterval(typing._timer); // stop rotating phrases
+    clearTimeout(typing._long);
     if (typing._orb) typing._orb.destroy(); // stop the orb's animation loop
     typing.remove();
     render();
+    setBusyUI(false);
     playMove(headMascot, null, false, "hop"); // little hop when the reply lands
     busy = false;
+  }
+
+  // header status + dimmed input while Sugi is thinking
+  function setBusyUI(on) {
+    subStatus.textContent = on ? "Sugi is thinking…" : SUB_IDLE;
+    form.classList.toggle("is-busy", on);
+    log.setAttribute("aria-busy", on ? "true" : "false");
   }
 
   function ask(raw) {
@@ -959,18 +1002,20 @@
     const hit = findAnswer(text);
     const kind = DRAFT_RE.test(text) ? "draft" : hit ? "known" : "ai";
 
-    const typing = makeTyping(kind);
+    const minMs = thinkTime(kind);
+    const typing = makeTyping(kind, minMs);
     log.appendChild(typing);
     scrollDown();
     setMood("thinking");
+    setBusyUI(true);
 
     const repeat = !!hit && hit.id === lastId;
     lastId = hit ? hit.id : null;
     const startedAt = Date.now();
 
-    // Wait out whatever is left of MIN_THINK_MS, then show the reply.
+    // Wait out whatever is left of the planned think time, then show the reply.
     const reveal = (render) => {
-      const wait = Math.max(0, MIN_THINK_MS - (Date.now() - startedAt));
+      const wait = Math.max(0, minMs - (Date.now() - startedAt));
       setTimeout(() => finish(typing, render), wait);
     };
 

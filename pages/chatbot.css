@@ -584,6 +584,91 @@
   transform: translateY(3px);
 }
 
+/* thinking bubble: wider, with step pips + progress meter */
+.essu-bot-typing.has-orb {
+  min-width: 14rem;
+  padding: 10px 18px 10px 12px;
+}
+
+.essu-bot-typing-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* step pips */
+.essu-bot-pips {
+  display: flex;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.essu-bot-pips span {
+  width: 14px;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(22, 163, 74, 0.16);
+  animation: none; /* override the fallback-dots bounce (.essu-bot-typing span) */
+  transition: background-color 0.35s ease, transform 0.35s var(--eb-ease);
+}
+
+.essu-bot-pips span.is-on {
+  background: var(--eb-green-600);
+  transform: scaleY(1.25);
+}
+
+/* progress meter: fills over the planned think time */
+.essu-bot-meter {
+  height: 4px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(22, 163, 74, 0.14);
+}
+
+.essu-bot-meter span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+  transform-origin: left center;
+  transform: scaleX(0);
+  animation: essu-bot-fill var(--think-ms, 3s) cubic-bezier(0.25, 0.8, 0.35, 1) forwards;
+}
+
+@keyframes essu-bot-fill {
+  to {
+    transform: scaleX(0.94);
+  }
+}
+
+/* wait is running long: switch to an indeterminate sweep */
+.essu-bot-typing.is-long .essu-bot-meter span {
+  width: 40%;
+  transform: none;
+  animation: essu-bot-sweep 1.2s ease-in-out infinite;
+}
+
+@keyframes essu-bot-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+/* input row while Sugi is busy */
+.essu-bot-form.is-busy .essu-bot-input {
+  background: #ecf3ef;
+}
+
+.essu-bot-form.is-busy .essu-bot-send {
+  opacity: 0.45;
+  box-shadow: none;
+  pointer-events: none;
+}
+
 @keyframes essu-bot-shimmer {
   from {
     background-position: 130% 0;
@@ -964,6 +1049,16 @@
   .essu-intro-skip,
   .essu-bot-logo.is-landed {
     animation: none;
+  }
+
+  .essu-bot-meter span {
+    animation: none;
+    transform: scaleX(0.5);
+  }
+
+  .essu-bot-typing.is-long .essu-bot-meter span {
+    transform: none;
+    width: 100%;
   }
 
   .essu-bot-log {
