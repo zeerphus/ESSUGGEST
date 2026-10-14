@@ -38,7 +38,10 @@ const MODELS = [
 // whether the AI binding is connected. Keep false in production.
 const DEBUG = false;
 
-const DAILY_PER_VISITOR = 20; // only applies if the RATE_LIMIT KV binding exists
+// Only applies if the RATE_LIMIT KV binding exists. Only SUCCESSFUL replies
+// count toward it. Students on the same campus Wi-Fi often share one public
+// IP, so this is set generously.
+const DAILY_PER_VISITOR = 500;
 const MAX_BODY = 4000;        // characters, checked before the JSON is parsed
 const MAX_MESSAGE = 200;
 const MAX_HISTORY = 4;
@@ -174,9 +177,12 @@ function fromThisSite(request) {
 }
 
 // Per-visitor daily cap. The KV key holds a one-way hash, never the raw IP.
-// If KV itself fails, chat stays available (Workers AI's own quota still applies).
-async function overLimit(env, request) {
-  if (!env.RATE_LIMIT) return false;
+// getUsage() only READS the counter; recordUse() adds one, and is called only
+// after a reply was actually produced, so failed requests never use up a
+// visitor's allowance. If KV itself fails, chat stays available (Workers AI's
+// own quota still applies).
+async function getUsage(env, request) {
+  if (!env.RATE_LIMIT) return null;
   try {
     const ip = request.headers.get("CF-Connecting-IP") || "unknown";
     const day = new Date().toISOString().slice(0, 10);
@@ -185,12 +191,17 @@ async function overLimit(env, request) {
     const hash = [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
     const key = `chat:${day}:${hash}`;
     const used = parseInt((await env.RATE_LIMIT.get(key)) || "0", 10);
-    if (used >= DAILY_PER_VISITOR) return true;
-    await env.RATE_LIMIT.put(key, String(used + 1), { expirationTtl: 60 * 60 * 26 });
-    return false;
+    return { key, used };
   } catch (_) {
-    return false;
+    return null;
   }
+}
+
+async function recordUse(env, usage) {
+  if (!usage) return;
+  try {
+    await env.RATE_LIMIT.put(usage.key, String(usage.used + 1), { expirationTtl: 60 * 60 * 26 });
+  } catch (_) {}
 }
 
 export async function onRequestPost({ request, env }) {
@@ -221,7 +232,8 @@ export async function onRequestPost({ request, env }) {
         .map((m) => ({ role: m.role, content: redact(m.content.slice(0, MAX_HISTORY_CHARS)) }))
     : [];
 
-  if (await overLimit(env, request)) return json({ error: "Daily limit reached" }, 429);
+  const usage = await getUsage(env, request);
+  if (usage && usage.used >= DAILY_PER_VISITOR) return json({ error: "Daily limit reached" }, 429);
 
   const userText = redact(message);
   const isDraft = DRAFT_RE.test(message);
@@ -231,7 +243,10 @@ export async function onRequestPost({ request, env }) {
     try {
       const result = await env.AI.run(model, buildRequest(model, history, userText, isDraft));
       const reply = cleanReply(extractText(result));
-      if (reply) return json({ reply });
+      if (reply) {
+        await recordUse(env, usage); // count only successful replies
+        return json({ reply });
+      }
       lastError = `${model}: empty reply`;
     } catch (err) {
       // Includes running out of the free daily allocation and retired models.
