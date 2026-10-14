@@ -127,6 +127,24 @@
   const MAX_LEN = 200;
 
   /* ------------------------------------------------------------------
+     PRIVACY
+     Personal details are removed here, in the browser, before a message is
+     sent to /api/chat. The server filters again as a second layer. This is
+     best-effort (it can't catch every name), so the chat window also asks
+     students not to share personal details.
+  ------------------------------------------------------------------- */
+  const NAME_RE =
+    /\b(My name is|my name is|I am|I'm|This is|this is|Ako si|ako si|Ako po si|ako po si|Pangalan ko(?: po)? ay|pangalan ko(?: po)? ay|Name ko|name ko)\s+[A-Z][\p{L}'.-]*(?:\s+[A-Z][\p{L}'.-]*){0,3}/gu;
+
+  function scrubPII(text) {
+    return text
+      .replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, "[email removed]")
+      .replace(/(?:\+?63|0)9\d{2}[\s-]?\d{3}[\s-]?\d{4}/g, "[number removed]")
+      .replace(/\b\d[\d-]{5,}\d\b/g, "[number removed]")
+      .replace(NAME_RE, "$1 [name removed]");
+  }
+
+  /* ------------------------------------------------------------------
      MATCHING
   ------------------------------------------------------------------- */
   const clean = (s) => s.toLowerCase().replace(/[^\p{L}\p{N}\s'-]/gu, " ").replace(/\s+/g, " ").trim();
@@ -217,7 +235,8 @@
   sendBtn.innerHTML = ICON_SEND;
   form.append(input, sendBtn);
 
-  panel.append(head, log, form);
+  const privacyNote = el("p", "essu-bot-note", "Don't share personal details. AI answers can be wrong.");
+  panel.append(head, log, form, privacyNote);
 
   const launch = el("button", "essu-bot-launch");
   launch.type = "button";
@@ -314,18 +333,19 @@
   async function askAI(text) {
     if (aiCalls >= AI_SESSION_CAP) return null;
     aiCalls++;
+    const safeText = scrubPII(text);
     try {
       const res = await fetch(AI_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history: aiHistory.slice(-4) }),
+        body: JSON.stringify({ message: safeText, history: aiHistory.slice(-4) }),
         signal: AbortSignal.timeout(15000),
       });
       if (!res.ok) return null;
       const data = await res.json();
       const reply = typeof data.reply === "string" ? data.reply.trim() : "";
       if (!reply) return null;
-      aiHistory.push({ role: "user", content: text }, { role: "assistant", content: reply });
+      aiHistory.push({ role: "user", content: safeText }, { role: "assistant", content: reply });
       return reply;
     } catch (_) {
       return null;
@@ -387,7 +407,8 @@
     if (!started) {
       started = true;
       addBot({
-        answer: "Hi! I'm the ESSUGGEST helper. Ask me how things work, or pick a question below.",
+        answer: "Hi! I'm the ESSUGGEST helper. Ask me how things work, or pick a question below. Please don't share your name, student number, or other personal details here.",
+        links: [{ label: "Data Privacy Policy", href: "/pages/PrivacyPolicy.html" }],
         chips: STARTERS,
       });
     }

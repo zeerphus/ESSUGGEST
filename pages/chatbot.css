@@ -328,3 +328,13 @@
   width: 18px;
   height: 18px;
 }
+
+/* ---------- privacy reminder under the input ---------- */
+.essu-bot-note {
+  padding: 0 14px 10px;
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  text-align: center;
+  color: #6b7280;
+  background: #fff;
+}
