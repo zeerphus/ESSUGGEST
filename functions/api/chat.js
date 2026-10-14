@@ -13,9 +13,19 @@
  * endpoint returns an error, including when the free daily quota runs out.
  */
 
-// Models get retired over time. Run `npx wrangler ai models list` to see
-// what is available, and swap the name here if this one disappears.
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+// Models get retired over time. The first one that works is used, so if one
+// disappears the next takes over. Check the Workers AI model catalog in the
+// Cloudflare dashboard (or run `npx wrangler ai models list`) and use the
+// "Copy ID" value to add or replace names here.
+const MODELS = [
+  "@cf/meta/llama-3.1-8b-instruct",
+  "@cf/meta/llama-3.2-3b-instruct",
+  "@cf/meta/llama-3.1-8b-instruct-fp8",
+];
+
+// While testing, error details are sent back so you can see what failed.
+// Set to false once the chatbot works.
+const DEBUG = true;
 
 const DAILY_PER_VISITOR = 20; // only applies if the RATE_LIMIT KV binding exists
 const MAX_MESSAGE = 200;
@@ -100,21 +110,27 @@ export async function onRequestPost({ request, env }) {
 
   if (await overLimit(env, request)) return json({ error: "Daily limit reached" }, 429);
 
-  try {
-    const result = await env.AI.run(MODEL, {
-      messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history, { role: "user", content: redact(message) }],
-      max_tokens: 220,
-      temperature: 0.3,
-    });
-    const reply = typeof result?.response === "string" ? result.response.trim() : "";
-    if (!reply) return json({ error: "Empty reply" }, 502);
-    return json({ reply });
-  } catch (err) {
-    // Includes running out of the free daily allocation.
-    return json({ error: "AI unavailable" }, 502);
+  const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...history, { role: "user", content: redact(message) }];
+  let lastError = "";
+
+  for (const model of MODELS) {
+    try {
+      const result = await env.AI.run(model, { messages, max_tokens: 220, temperature: 0.3 });
+      const reply = typeof result?.response === "string" ? result.response.trim() : "";
+      if (reply) return json({ reply });
+      lastError = `${model}: empty reply`;
+    } catch (err) {
+      // Includes running out of the free daily allocation.
+      lastError = `${model}: ${err && err.message ? err.message : err}`;
+      console.error("Workers AI failed", lastError);
+    }
   }
+
+  return json(DEBUG ? { error: "AI unavailable", detail: String(lastError).slice(0, 300) } : { error: "AI unavailable" }, 502);
 }
 
-export function onRequest() {
-  return json({ error: "Method not allowed" }, 405);
+// Health check: open /api/chat in the browser. {"ok":true,"ai":true} means the
+// function is deployed and the AI binding is connected.
+export function onRequestGet({ env }) {
+  return json({ ok: true, ai: Boolean(env.AI) });
 }
