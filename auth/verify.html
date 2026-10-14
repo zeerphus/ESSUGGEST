@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpg" href="/assets/LOGO.png">
+    <title>ESSUGGEST | Verify your Email</title>
+    <link rel="stylesheet" href="/src/output.css">
+
+    <!-- Page-only styles (progress steps). Kept inline so no Tailwind rebuild is needed. -->
+    <style>
+      .ve-brand { margin-bottom: 1.25rem; }
+
+      /* ---------- card extras ---------- */
+      .ve-card { padding-top: 1.75rem; }
+
+      .ve-steps {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 0;
+        margin: 0 0 1.5rem;
+        padding: 0;
+        list-style: none;
+      }
+
+      .ve-step {
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.6875rem;
+        line-height: 1.2;
+        text-align: center;
+        color: #8a978f;
+      }
+
+      /* connector line between dots */
+      .ve-step + .ve-step::before {
+        content: "";
+        position: absolute;
+        top: 13px;
+        right: 50%;
+        width: 100%;
+        height: 2px;
+        background: #e3ebe5;
+      }
+
+      .ve-step.is-done + .ve-step::before,
+      .ve-step.is-now::before { background: #16a34a; }
+
+      .ve-dot {
+        position: relative;
+        z-index: 1;
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #8a978f;
+        background: #fff;
+        border: 2px solid #dbe5de;
+        border-radius: 50%;
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+      }
+
+      .ve-dot svg { width: 14px; height: 14px; }
+
+      .ve-step.is-done { color: #166534; }
+      .ve-step.is-done .ve-dot { color: #fff; background: #16a34a; border-color: #16a34a; }
+
+      .ve-step.is-now { color: #14211a; font-weight: 600; }
+      .ve-step.is-now .ve-dot {
+        color: #fff;
+        background: #15803d;
+        border-color: #15803d;
+        animation: ve-ring 2s ease-out infinite;
+      }
+
+      @keyframes ve-ring {
+        0%   { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+        70%, 100% { box-shadow: 0 0 0 9px rgba(22, 163, 74, 0); }
+      }
+
+      .ve-actions { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1rem; }
+
+      .ve-ghost {
+        height: 2.5rem;
+        width: 100%;
+        cursor: pointer;
+        font-weight: 600;
+        color: #166534;
+        background: #fff;
+        border: 1px solid #b7e4c7;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+      }
+
+      .ve-ghost:hover:not(:disabled) { background: #f0fdf4; border-color: #16a34a; }
+      .ve-ghost:disabled { cursor: not-allowed; opacity: 0.6; }
+      .ve-ghost:focus-visible { outline: 2px solid #16a34a; outline-offset: 2px; }
+
+      #sent-note.is-ok  { color: #15803d; }
+      #sent-note.is-err { color: #b91c1c; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .ve-step.is-now .ve-dot { animation: none; }
+      }
+    </style>
+</head>
+<body class="flex min-h-screen flex-col items-center justify-center bg-white px-4 py-6 font-dm">
+
+  <div class="ve-brand flex items-center justify-center gap-2">
+    <h1 class="font-dm text-4xl font-bold leading-tight text-green-800 mb-80">ESSUGGEST</h1>
+  </div>
+
+  <!-- ============================= VERIFY EMAIL CARD ============================= -->
+  <main class="ve-card w-full max-w-md rounded-2xl border -mt-50 border-gray-200 bg-white px-6 py-7 shadow-[0_18px_30px_-8px_rgba(0,0,0,0.25)] sm:px-8">
+
+    <ol class="ve-steps" aria-label="Sign up progress">
+      <li class="ve-step is-done" id="step-1">
+        <span class="ve-dot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </span>
+        Create account
+      </li>
+      <li class="ve-step is-now" id="step-2" aria-current="step">
+        <span class="ve-dot" id="step-2-dot">2</span>
+        Verify email
+      </li>
+      <li class="ve-step" id="step-3">
+        <span class="ve-dot" id="step-3-dot">3</span>
+        Start suggesting
+      </li>
+    </ol>
+
+    <div class="text-center">
+      <h2 id="ve-title" class="font-dm text-xl font-bold leading-tight text-black">Verify your Email</h2>
+
+      <p id="ve-lede" class="mx-auto mt-6 max-w-xs font-dm text-sm font-light leading-snug text-gray-500">
+        We've sent a verification link to
+        <span id="sent-email" class="font-medium text-black"></span>.
+        Click the link in that email, then come back and tap the button below. If you haven't received it, check your spam folder or resend it.
+      </p>
+    </div>
+
+    <p id="sent-note" class="mt-4 h-5 text-center font-dm text-sm font-light" aria-live="polite"></p>
+
+    <div class="ve-actions">
+      <button id="checkBtn" type="button"
+              class="h-10 w-full cursor-pointer rounded-lg bg-green-600 font-dm text-md font-semibold text-white shadow-[0_8px_14px_-4px_rgba(0,0,0,0.35)] transition duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-90 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2">
+        Verify Email
+      </button>
+
+      <button id="resendBtn" type="button" class="ve-ghost font-dm text-md">
+        Resend email
+      </button>
+    </div>
+  </main>
+
+  <!-- ============================= BACK TO LOG IN ============================= -->
+  <a href="/auth/LogIn.html" class="mt-8 font-dm text-xs text-black underline underline-offset-2 transition hover:text-green-700">
+    Back to Log in
+  </a>
+
+  <!-- FIX: was /auth/verifyemail.js, which doesn't match the file name (verify.js) -->
+  <script type="module" src="/auth/verify.js"></script>
+
+</body>
+</html>
