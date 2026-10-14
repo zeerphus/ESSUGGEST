@@ -1,11 +1,32 @@
 /* =======================================================================
-   ESSUGGEST — student help chatbot (homepage, About Us, Contact Us)
-   Loaded after animationLp.css. All selectors are prefixed .essu-bot or
-   .essu-mascot so nothing here can leak into the rest of the page.
-   Brand colors: green-700 #15803d, green-800 #166534, yellow #f7ea7a
+   ESSUGGEST — Sugi chat widget (homepage, About Us, Contact Us)
+   Drop-in replacement for pages/chatbot.css. No HTML/JS changes needed:
+   every class name used by chatbot.js is kept.
+
+   Tokens
+     --eb-green-900  #052e16   ink / shadows
+     --eb-green-800  #166534   hover, text on light
+     --eb-green-700  #15803d   brand
+     --eb-green-600  #16a34a   highlights
+     --eb-green-50   #f0fdf4   tints
+     --eb-yellow     #f7ea7a   brand accent (links, dot)
    ======================================================================= */
 
 .essu-bot {
+  --eb-green-900: #052e16;
+  --eb-green-800: #166534;
+  --eb-green-700: #15803d;
+  --eb-green-600: #16a34a;
+  --eb-green-100: #dcfce7;
+  --eb-green-50: #f0fdf4;
+  --eb-yellow: #f7ea7a;
+  --eb-yellow-deep: #e3d25c;
+  --eb-ink: #14211a;
+  --eb-muted: #5f6f66;
+  --eb-line: #e3ebe5;
+  --eb-surface: #f6faf7;
+  --eb-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
   position: fixed;
   right: max(16px, env(safe-area-inset-right));
   bottom: max(16px, env(safe-area-inset-bottom));
@@ -13,31 +34,77 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 12px;
+  gap: 14px;
+}
+
+.essu-bot button {
+  font: inherit;
+  border: 0;
+}
+
+.essu-bot :focus-visible {
+  outline: 2px solid var(--eb-green-600);
+  outline-offset: 2px;
 }
 
 /* ---------- launcher ---------- */
 .essu-bot-launch {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 6px;
   border-radius: 999px;
   color: #fff;
-  background: #15803d;
-  box-shadow: 0 14px 30px -10px rgba(5, 46, 22, 0.6);
+  background: linear-gradient(135deg, var(--eb-green-600), var(--eb-green-800));
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset,
+    0 1px 2px rgba(5, 46, 22, 0.3),
+    0 16px 32px -10px rgba(5, 46, 22, 0.55);
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
 }
 
 .essu-bot-launch:hover {
-  background: #166534;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.18) inset,
+    0 2px 4px rgba(5, 46, 22, 0.3),
+    0 22px 36px -12px rgba(5, 46, 22, 0.6);
 }
 
 .essu-bot-launch:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
+}
+
+/* "online" dot with a soft ping */
+.essu-bot-launch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--eb-yellow);
+  border: 2px solid var(--eb-green-700);
+  box-shadow: 0 0 0 0 rgba(247, 234, 122, 0.7);
+  animation: essu-bot-ping 2.6s ease-out infinite;
+}
+
+.essu-bot-launch[aria-expanded="true"]::after {
+  display: none;
+}
+
+@keyframes essu-bot-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgba(247, 234, 122, 0.65);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 9px rgba(247, 234, 122, 0);
+  }
 }
 
 .essu-bot-logo {
@@ -47,7 +114,7 @@
   place-items: center;
   flex-shrink: 0;
   border-radius: 999px;
-  background: #166534;
+  background: var(--eb-green-800);
 }
 
 .essu-bot-logo img {
@@ -58,9 +125,10 @@
 
 .essu-bot-launch-text {
   display: none;
-  padding-right: 14px;
+  padding-right: 16px;
   font-size: 0.875rem;
   font-weight: 600;
+  letter-spacing: 0.005em;
   white-space: nowrap;
 }
 
@@ -74,14 +142,23 @@
 .essu-bot-panel {
   display: flex;
   flex-direction: column;
-  width: min(calc(100vw - 32px), 24rem);
-  height: min(75vh, 34rem);
+  width: min(calc(100vw - 32px), 25rem);
+  height: min(78vh, 36rem);
   overflow: hidden;
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 1.25rem;
-  box-shadow: 0 28px 56px -18px rgba(5, 46, 22, 0.5);
+  border: 1px solid rgba(5, 46, 22, 0.1);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 1px 2px rgba(5, 46, 22, 0.08),
+    0 12px 24px -8px rgba(5, 46, 22, 0.18),
+    0 40px 80px -24px rgba(5, 46, 22, 0.38);
   transform-origin: bottom right;
+}
+
+@supports (height: 100dvh) {
+  .essu-bot-panel {
+    height: min(78dvh, 36rem);
+  }
 }
 
 .essu-bot-panel[hidden] {
@@ -89,13 +166,13 @@
 }
 
 .essu-bot-panel.is-opening {
-  animation: essu-bot-pop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: essu-bot-pop 0.35s var(--eb-ease);
 }
 
 @keyframes essu-bot-pop {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.96);
+    transform: translateY(14px) scale(0.94);
   }
   to {
     opacity: 1;
@@ -103,34 +180,70 @@
   }
 }
 
+/* ---------- header ---------- */
 .essu-bot-head {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 12px 12px 14px;
+  gap: 12px;
+  padding: 14px 14px 14px 16px;
   color: #fff;
-  background: #15803d;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(247, 234, 122, 0.22) 0, rgba(247, 234, 122, 0) 55%),
+    linear-gradient(135deg, var(--eb-green-700), var(--eb-green-800));
+}
+
+/* faint dot texture, echoing the site's dotted background */
+.essu-bot-head::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1.2px);
+  background-size: 14px 14px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 30%, #000);
+  mask-image: linear-gradient(90deg, transparent 30%, #000);
+  pointer-events: none;
+}
+
+.essu-bot-head > * {
+  position: relative;
 }
 
 .essu-bot-head .essu-bot-logo {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
 }
 
 .essu-bot-head .essu-bot-logo img {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
 }
 
 .essu-bot-title {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
+  letter-spacing: -0.005em;
 }
 
 .essu-bot-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
   font-size: 0.75rem;
-  opacity: 0.85;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.essu-bot-sub::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #86efac;
+  box-shadow: 0 0 0 3px rgba(134, 239, 172, 0.25);
 }
 
 .essu-bot-close {
@@ -140,18 +253,24 @@
   display: grid;
   place-items: center;
   border-radius: 999px;
-  color: inherit;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .essu-bot-close:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.22);
+  transform: rotate(90deg);
+}
+
+.essu-bot-close:focus-visible {
+  outline-color: #fff;
 }
 
 .essu-bot-close svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* ---------- messages ---------- */
@@ -160,94 +279,141 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 14px;
+  padding: 16px 14px;
   overflow-y: auto;
-  background: #f9fafb;
+  background-color: var(--eb-surface);
+  background-image: radial-gradient(rgba(21, 128, 61, 0.1) 1px, transparent 1.2px);
+  background-size: 16px 16px;
   overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: #c5d6cb transparent;
+}
+
+.essu-bot-log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.essu-bot-log::-webkit-scrollbar-thumb {
+  background: #c5d6cb;
+  border-radius: 99px;
 }
 
 .essu-bot-msg {
-  max-width: 88%;
-  padding: 9px 12px;
+  max-width: 86%;
+  padding: 10px 14px;
   font-size: 0.875rem;
-  line-height: 1.45;
+  line-height: 1.5;
   white-space: pre-line;
-  border-radius: 14px;
+  border-radius: 18px;
+  animation: essu-bot-in 0.3s var(--eb-ease) both;
+}
+
+@keyframes essu-bot-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .essu-bot-msg.is-bot {
   align-self: flex-start;
-  color: #1f2937;
+  color: var(--eb-ink);
   background: #fff;
-  border: 1px solid #e5e7eb;
-  border-bottom-left-radius: 4px;
+  border: 1px solid var(--eb-line);
+  border-bottom-left-radius: 6px;
+  box-shadow: 0 1px 2px rgba(5, 46, 22, 0.05), 0 6px 14px -8px rgba(5, 46, 22, 0.18);
 }
 
 .essu-bot-msg.is-user {
   align-self: flex-end;
   color: #fff;
-  background: #15803d;
-  border-bottom-right-radius: 4px;
+  background: linear-gradient(135deg, var(--eb-green-600), var(--eb-green-700));
+  border-bottom-right-radius: 6px;
+  box-shadow: 0 6px 14px -6px rgba(21, 128, 61, 0.55);
 }
 
+/* link pills under a bot reply */
 .essu-bot-links {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--eb-line);
 }
 
 .essu-bot-link {
-  display: inline-block;
-  padding: 4px 11px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.4;
-  color: #171717;
+  color: #2a2606;
   text-decoration: none;
-  background: #f7ea7a;
+  background: var(--eb-yellow);
   border-radius: 999px;
-  transition: filter 0.2s ease;
+  box-shadow: 0 0 0 1px rgba(227, 210, 92, 0.7) inset;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .essu-bot-link:hover {
-  filter: brightness(0.95);
+  transform: translateY(-1px);
+  filter: brightness(0.97);
+  box-shadow: 0 0 0 1px rgba(227, 210, 92, 0.9) inset, 0 4px 10px -4px rgba(120, 105, 10, 0.5);
 }
 
+/* quick-reply chips */
 .essu-bot-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  animation: essu-bot-in 0.35s var(--eb-ease) 0.08s both;
 }
 
 .essu-bot-chip {
-  padding: 5px 12px;
-  font-size: 0.75rem;
+  padding: 6px 13px;
+  font-size: 0.78rem;
   font-weight: 500;
-  color: #166534;
+  line-height: 1.3;
+  color: var(--eb-green-800);
   background: #fff;
-  border: 1px solid #15803d;
+  border: 1px solid #b7e4c7 !important;
   border-radius: 999px;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 1px 2px rgba(5, 46, 22, 0.05);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .essu-bot-chip:hover {
-  background: #f0fdf4;
+  color: #fff;
+  background: var(--eb-green-700);
+  border-color: var(--eb-green-700) !important;
+  transform: translateY(-1px);
+}
+
+.essu-bot-chip:active {
+  transform: scale(0.97);
 }
 
 /* typing indicator (fallback: three bouncing dots, used if orbs.js is missing) */
 .essu-bot-typing {
   display: flex;
   gap: 4px;
-  padding: 12px 14px;
+  padding: 13px 16px;
 }
 
 .essu-bot-typing span {
   width: 6px;
   height: 6px;
-  background: #9ca3af;
+  background: #9db3a5;
   border-radius: 50%;
   animation: essu-bot-dot 1s ease-in-out infinite;
 }
@@ -274,97 +440,193 @@
 }
 
 /* typing indicator with the thinking orb (pages/orbs.js) */
+/* the bubble itself breathes with a soft green halo */
 .essu-bot-typing.has-orb {
   align-items: center;
-  gap: 8px;
-  padding: 9px 14px 9px 10px;
+  gap: 10px;
+  padding: 8px 18px 8px 10px;
+  border-color: rgba(22, 163, 74, 0.35);
+  animation: essu-bot-in 0.3s var(--eb-ease) both, essu-bot-halo 2.4s ease-in-out 0.3s infinite;
 }
 
+@keyframes essu-bot-halo {
+  0%,
+  100% {
+    box-shadow: 0 1px 2px rgba(5, 46, 22, 0.05), 0 0 0 0 rgba(22, 163, 74, 0), 0 6px 14px -8px rgba(5, 46, 22, 0.18);
+  }
+  50% {
+    box-shadow: 0 1px 2px rgba(5, 46, 22, 0.05), 0 0 0 3px rgba(22, 163, 74, 0.12), 0 0 22px -2px rgba(22, 163, 74, 0.4);
+  }
+}
+
+/* glowing orb */
+.essu-bot-typing.has-orb canvas {
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px rgba(22, 163, 74, 0.85)) drop-shadow(0 0 9px rgba(22, 163, 74, 0.5));
+  animation: essu-bot-orb-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes essu-bot-orb-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px rgba(22, 163, 74, 0.7)) drop-shadow(0 0 5px rgba(22, 163, 74, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 4px rgba(22, 163, 74, 1)) drop-shadow(0 0 13px rgba(74, 222, 128, 0.75));
+  }
+}
+
+/* glowing text: a light sweep runs across while the glow pulses with the orb */
 .essu-bot-typing-text {
   font-size: 0.8125rem;
-  color: #6b7280;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--eb-green-700); /* fallback if background-clip:text is unsupported */
+  background: linear-gradient(100deg, #15803d 0%, #15803d 38%, #4ade80 50%, #15803d 62%, #15803d 100%) 0 0 / 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation:
+    essu-bot-shimmer 2.2s linear infinite,
+    essu-bot-text-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes essu-bot-shimmer {
+  from {
+    background-position: 130% 0;
+  }
+  to {
+    background-position: -130% 0;
+  }
+}
+
+@keyframes essu-bot-text-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 1px rgba(22, 163, 74, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 5px rgba(22, 163, 74, 0.8));
+  }
 }
 
 /* ---------- input row ---------- */
 .essu-bot-form {
   display: flex;
+  align-items: center;
   gap: 8px;
-  padding: 10px;
+  padding: 12px 12px 8px;
   background: #fff;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--eb-line);
 }
 
 .essu-bot-input {
   flex: 1;
   min-width: 0;
-  height: 40px;
-  padding: 0 14px;
+  height: 44px;
+  padding: 0 16px;
   font: inherit;
   font-size: 16px; /* stops iOS Safari zooming on focus */
-  color: #111827;
-  background: #f3f4f6;
+  color: var(--eb-ink);
+  background: #f1f6f3;
   border: 1px solid transparent;
   border-radius: 999px;
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .essu-bot-input::placeholder {
-  color: #6b7280;
+  color: #74857b;
+}
+
+.essu-bot-input:hover {
+  background: #ecf3ef;
 }
 
 .essu-bot-input:focus-visible {
   outline: none;
   background: #fff;
-  border-color: #15803d;
-  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.18);
+  border-color: var(--eb-green-600);
+  box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.16);
 }
 
 .essu-bot-send {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
   flex-shrink: 0;
   color: #fff;
-  background: #15803d;
+  background: linear-gradient(135deg, var(--eb-green-600), var(--eb-green-800));
   border-radius: 999px;
   cursor: pointer;
   touch-action: manipulation;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 8px 16px -8px rgba(21, 128, 61, 0.8);
+  transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
 }
 
 .essu-bot-send:hover {
-  background: #166534;
+  transform: translateY(-1px);
+}
+
+.essu-bot-send:active {
+  transform: scale(0.94);
 }
 
 .essu-bot-send svg {
   width: 18px;
   height: 18px;
+  transition: transform 0.2s ease;
+}
+
+.essu-bot-send:hover svg {
+  transform: translateX(2px);
+}
+
+/* dim the send button until there's something to send */
+.essu-bot-input:placeholder-shown ~ .essu-bot-send {
+  opacity: 0.45;
+  box-shadow: none;
 }
 
 /* ---------- privacy reminder under the input ---------- */
 .essu-bot-note {
-  padding: 0 14px 10px;
+  padding: 0 16px 12px;
   font-size: 0.6875rem;
-  line-height: 1.3;
+  line-height: 1.35;
   text-align: center;
-  color: #6b7280;
+  color: #7a8a81;
   background: #fff;
 }
 
+/* ---------- small screens: nearly full-width sheet ---------- */
+@media (max-width: 480px) {
+  .essu-bot {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .essu-bot-panel {
+    width: calc(100vw - 24px);
+    height: min(82vh, 40rem);
+    border-radius: 1.25rem;
+  }
+
+  @supports (height: 100dvh) {
+    .essu-bot-panel {
+      height: min(82dvh, 40rem);
+    }
+  }
+}
+
 /* =======================================================================
-   MASCOT ("Sugi", pages/mascot.js)
-   Sits on a soft white badge so the green box pops against the green
-   launcher/header. Always running: blink + paper wiggle + thinking dots.
-   Driven from chatbot.js:
-     - cursor following: JS sets --look-x / --look-y (-1..1) on the mascot;
-       the `translate` / `rotate` properties below turn that into movement.
-       (They are separate from `transform`, so they stack with the moves.)
-     - hover / click / reaction moves: JS adds one .mv-* class for the
-       length of its animation.
+   MASCOT BADGE
+   The 3D Sugi (pages/mascot.js) injects its own styles; these rules only
+   size the round badge she sits in.
    ======================================================================= */
 .essu-bot-logo.has-mascot {
-  background: #f0fdf4;
+  background: radial-gradient(circle at 50% 30%, #fff, var(--eb-green-100));
   padding: 3px;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35);
 }
 
 .essu-bot-launch .essu-bot-logo.has-mascot {
@@ -373,8 +635,8 @@
 }
 
 .essu-bot-head .essu-bot-logo.has-mascot {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   cursor: pointer; /* poke her! */
 }
 
@@ -383,256 +645,30 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  transform-origin: 50% 90%;
-  /* lean toward the cursor */
-  translate: calc(var(--look-x, 0) * 2.5px) calc(var(--look-y, 0) * 1.8px);
-  rotate: calc(var(--look-x, 0) * 5deg);
-  transition: translate 0.25s ease-out, rotate 0.25s ease-out;
 }
 
-.essu-mascot .m-eyes {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: essu-mascot-blink 4.5s ease-in-out infinite;
-  /* eyes glance toward the cursor a little further than the body leans */
-  translate: calc(var(--look-x, 0) * 16%) calc(var(--look-y, 0) * 12%);
-  transition: translate 0.15s ease-out;
-}
-
-@keyframes essu-mascot-blink {
-  0%,
-  93%,
-  100% {
-    transform: scaleY(1);
-  }
-  96.5% {
-    transform: scaleY(0.12);
-  }
-}
-
-.essu-mascot .m-paper {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: essu-mascot-paper 3s ease-in-out infinite;
-}
-
-@keyframes essu-mascot-paper {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-1.5px) rotate(2deg);
-  }
-}
-
-/* "thinking" bubbles pulse one after another */
-.essu-mascot .m-dots circle {
-  animation: essu-mascot-dot 1.2s ease-in-out infinite;
-}
-
-.essu-mascot .m-dots circle:nth-child(2) {
-  animation-delay: 0.2s;
-}
-
-.essu-mascot .m-dots circle:nth-child(3) {
-  animation-delay: 0.4s;
-}
-
-@keyframes essu-mascot-dot {
-  0%,
-  100% {
-    opacity: 0.35;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-/* ---------- moves (hover / click / reactions) ---------- */
-
-/* hover moves */
-.essu-mascot.mv-hop {
-  animation: essu-mv-hop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-@keyframes essu-mv-hop {
-  0%,
-  100% {
-    transform: none;
-  }
-  35% {
-    transform: translateY(-7px) scale(0.96, 1.06);
-  }
-  65% {
-    transform: translateY(0) scale(1.06, 0.94);
-  }
-}
-
-.essu-mascot.mv-wiggle {
-  animation: essu-mv-wiggle 0.6s ease-in-out;
-}
-
-@keyframes essu-mv-wiggle {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  20% {
-    transform: rotate(-10deg);
-  }
-  40% {
-    transform: rotate(9deg);
-  }
-  60% {
-    transform: rotate(-6deg);
-  }
-  80% {
-    transform: rotate(4deg);
-  }
-}
-
-.essu-mascot.mv-jelly {
-  animation: essu-mv-jelly 0.7s ease-in-out;
-}
-
-@keyframes essu-mv-jelly {
-  0%,
-  100% {
-    transform: scale(1, 1);
-  }
-  25% {
-    transform: scale(1.18, 0.82);
-  }
-  50% {
-    transform: scale(0.88, 1.12);
-  }
-  75% {
-    transform: scale(1.06, 0.95);
-  }
-}
-
-.essu-mascot.mv-tilt {
-  animation: essu-mv-tilt 0.9s ease-in-out;
-}
-
-@keyframes essu-mv-tilt {
-  0%,
-  100% {
-    transform: none;
-  }
-  25%,
-  65% {
-    transform: rotate(14deg) translateY(-1px);
-  }
-}
-
-.essu-mascot.mv-nod {
-  animation: essu-mv-nod 0.5s ease-in-out;
-}
-
-@keyframes essu-mv-nod {
-  0%,
-  100% {
-    transform: none;
-  }
-  30% {
-    transform: translateY(3px) scale(1.03, 0.96);
-  }
-  60% {
-    transform: translateY(-1px);
-  }
-}
-
-/* click moves */
-.essu-mascot.mv-spin {
-  animation: essu-mv-spin 0.8s cubic-bezier(0.34, 1.3, 0.64, 1);
-}
-
-@keyframes essu-mv-spin {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  50% {
-    transform: rotate(200deg) scale(1.12);
-  }
-  100% {
-    transform: rotate(360deg) scale(1);
-  }
-}
-
-.essu-mascot.mv-bigjump {
-  animation: essu-mv-bigjump 0.75s cubic-bezier(0.34, 1.2, 0.64, 1);
-}
-
-@keyframes essu-mv-bigjump {
-  0%,
-  100% {
-    transform: none;
-  }
-  30% {
-    transform: translateY(-9px) scale(0.94, 1.1);
-  }
-  55% {
-    transform: translateY(0) scale(1.1, 0.88);
-  }
-  75% {
-    transform: translateY(-3px) scale(0.98, 1.03);
-  }
-}
-
-.essu-mascot.mv-heart {
-  animation: essu-mv-heart 0.8s ease-in-out;
-}
-
-@keyframes essu-mv-heart {
-  0%,
-  30%,
-  70%,
-  100% {
-    transform: scale(1);
-  }
-  15%,
-  50% {
-    transform: scale(1.15);
-  }
-}
-
-.essu-mascot.mv-shake {
-  animation: essu-mv-shake 0.45s ease-in-out;
-}
-
-@keyframes essu-mv-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-3px);
-  }
-  40% {
-    transform: translateX(3px);
-  }
-  60% {
-    transform: translateX(-2px);
-  }
-  80% {
-    transform: translateX(2px);
-  }
-}
-
+/* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .essu-mascot .m-eyes,
-  .essu-mascot .m-paper,
-  .essu-mascot .m-dots circle,
-  .essu-mascot[class*="mv-"] {
+  .essu-bot-launch::after,
+  .essu-bot-panel.is-opening,
+  .essu-bot-msg,
+  .essu-bot-chips,
+  .essu-bot-typing span,
+  .essu-bot-typing.has-orb,
+  .essu-bot-typing.has-orb canvas,
+  .essu-bot-typing-text {
     animation: none;
   }
 
-  .essu-bot-logo .essu-mascot,
-  .essu-mascot .m-eyes {
-    translate: none;
-    rotate: none;
+  .essu-bot-log {
+    scroll-behavior: auto;
+  }
+
+  .essu-bot-launch,
+  .essu-bot-close,
+  .essu-bot-chip,
+  .essu-bot-link,
+  .essu-bot-send {
     transition: none;
   }
 }

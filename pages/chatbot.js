@@ -542,7 +542,7 @@
 
   const head = el("div", "essu-bot-head");
   const headText = el("div");
-  headText.append(el("p", "essu-bot-title", "Sugi"), el("p", "essu-bot-sub", "Your ESSUdyante bestie"));
+  headText.append(el("p", "essu-bot-title", "Sugi"), el("p", "essu-bot-sub", "Online · usually replies instantly"));
   const closeBtn = el("button", "essu-bot-close");
   closeBtn.type = "button";
   closeBtn.setAttribute("aria-label", "Close chat");
@@ -574,7 +574,7 @@
   launch.setAttribute("aria-expanded", "false");
   launch.setAttribute("aria-controls", "essu-bot-panel");
   launch.setAttribute("aria-label", "Open help chat");
-  launch.append(logo(), el("span", "essu-bot-launch-text", "Psst, need help?"));
+  launch.append(logo(), el("span", "essu-bot-launch-text", "Ask Sugi"));
 
   root.append(panel, launch);
   document.body.appendChild(root);
