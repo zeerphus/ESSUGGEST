@@ -1,7 +1,7 @@
 /* =======================================================================
-   ESSUGGEST — student help chatbot (homepage)
-   Loaded after animationLp.css. All selectors are prefixed .essu-bot so
-   nothing here can leak into the rest of the page.
+   ESSUGGEST — student help chatbot (homepage, About Us, Contact Us)
+   Loaded after animationLp.css. All selectors are prefixed .essu-bot or
+   .essu-mascot so nothing here can leak into the rest of the page.
    Brand colors: green-700 #15803d, green-800 #166534, yellow #f7ea7a
    ======================================================================= */
 
@@ -237,7 +237,7 @@
   background: #f0fdf4;
 }
 
-/* typing indicator */
+/* typing indicator (fallback: three bouncing dots, used if orbs.js is missing) */
 .essu-bot-typing {
   display: flex;
   gap: 4px;
@@ -271,6 +271,18 @@
     transform: translateY(-4px);
     opacity: 1;
   }
+}
+
+/* typing indicator with the thinking orb (pages/orbs.js) */
+.essu-bot-typing.has-orb {
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px 9px 10px;
+}
+
+.essu-bot-typing-text {
+  font-size: 0.8125rem;
+  color: #6b7280;
 }
 
 /* ---------- input row ---------- */
@@ -337,4 +349,290 @@
   text-align: center;
   color: #6b7280;
   background: #fff;
+}
+
+/* =======================================================================
+   MASCOT ("Sugi", pages/mascot.js)
+   Sits on a soft white badge so the green box pops against the green
+   launcher/header. Always running: blink + paper wiggle + thinking dots.
+   Driven from chatbot.js:
+     - cursor following: JS sets --look-x / --look-y (-1..1) on the mascot;
+       the `translate` / `rotate` properties below turn that into movement.
+       (They are separate from `transform`, so they stack with the moves.)
+     - hover / click / reaction moves: JS adds one .mv-* class for the
+       length of its animation.
+   ======================================================================= */
+.essu-bot-logo.has-mascot {
+  background: #f0fdf4;
+  padding: 3px;
+}
+
+.essu-bot-launch .essu-bot-logo.has-mascot {
+  width: 52px;
+  height: 52px;
+}
+
+.essu-bot-head .essu-bot-logo.has-mascot {
+  width: 44px;
+  height: 44px;
+  cursor: pointer; /* poke her! */
+}
+
+.essu-bot-logo .essu-mascot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform-origin: 50% 90%;
+  /* lean toward the cursor */
+  translate: calc(var(--look-x, 0) * 2.5px) calc(var(--look-y, 0) * 1.8px);
+  rotate: calc(var(--look-x, 0) * 5deg);
+  transition: translate 0.25s ease-out, rotate 0.25s ease-out;
+}
+
+.essu-mascot .m-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: essu-mascot-blink 4.5s ease-in-out infinite;
+  /* eyes glance toward the cursor a little further than the body leans */
+  translate: calc(var(--look-x, 0) * 16%) calc(var(--look-y, 0) * 12%);
+  transition: translate 0.15s ease-out;
+}
+
+@keyframes essu-mascot-blink {
+  0%,
+  93%,
+  100% {
+    transform: scaleY(1);
+  }
+  96.5% {
+    transform: scaleY(0.12);
+  }
+}
+
+.essu-mascot .m-paper {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: essu-mascot-paper 3s ease-in-out infinite;
+}
+
+@keyframes essu-mascot-paper {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-1.5px) rotate(2deg);
+  }
+}
+
+/* "thinking" bubbles pulse one after another */
+.essu-mascot .m-dots circle {
+  animation: essu-mascot-dot 1.2s ease-in-out infinite;
+}
+
+.essu-mascot .m-dots circle:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.essu-mascot .m-dots circle:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes essu-mascot-dot {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* ---------- moves (hover / click / reactions) ---------- */
+
+/* hover moves */
+.essu-mascot.mv-hop {
+  animation: essu-mv-hop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes essu-mv-hop {
+  0%,
+  100% {
+    transform: none;
+  }
+  35% {
+    transform: translateY(-7px) scale(0.96, 1.06);
+  }
+  65% {
+    transform: translateY(0) scale(1.06, 0.94);
+  }
+}
+
+.essu-mascot.mv-wiggle {
+  animation: essu-mv-wiggle 0.6s ease-in-out;
+}
+
+@keyframes essu-mv-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-10deg);
+  }
+  40% {
+    transform: rotate(9deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(4deg);
+  }
+}
+
+.essu-mascot.mv-jelly {
+  animation: essu-mv-jelly 0.7s ease-in-out;
+}
+
+@keyframes essu-mv-jelly {
+  0%,
+  100% {
+    transform: scale(1, 1);
+  }
+  25% {
+    transform: scale(1.18, 0.82);
+  }
+  50% {
+    transform: scale(0.88, 1.12);
+  }
+  75% {
+    transform: scale(1.06, 0.95);
+  }
+}
+
+.essu-mascot.mv-tilt {
+  animation: essu-mv-tilt 0.9s ease-in-out;
+}
+
+@keyframes essu-mv-tilt {
+  0%,
+  100% {
+    transform: none;
+  }
+  25%,
+  65% {
+    transform: rotate(14deg) translateY(-1px);
+  }
+}
+
+.essu-mascot.mv-nod {
+  animation: essu-mv-nod 0.5s ease-in-out;
+}
+
+@keyframes essu-mv-nod {
+  0%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(3px) scale(1.03, 0.96);
+  }
+  60% {
+    transform: translateY(-1px);
+  }
+}
+
+/* click moves */
+.essu-mascot.mv-spin {
+  animation: essu-mv-spin 0.8s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+@keyframes essu-mv-spin {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(200deg) scale(1.12);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.essu-mascot.mv-bigjump {
+  animation: essu-mv-bigjump 0.75s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+@keyframes essu-mv-bigjump {
+  0%,
+  100% {
+    transform: none;
+  }
+  30% {
+    transform: translateY(-9px) scale(0.94, 1.1);
+  }
+  55% {
+    transform: translateY(0) scale(1.1, 0.88);
+  }
+  75% {
+    transform: translateY(-3px) scale(0.98, 1.03);
+  }
+}
+
+.essu-mascot.mv-heart {
+  animation: essu-mv-heart 0.8s ease-in-out;
+}
+
+@keyframes essu-mv-heart {
+  0%,
+  30%,
+  70%,
+  100% {
+    transform: scale(1);
+  }
+  15%,
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.essu-mascot.mv-shake {
+  animation: essu-mv-shake 0.45s ease-in-out;
+}
+
+@keyframes essu-mv-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-3px);
+  }
+  40% {
+    transform: translateX(3px);
+  }
+  60% {
+    transform: translateX(-2px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .essu-mascot .m-eyes,
+  .essu-mascot .m-paper,
+  .essu-mascot .m-dots circle,
+  .essu-mascot[class*="mv-"] {
+    animation: none;
+  }
+
+  .essu-bot-logo .essu-mascot,
+  .essu-mascot .m-eyes {
+    translate: none;
+    rotate: none;
+    transition: none;
+  }
 }
