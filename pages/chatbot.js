@@ -581,6 +581,136 @@
   wireMascotMotion();
 
   /* ------------------------------------------------------------------
+     SUGI INTRO
+     First time the chat opens: a big Sugi drops in, introduces herself,
+     then shrinks and flies into the header badge before the greeting shows.
+     Skippable (click, Skip, typing, sending, closing the panel).
+  ------------------------------------------------------------------- */
+  const INTRO_KEY = "essu-sugi-intro";
+  const INTRO_ONCE_PER_SESSION = true; // set false while demoing to see it every time
+  const INTRO_HOLD_MS = 3300; // how long she stays centered before flying to the header
+
+  let introEl = null;
+  let introStage = null;
+  let introBig = null;
+  let introTimers = [];
+
+  function introSeen() {
+    try {
+      return INTRO_ONCE_PER_SESSION && sessionStorage.getItem(INTRO_KEY) === "1";
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function introLater(fn, ms) {
+    introTimers.push(setTimeout(fn, ms));
+  }
+
+  function canIntro() {
+    return !!(window.EssuMascot && headMascot && !reduceMotion && !introSeen());
+  }
+
+  function runIntro() {
+    try {
+      sessionStorage.setItem(INTRO_KEY, "1");
+    } catch (_) {}
+
+    introBig = window.EssuMascot.create({ mood: "happy", size: 112 });
+
+    introEl = el("div", "essu-intro");
+    // cover just the chat-log area, so the header and input row stay visible
+    introEl.style.top = log.offsetTop + "px";
+    introEl.style.height = log.offsetHeight + "px";
+
+    introStage = el("div", "essu-intro-stage");
+    introStage.appendChild(introBig);
+
+    const copy = el("div", "essu-intro-copy");
+    const name = el("p", "essu-intro-name");
+    name.setAttribute("aria-label", "Sugi");
+    "Sugi".split("").forEach((ch, i) => {
+      const s = el("span", "", ch);
+      s.style.setProperty("--i", i);
+      s.setAttribute("aria-hidden", "true");
+      name.appendChild(s);
+    });
+    copy.append(el("p", "essu-intro-hello", "Hi, I'm"), name, el("p", "essu-intro-tag", "Your ESSUGGEST helper"));
+
+    const skip = el("button", "essu-intro-skip", "Skip");
+    skip.type = "button";
+
+    introEl.append(introStage, copy, skip);
+    panel.appendChild(introEl);
+    panel.classList.add("is-intro");
+
+    introEl.addEventListener("click", () => exitIntro(true));
+
+    // choreography (the drop-in itself is CSS; these are Sugi's own reactions)
+    introLater(() => {
+      introBig.hop();
+      introBig.wave();
+    }, 1150);
+    introLater(() => introBig.celebrate(), 2500);
+    introLater(() => exitIntro(false), INTRO_HOLD_MS);
+  }
+
+  // instant = true: skip straight to the greeting. Otherwise Sugi flies into the header badge.
+  function exitIntro(instant) {
+    if (!introEl) return;
+    introTimers.forEach(clearTimeout);
+    introTimers = [];
+
+    const overlay = introEl;
+    const stage = introStage;
+    const big = introBig;
+    introEl = introStage = introBig = null;
+
+    const finish = () => {
+      overlay.remove();
+      big.destroy();
+      panel.classList.remove("is-intro");
+      greet();
+    };
+
+    const to = headMascot.getBoundingClientRect();
+    if (instant || !to.width || panel.hidden) {
+      finish();
+      return;
+    }
+
+    const from = big.getBoundingClientRect();
+    const scale = to.width / from.width;
+    const dx = to.left + to.width / 2 - (from.left + from.width / 2);
+    const dy = to.top + to.height / 2 - (from.top + from.height / 2);
+
+    overlay.classList.add("is-leaving");
+    overlay.style.pointerEvents = "none";
+    stage.style.transition = "transform 0.65s cubic-bezier(0.5, 0, 0.2, 1)";
+    stage.style.transform = `translate(${dx}px, ${dy}px) scale(${scale})`;
+
+    setTimeout(() => {
+      // she's arrived: reveal the real header badge with a pop, then show the greeting
+      const badge = headMascot.parentElement;
+      panel.classList.remove("is-intro");
+      badge.classList.add("is-landed");
+      badge.addEventListener("animationend", () => badge.classList.remove("is-landed"), { once: true });
+      overlay.remove();
+      big.destroy();
+      playMove(headMascot, null, true, "hop");
+      greet();
+    }, 680);
+  }
+
+  function greet() {
+    addBot({
+      answer: "Hiii, ESSUdyante! I'm Sugi, your ESSUGGEST helper. Ask me how things work, or tap a question below. Pls don't share your name, student number, or other personal details here, okay?",
+      links: [{ label: "Data Privacy Policy", href: "/pages/PrivacyPolicy.html" }],
+      chips: STARTERS,
+    });
+  }
+
+  /* ------------------------------------------------------------------
      CHAT BEHAVIOUR
   ------------------------------------------------------------------- */
   let started = false;
@@ -706,23 +836,101 @@
 
   /* ------------------------------------------------------------------
      TYPING INDICATOR
-     Shows the thinking orb (pages/orb.js, a vanilla port of thinking-orbs)
-     while the bot is "typing". If orb.js didn't load, it falls back to the
+     Shows the thinking orb (pages/orbs.js, a vanilla port of thinking-orbs)
+     while the bot is "typing". If orbs.js didn't load, it falls back to the
      three bouncing dots, so the chat never breaks.
      Orb sizes are only tuned for 20 (inline) and 64 (avatar).
+
+     DYNAMIC: the label and the orb animation change together every
+     THINK_SWAP_MS. Each phrase is paired with one of the orb's nine states
+     (working, searching, solving, listening, connecting, weaving, composing,
+     breathing, shaping), so the orb visibly changes shape as Sugi "thinks".
+     The phrase pool depends on the question (known / draft / ai), and after
+     THINK_SLOW_AFTER_MS it switches to "thanks for waiting" lines.
+     The npm package (thinking-orbs) is NOT needed: orbs.js already contains
+     all nine states for this vanilla site.
   ------------------------------------------------------------------- */
   // Minimum time the orb stays on screen, so fast replies don't flash past.
   // Lower it (or set to 0) when you're done demoing. 1500 ms feels natural.
   const MIN_THINK_MS = 1500;
 
-  function makeTyping() {
+  const THINK_FIRST = { state: "solving", text: "Sugi is thinking…" };
+  const THINK_POOLS = {
+    // a rule matched: quick, "looking it up" phrasing
+    known: [
+      { state: "searching", text: "Checking the suggestion box…" },
+      { state: "listening", text: "Got it, finding that for you…" },
+      { state: "connecting", text: "Connecting the dots…" },
+      { state: "working", text: "On it, ESSUdyante…" },
+      { state: "breathing", text: "One sec, hehe…" },
+    ],
+    // draft / reword requests
+    draft: [
+      { state: "listening", text: "Reading your draft…" },
+      { state: "composing", text: "Polishing your words…" },
+      { state: "shaping", text: "Shaping it up…" },
+      { state: "weaving", text: "Finding the right tone…" },
+      { state: "working", text: "Fixing the little things…" },
+    ],
+    // everything else goes to the AI
+    ai: [
+      { state: "listening", text: "Reading your question…" },
+      { state: "searching", text: "Digging through the guides…" },
+      { state: "connecting", text: "Connecting the dots…" },
+      { state: "weaving", text: "Weaving an answer…" },
+      { state: "composing", text: "Composing a reply…" },
+      { state: "breathing", text: "Hmm, let me think…" },
+      { state: "shaping", text: "Shaping my thoughts…" },
+      { state: "working", text: "Working on it…" },
+      { state: "solving", text: "Solving the puzzle…" },
+    ],
+  };
+  // shown once the wait gets long
+  const THINK_SLOW = [
+    { state: "working", text: "Still on it, thanks for waiting…" },
+    { state: "breathing", text: "Almost there, promise…" },
+    { state: "connecting", text: "Hang tight, ESSUdyante…" },
+    { state: "working", text: "Sugi's working extra hard…" },
+  ];
+  const THINK_SWAP_MS = 1300; // how often the phrase + orb change
+  const THINK_SLOW_AFTER_MS = 6000; // after this, switch to the "thanks for waiting" lines
+
+  function shuffle(list) {
+    const a = list.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function makeTyping(kind) {
     const box = el("div", "essu-bot-msg is-bot essu-bot-typing");
     box.setAttribute("aria-hidden", "true");
 
     if (window.EssuOrb) {
       box.classList.add("has-orb");
-      box._orb = window.EssuOrb.create({ state: "solving", size: 20, color: "#15803d" });
-      box.append(box._orb, el("p", "essu-bot-typing-text", "Sugi is thinking…"));
+      box._orb = window.EssuOrb.create({ state: THINK_FIRST.state, size: 20, color: "#15803d" });
+      const label = el("p", "essu-bot-typing-text", THINK_FIRST.text);
+      box.append(box._orb, label);
+
+      // shuffled so each wait looks different; cycles without repeating back to back
+      const queue = shuffle(THINK_POOLS[kind] || THINK_POOLS.ai);
+      const slow = shuffle(THINK_SLOW);
+      const born = Date.now();
+      let qi = 0;
+      let si = 0;
+
+      box._timer = setInterval(() => {
+        const isSlow = Date.now() - born > THINK_SLOW_AFTER_MS;
+        const step = isSlow ? slow[si++ % slow.length] : queue[qi++ % queue.length];
+        label.classList.add("is-swapping"); // fade out, swap text + orb, fade back in
+        setTimeout(() => {
+          label.textContent = step.text;
+          if (box._orb) box._orb.setState(step.state);
+          label.classList.remove("is-swapping");
+        }, 170);
+      }, THINK_SWAP_MS);
     } else {
       box.append(el("span"), el("span"), el("span"));
     }
@@ -730,6 +938,7 @@
   }
 
   function finish(typing, render) {
+    clearInterval(typing._timer); // stop rotating phrases
     if (typing._orb) typing._orb.destroy(); // stop the orb's animation loop
     typing.remove();
     render();
@@ -741,16 +950,20 @@
     const text = raw.trim().slice(0, MAX_LEN);
     if (!text || busy) return;
     busy = true;
+    if (introEl) exitIntro(true); // skip the intro if they send something early
     clearChips();
     addUser(text);
     playMove(headMascot, null, false, "nod"); // nods when you send
 
-    const typing = makeTyping();
+    // work out the topic first, so the thinking indicator can match it
+    const hit = findAnswer(text);
+    const kind = DRAFT_RE.test(text) ? "draft" : hit ? "known" : "ai";
+
+    const typing = makeTyping(kind);
     log.appendChild(typing);
     scrollDown();
     setMood("thinking");
 
-    const hit = findAnswer(text);
     const repeat = !!hit && hit.id === lastId;
     lastId = hit ? hit.id : null;
     const startedAt = Date.now();
@@ -807,11 +1020,8 @@
     launch.setAttribute("aria-label", "Close help chat");
     if (!started) {
       started = true;
-      addBot({
-        answer: "Hiii, ESSUdyante! I'm Sugi, your ESSUGGEST helper. Ask me how things work, or tap a question below. Pls don't share your name, student number, or other personal details here, okay?",
-        links: [{ label: "Data Privacy Policy", href: "/pages/PrivacyPolicy.html" }],
-        chips: STARTERS,
-      });
+      if (canIntro()) runIntro();
+      else greet();
     }
     playMove(headMascot, null, true, "wiggle"); // waves hello when the chat opens
     input.focus();
@@ -819,6 +1029,7 @@
 
   function closePanel() {
     if (panel.hidden) return;
+    if (introEl) exitIntro(true); // don't leave a half-played intro behind
     panel.hidden = true;
     panel.classList.remove("is-opening");
     launch.setAttribute("aria-expanded", "false");
@@ -831,6 +1042,10 @@
     launch.focus();
   });
   panel.addEventListener("animationend", () => panel.classList.remove("is-opening"));
+
+  input.addEventListener("input", () => {
+    if (introEl) exitIntro(true); // typing skips the intro
+  });
 
   form.addEventListener("submit", (e) => {
     e.preventDefault();

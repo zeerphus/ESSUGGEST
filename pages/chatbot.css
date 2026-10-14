@@ -140,6 +140,7 @@
 
 /* ---------- panel ---------- */
 .essu-bot-panel {
+  position: relative; /* the Sugi intro overlay is positioned against the panel */
   display: flex;
   flex-direction: column;
   width: min(calc(100vw - 32px), 25rem);
@@ -165,18 +166,101 @@
   display: none;
 }
 
+/* ---------- open / close animation ---------- */
 .essu-bot-panel.is-opening {
-  animation: essu-bot-pop 0.35s var(--eb-ease);
+  animation: essu-bot-open 0.55s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-@keyframes essu-bot-pop {
+.essu-bot-panel.is-closing {
+  animation: essu-bot-close 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+/* grows out of the launcher corner: scale + a clip that opens like a bubble */
+@keyframes essu-bot-open {
+  0% {
+    opacity: 0;
+    transform: translate(10px, 16px) scale(0.4);
+    clip-path: inset(60% 0 0 60% round 2rem);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0 round 1.5rem);
+  }
+}
+
+@keyframes essu-bot-close {
+  to {
+    opacity: 0;
+    transform: translate(8px, 14px) scale(0.5);
+    clip-path: inset(55% 0 0 55% round 2rem);
+  }
+}
+
+/* staggered reveal of the panel's parts */
+@keyframes essu-bot-rise {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.94);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes essu-bot-badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-25deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.essu-bot-panel.is-opening .essu-bot-head > .essu-bot-logo {
+  animation: essu-bot-badge-pop 0.55s cubic-bezier(0.34, 1.8, 0.64, 1) 0.18s both;
+}
+.essu-bot-panel.is-opening .essu-bot-head > div:not(.essu-bot-logo) {
+  animation: essu-bot-rise 0.4s var(--eb-ease) 0.24s both;
+}
+.essu-bot-panel.is-opening .essu-bot-close {
+  animation: essu-bot-rise 0.4s var(--eb-ease) 0.3s both;
+}
+.essu-bot-panel.is-opening .essu-bot-form {
+  animation: essu-bot-rise 0.4s var(--eb-ease) 0.34s both;
+}
+.essu-bot-panel.is-opening .essu-bot-note {
+  animation: essu-bot-rise 0.4s var(--eb-ease) 0.4s both;
+}
+
+/* the greeting lands after the panel has opened, then its chips */
+.essu-bot-log > .essu-bot-msg:first-child {
+  animation-delay: 0.3s;
+}
+.essu-bot-log > .essu-bot-msg:first-child + .essu-bot-chips {
+  animation-delay: 0.5s;
+}
+
+/* launcher gives a little squish when the chat opens */
+.essu-bot-launch[aria-expanded="true"] {
+  animation: essu-bot-launch-bump 0.4s var(--eb-ease);
+}
+@keyframes essu-bot-launch-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
   }
 }
 
@@ -491,6 +575,15 @@
     essu-bot-text-glow 2.4s ease-in-out infinite;
 }
 
+.essu-bot-typing-text {
+  transition: opacity 0.17s ease, transform 0.17s ease;
+}
+
+.essu-bot-typing-text.is-swapping {
+  opacity: 0;
+  transform: translateY(3px);
+}
+
 @keyframes essu-bot-shimmer {
   from {
     background-position: 130% 0;
@@ -647,16 +740,229 @@
   overflow: visible;
 }
 
+/* =======================================================================
+   SUGI INTRO — plays the first time the chat opens
+   A big Sugi drops in, introduces herself, then flies into the header badge.
+   ======================================================================= */
+
+/* header badge stays hidden until the big Sugi flies into it */
+.essu-bot-panel.is-intro .essu-bot-head .essu-bot-logo {
+  visibility: hidden;
+}
+
+.essu-bot-logo.is-landed {
+  animation: essu-bot-badge-pop 0.45s cubic-bezier(0.34, 1.8, 0.64, 1) both;
+}
+
+.essu-intro {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* same dotted surface as the chat log, so it feels like the log "wakes up" */
+.essu-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--eb-surface);
+  background-image: radial-gradient(rgba(21, 128, 61, 0.1) 1px, transparent 1.2px);
+  background-size: 16px 16px;
+  transition: opacity 0.45s ease 0.2s;
+}
+
+.essu-intro.is-leaving::before {
+  opacity: 0;
+}
+
+/* --- Sugi drops in, with pulse rings behind her --- */
+.essu-intro-stage {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  flex-shrink: 0;
+  animation: essu-intro-drop 0.95s cubic-bezier(0.34, 1.45, 0.64, 1) 0.45s backwards;
+}
+
+.essu-intro-stage .essu-mascot3d {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.essu-intro-stage::before,
+.essu-intro-stage::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  z-index: -1;
+  border-radius: 50%;
+  border: 2px solid rgba(22, 163, 74, 0.38);
+  background: radial-gradient(circle, rgba(247, 234, 122, 0.35), rgba(247, 234, 122, 0) 70%);
+  animation: essu-intro-ring 2.2s ease-out 1.1s infinite backwards;
+}
+
+.essu-intro-stage::after {
+  animation-delay: 1.9s;
+}
+
+.essu-intro.is-leaving .essu-intro-stage::before,
+.essu-intro.is-leaving .essu-intro-stage::after {
+  display: none;
+}
+
+@keyframes essu-intro-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(-110px) scale(0.55) rotate(-14deg);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes essu-intro-ring {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+/* --- "Hi, I'm Sugi" --- */
+.essu-intro-copy {
+  margin-top: 14px;
+  transition: opacity 0.25s ease;
+}
+
+.essu-intro.is-leaving .essu-intro-copy,
+.essu-intro.is-leaving .essu-intro-skip {
+  opacity: 0;
+}
+
+.essu-intro-hello {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--eb-muted);
+  animation: essu-bot-rise 0.45s var(--eb-ease) 1.1s backwards;
+}
+
+.essu-intro-name {
+  position: relative;
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 2.6rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--eb-green-700);
+}
+
+.essu-intro-name span {
+  display: inline-block;
+  animation: essu-intro-letter 0.55s cubic-bezier(0.34, 1.8, 0.64, 1) calc(1.2s + var(--i) * 0.09s) backwards;
+}
+
+/* yellow highlighter swipe under the name */
+.essu-intro-name::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 3px;
+  height: 10px;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--eb-yellow);
+  transform-origin: left center;
+  animation: essu-intro-swipe 0.5s var(--eb-ease) 1.65s backwards;
+}
+
+@keyframes essu-intro-letter {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.5) rotate(-12deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes essu-intro-swipe {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.essu-intro-tag {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: var(--eb-green-800);
+  animation: essu-bot-rise 0.45s var(--eb-ease) 1.9s backwards;
+}
+
+.essu-intro-skip {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  padding: 4px 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--eb-green-800);
+  background: #fff;
+  border: 1px solid var(--eb-line);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: opacity 0.25s ease, background-color 0.2s ease;
+  animation: essu-bot-rise 0.4s var(--eb-ease) 1.2s backwards;
+}
+
+.essu-intro-skip:hover {
+  background: var(--eb-green-50);
+}
+
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   .essu-bot-launch::after,
   .essu-bot-panel.is-opening,
+  .essu-bot-panel.is-closing,
+  .essu-bot-panel.is-opening .essu-bot-head > *,
+  .essu-bot-panel.is-opening .essu-bot-form,
+  .essu-bot-panel.is-opening .essu-bot-note,
+  .essu-bot-launch[aria-expanded="true"],
   .essu-bot-msg,
   .essu-bot-chips,
   .essu-bot-typing span,
   .essu-bot-typing.has-orb,
   .essu-bot-typing.has-orb canvas,
-  .essu-bot-typing-text {
+  .essu-bot-typing-text,
+  .essu-intro-stage,
+  .essu-intro-stage::before,
+  .essu-intro-stage::after,
+  .essu-intro-hello,
+  .essu-intro-name span,
+  .essu-intro-name::after,
+  .essu-intro-tag,
+  .essu-intro-skip,
+  .essu-bot-logo.is-landed {
     animation: none;
   }
 
