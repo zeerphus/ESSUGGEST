@@ -568,7 +568,7 @@
   sendBtn.innerHTML = ICON_SEND;
   form.append(input, sendBtn);
 
-  const privacyNote = el("p", "essu-bot-note", "Pls don't share personal info. Sugi's AI can be wrong sometimes, hehe.");
+  const privacyNote = el("p", "essu-bot-note", "Sugi can be wrong sometimes. make sure to verify information :D");
   panel.append(head, log, form, privacyNote);
 
   const launch = el("button", "essu-bot-launch");
@@ -581,6 +581,30 @@
   root.append(panel, launch);
   document.body.appendChild(root);
   wireMascotMotion();
+
+  /* ------------------------------------------------------------------
+     METAL SEND BUTTON
+     Liquid-metal ring + cursor dent on the send button (pages/metal.js, a
+     vanilla port of metal-fx). Mounted the first time the chat opens, since
+     the button needs a real size. If metal.js didn't load or the browser has
+     no WebGL2, mount() returns null and the plain button stays as it is.
+  ------------------------------------------------------------------- */
+  let sendFx = null;
+
+  function mountSendFx() {
+    if (sendFx || !window.EssuMetal) return;
+    sendFx = window.EssuMetal.mount(sendBtn, {
+      preset: "green",
+      variant: "circle",
+      theme: "light", // the chat panel is always white, whatever the OS theme is
+      innerShadow: true,
+      strength: 0.9,
+      frameMs: 16, // ~60 fps. The library default is 66 (about 15 fps); use 33 for ~30 fps if it feels heavy
+      bend: !reduceMotion,
+      paused: reduceMotion,
+      className: "essu-bot-sendfx",
+    });
+  }
 
   /* ------------------------------------------------------------------
      SUGI INTRO
@@ -850,9 +874,8 @@
      The phrase pool depends on the question (known / draft / ai), and after
      THINK_SLOW_AFTER_MS it switches to "thanks for waiting" lines.
 
-     INDICATORS: step pips light up one per phrase, a progress bar fills over
-     the planned think time (then becomes a "still working" sweep), the header
-     status says "Sugi is thinking…", and the input row dims while she works.
+     INDICATORS: the header status says "Sugi is thinking…", and the input
+     row dims while she works.
      The npm package (thinking-orbs) is NOT needed: orbs.js already contains
      all nine states for this vanilla site.
   ------------------------------------------------------------------- */
@@ -867,7 +890,6 @@
     const [a, b] = THINK_RANGE[kind] || THINK_RANGE.ai;
     return Math.round(a + Math.random() * (b - a));
   };
-  const THINK_PIPS = 5; // step dots under the label
 
   const THINK_FIRST = { state: "solving", text: "Sugi is thinking…" };
   const THINK_POOLS = {
@@ -919,30 +941,19 @@
     return a;
   }
 
-  function makeTyping(kind, totalMs) {
+  function makeTyping(kind) {
     const box = el("div", "essu-bot-msg is-bot essu-bot-typing");
     box.setAttribute("aria-hidden", "true");
 
     if (window.EssuOrb) {
       box.classList.add("has-orb");
-      box.style.setProperty("--think-ms", totalMs + "ms");
       box._orb = window.EssuOrb.create({ state: THINK_FIRST.state, size: 32, color: "#15803d" });
 
       const body = el("div", "essu-bot-typing-body");
       const label = el("p", "essu-bot-typing-text", THINK_FIRST.text);
 
-      const pips = el("div", "essu-bot-pips");
-      for (let i = 0; i < THINK_PIPS; i++) pips.appendChild(el("span"));
-      pips.firstChild.classList.add("is-on");
-
-      const meter = el("div", "essu-bot-meter");
-      meter.appendChild(el("span"));
-
-      body.append(label, pips, meter);
+      body.append(label);
       box.append(box._orb, body);
-
-      // after the planned time, the bar switches to a "still working" sweep
-      box._long = setTimeout(() => box.classList.add("is-long"), totalMs);
 
       // shuffled so each wait looks different; cycles without repeating back to back
       const queue = shuffle(THINK_POOLS[kind] || THINK_POOLS.ai);
@@ -950,14 +961,10 @@
       const born = Date.now();
       let qi = 0;
       let si = 0;
-      let step = 0;
 
       box._timer = setInterval(() => {
         const isSlow = Date.now() - born > THINK_SLOW_AFTER_MS;
         const next = isSlow ? slow[si++ % slow.length] : queue[qi++ % queue.length];
-        step++;
-        // light up one more pip each swap (stays full once it reaches the end)
-        for (let i = 0; i < THINK_PIPS; i++) pips.children[i].classList.toggle("is-on", i <= step);
         label.classList.add("is-swapping"); // fade out, swap text + orb, fade back in
         setTimeout(() => {
           label.textContent = next.text;
@@ -973,7 +980,6 @@
 
   function finish(typing, render) {
     clearInterval(typing._timer); // stop rotating phrases
-    clearTimeout(typing._long);
     if (typing._orb) typing._orb.destroy(); // stop the orb's animation loop
     typing.remove();
     render();
@@ -1003,7 +1009,7 @@
     const kind = DRAFT_RE.test(text) ? "draft" : hit ? "known" : "ai";
 
     const minMs = thinkTime(kind);
-    const typing = makeTyping(kind, minMs);
+    const typing = makeTyping(kind);
     log.appendChild(typing);
     scrollDown();
     setMood("thinking");
@@ -1065,6 +1071,7 @@
     launch.setAttribute("aria-label", "Close help chat");
     if (!started) {
       started = true;
+      mountSendFx();
       if (canIntro()) runIntro();
       else greet();
     }
