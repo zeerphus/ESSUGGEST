@@ -86,19 +86,7 @@ Sugi is a real 3D character built with CSS 3D transforms, with no images or libr
 
 ---
 
-## Project Structure (chatbot)
 
-```
-functions/
-  api/
-    chat.js        Cloudflare Pages Function: POST /api/chat (Workers AI)
-pages/
-  chatbot.js       Chat widget, knowledge base, matching, AI calls
-  chatbot.css      Chat widget styles
-  mascot.js        3D mascot "Sugi"
-  orbs.js          Thinking orb animation
-  homepage.html    Loads the scripts
-```
 
 ### Setup
 In the Cloudflare dashboard (Pages project, Settings, Bindings):
