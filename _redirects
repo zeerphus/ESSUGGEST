@@ -1,1 +1,4 @@
-/    /pages/homepage    302
+/    /pages/homepage    200
+
+/pages/homepage.html    /    301
+/pages/homepage    /    301
