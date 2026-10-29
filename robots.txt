@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+Disallow: /auth/
+Disallow: /api/
+Disallow: /app/
+Disallow: /superadmin/
+Disallow: /__shot.html
+Disallow: /assets/pdfs/
+
+Sitemap: https://essuggest.pages.dev/sitemap.xml
