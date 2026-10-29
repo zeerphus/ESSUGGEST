@@ -1,13 +1,14 @@
 /**
  * ESSUGGEST — dotted.js
- * Independent pieces sharing one file since index.html only loads
- * one <script>:
+ * Page-level behaviour shared by every page that loads the dot grid:
  *   1. Magnetic dot-grid background canvas (#dots-canvas): bounce + click shockwave
  *   2. Shrink-on-scroll masthead (#site-header)
- *   3. Hero image float + tilt (essuggest.png)
- *   4. Staff access panel (HR passcode gate, fingerprint trigger)
- *   5. Hero video sound controls (#hero-video: mute toggle + volume)
- *   6. Site search (utility bar)
+ *   3. Hero video controls (#hero-video: pause + mute + volume)
+ *   4. Site search (utility bar)
+ *   5. Scroll reveal (.scroll-reveal)
+ *
+ * Chat-only visual libraries live in orbs.js / metal.js and are loaded on
+ * idle by chatbot.js, so they never block the first paint.
  */
 
 /* =========================================================================
@@ -97,6 +98,9 @@
 
   let rafId = null;
   let lastT = 0;
+  // Region of the canvas cleared on the previous frame, so the full-page
+  // canvas never has to be wiped in one go. See step().
+  const lastClear = { top: 0, bottom: 0 };
 
   // Rounds the influence falloff into a soft hill instead of a linear cone.
   function smoothstep(edge0, edge1, x) {
@@ -115,6 +119,7 @@
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    lastClear.top = lastClear.bottom = 0; // resizing the bitmap already cleared it
 
     cols = Math.ceil(width / SPACING) + 1;
     rows = Math.ceil(height / SPACING) + 1;
@@ -143,6 +148,7 @@
   function drawStillGrid() {
     // Reduced-motion path: every dot once at rest, no reactivity.
     ctx.clearRect(0, 0, width, height);
+    lastClear.top = lastClear.bottom = 0;
     ctx.globalAlpha = 0.6;
     ctx.fillStyle = PALETTE[0];
     ctx.beginPath();
@@ -174,7 +180,19 @@
     const r0 = Math.max(0, Math.floor((-rect.top - VIEW_MARGIN) / SPACING));
     const r1 = Math.min(rows - 1, Math.ceil((-rect.top + window.innerHeight + VIEW_MARGIN) / SPACING));
 
-    ctx.clearRect(0, 0, width, height);
+    // Clear only the band we simulate, plus the band we cleared last frame.
+    // The canvas spans the whole page (see buildGrid), so clearRect(0, 0,
+    // width, height) meant wiping a multi-megabyte bitmap 60 times a second
+    // to redraw a few hundred pixels of dots. Nothing is ever drawn outside
+    // the simulated band, so these two slices cover every stale pixel.
+    const bandTop = Math.max(0, -rect.top - VIEW_MARGIN);
+    const bandBottom = Math.min(height, -rect.top + window.innerHeight + VIEW_MARGIN);
+    if (lastClear.bottom > lastClear.top) {
+      ctx.clearRect(0, lastClear.top, width, lastClear.bottom - lastClear.top);
+    }
+    ctx.clearRect(0, bandTop, width, Math.max(0, bandBottom - bandTop));
+    lastClear.top = bandTop;
+    lastClear.bottom = bandBottom;
 
     const damp = Math.pow(DAMPING, dt);
     const ease = Math.min(1, EASE * dt);
@@ -385,8 +403,8 @@
    (scrollY below THRESHOLD), the header stays fully intact at its
    normal size. Past that, .is-shrunk is added and animationLp.css
    handles the actual size/shrink transition — this just tracks scroll
-   position and flips the class. No color change, no blur — solid
-   green-700 the whole time.
+   position and flips the class. animationLp.css turns the bar into a
+   rounded, lightly frosted pill in that state.
 ========================================================================= */
 (function shrinkMasthead() {
   const header = document.getElementById("site-header");
@@ -425,99 +443,16 @@
 })();
 
 /* =========================================================================
-   3) HERO IMAGE FLOAT + TILT (essuggest.png)
+   3) HERO VIDEO CONTROLS
    ---------------------------------------------------------------------
-   Split into two layers so the CSS float animation and the JS tilt
-   loop don't fight over the same element's transform:
-     - .hero-float (outer, in index.html) — pure CSS keyframe bob,
-       runs constantly, untouched by JS.
-     - .hero-tilt-img (inner <img>, this script) — tilts toward the
-       cursor like a physical card. No bulge/scale or glow — plain
-       tilt only.
-
-   Mouse-only on purpose: there's no touch handler here, so on phones
-   and tablets the image just holds still (aside from the CSS float) —
-   there's no cursor to tilt toward, and rigging this to touch-drag
-   would fight normal page scrolling.
-
-   Respects prefers-reduced-motion the same way section 1 does — for
-   anyone with that OS setting on, this whole effect is skipped and the
-   image just sits still. The CSS float animation is separately
-   disabled in animationLp.css under the same media query.
+   Video autoplays muted + looped (browsers only allow autoplay when
+   muted). Controls are play/pause, mute/unmute, and volume. Both the
+   pause button and the volume slider count as a user gesture, so
+   unmuting is allowed.
+   Play/pause is not optional: WCAG 2.2.2 requires a way to stop
+   content that moves for more than five seconds.
 ========================================================================= */
-(function heroTilt() {
-  const wrap = document.querySelector(".hero-tilt-wrap");
-  const img = document.querySelector(".hero-tilt-img");
-  if (!wrap || !img) return;
-
-  const prefersReducedMotion = window.matchMedia
-    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    : false;
-  if (prefersReducedMotion) return; // leave the image completely static
-
-  // ---- Tunables ---------------------------------------------------------
-  const MAX_TILT = 10;   // degrees of rotation at the edge of the image
-  const EASE = 0.12;     // 0-1, lower = slower/smoother trailing motion
-
-  let target = { rx: 0, ry: 0 };
-  let current = { rx: 0, ry: 0 };
-  let rafId = null;
-  let hovering = false;
-
-  function onMouseMove(e) {
-    const rect = wrap.getBoundingClientRect();
-    const offsetX = (e.clientX - rect.left) / rect.width; // 0 (left) -> 1 (right)
-    const offsetY = (e.clientY - rect.top) / rect.height; // 0 (top) -> 1 (bottom)
-
-    // Cursor right of center -> tilt right; cursor above center -> top
-    // edge tilts toward the viewer (hence the minus sign on rx).
-    target.ry = (offsetX - 0.5) * MAX_TILT * 2;
-    target.rx = -(offsetY - 0.5) * MAX_TILT * 2;
-  }
-
-  function onEnter() {
-    hovering = true;
-    if (!rafId) rafId = requestAnimationFrame(tick);
-  }
-
-  function onLeave() {
-    hovering = false;
-    target = { rx: 0, ry: 0 };
-    // Don't stop the rAF loop here — tick() keeps it running until the
-    // image has actually eased back to neutral, otherwise it would
-    // just snap flat instead of settling smoothly.
-  }
-
-  function tick() {
-    current.rx += (target.rx - current.rx) * EASE;
-    current.ry += (target.ry - current.ry) * EASE;
-
-    img.style.transform = `rotateX(${current.rx}deg) rotateY(${current.ry}deg)`;
-
-    const settled =
-      Math.abs(current.rx) < 0.01 && Math.abs(current.ry) < 0.01;
-
-    if (hovering || !settled) {
-      rafId = requestAnimationFrame(tick);
-    } else {
-      rafId = null;
-    }
-  }
-
-  wrap.addEventListener("mouseenter", onEnter);
-  wrap.addEventListener("mousemove", onMouseMove, { passive: true });
-  wrap.addEventListener("mouseleave", onLeave);
-})();
-
-/* =========================================================================
-   5) HERO VIDEO SOUND CONTROLS
-   ---------------------------------------------------------------------
-   Video stays autoplay + muted + loop (browsers only allow autoplay when
-   muted). The only things the user can change are mute/unmute and volume.
-   Clicking the button or dragging the slider counts as a user gesture,
-   so unmuting is allowed.
-========================================================================= */
-(function videoSoundControls() {
+(function videoControls() {
   const video  = document.getElementById("hero-video");
   const toggle = document.getElementById("vc-toggle");
   const slider = document.getElementById("vc-volume");
@@ -543,8 +478,8 @@
     // SVG elements have no .hidden property (only HTML elements do), so
     // assigning it does nothing. Toggle the attribute instead; the CSS rule
     // `.vc-btn svg[hidden] { display: none }` handles the rest.
-    iconOn.toggleAttribute("hidden", silent);
-    iconOff.toggleAttribute("hidden", !silent);
+    iconOn?.toggleAttribute("hidden", silent);
+    iconOff?.toggleAttribute("hidden", !silent);
     toggle.setAttribute("aria-label", silent ? "Unmute video" : "Mute video");
 
     slider.value = pct;
@@ -570,6 +505,34 @@
 
   video.addEventListener("volumechange", render);
 
+  // ---- play / pause ------------------------------------------------------
+  const pauseBtn = document.getElementById("vc-pause");
+  if (pauseBtn) {
+    const playIcon  = pauseBtn.querySelector(".vc-icon-play");
+    const pauseIcon = pauseBtn.querySelector(".vc-icon-pause");
+
+    const renderPlay = () => {
+      const paused = video.paused;
+      playIcon?.toggleAttribute("hidden", !paused);
+      pauseIcon?.toggleAttribute("hidden", paused);
+      pauseBtn.setAttribute("aria-label", paused ? "Play video" : "Pause video");
+    };
+
+    pauseBtn.addEventListener("click", () => {
+      if (video.paused) {
+        const p = video.play();
+        if (p && p.catch) p.catch(() => {});
+      } else {
+        video.pause();
+      }
+      renderPlay();
+    });
+
+    video.addEventListener("play", renderPlay);
+    video.addEventListener("pause", renderPlay);
+    renderPlay();
+  }
+
   // Belt and braces for autoplay (e.g. if the tab loaded in the background)
   const p = video.play();
   if (p && p.catch) p.catch(() => {});
@@ -578,7 +541,55 @@
 })();
 
 /* =========================================================================
-   6) SITE SEARCH (utility bar)
+   4) SCROLL REVEAL
+   ---------------------------------------------------------------------
+   Progressive enhancement for .scroll-reveal. The CSS only hides these
+   elements once `html.reveal-ready` exists, and that class is added here
+   — so with JS off, reduced motion on, or an ancient browser, every
+   element is simply visible. A safety timer reveals anything the
+   observer missed (hidden tab, zero-height container) rather than
+   leaving content permanently invisible.
+========================================================================= */
+(function scrollReveal() {
+  const items = document.querySelectorAll(".scroll-reveal");
+  if (!items.length) return;
+
+  const reduce = window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
+  if (reduce || !("IntersectionObserver" in window)) return;
+
+  const root = document.documentElement;
+  root.classList.add("reveal-ready");
+  let observed = false;
+
+  const revealAll = () => {
+    items.forEach((el) => el.classList.add("is-revealed"));
+  };
+
+  const io = new IntersectionObserver(
+    (entries) => {
+      observed = true;
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        io.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
+  );
+
+  items.forEach((el) => io.observe(el));
+
+  // Never let a failed observation hide content: if the observer produced no
+  // callbacks at all (throttled tab, zero-height container), show everything.
+  setTimeout(() => {
+    if (!observed) revealAll();
+  }, 2500);
+})();
+
+/* =========================================================================
+   5) SITE SEARCH (utility bar)
    ---------------------------------------------------------------------
    Append this to the end of dotted.js (every page already loads it), or
    save it as /pages/search.js and add a <script> tag after dotted.js.

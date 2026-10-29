@@ -14,7 +14,38 @@
  * It builds its own widget, so the homepage only needs the stylesheet and
  * this script. If nothing matches, it offers to run the site search
  * (#site-search-input from dotted.js) with the student's words.
+ *
+ * orbs.js and metal.js are optional garnish: an animated "thinking" orb and
+ * a liquid-metal send button. They are 146 KB between them, so they are
+ * fetched on idle rather than on load. Every use site checks for the global
+ * first, so the widget works while they are still in flight.
  */
+(function lazyChatExtras() {
+  const SRC = ["/pages/orbs.js", "/pages/metal.js"];
+  let started = false;
+
+  function load() {
+    if (started) return;
+    started = true;
+    SRC.forEach((src) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.async = false; // keep orbs -> metal order without blocking parsing
+      document.head.appendChild(s);
+    });
+  }
+
+  // Idle first; a pointerdown is a strong hint the student is about to chat,
+  // so pull them in immediately in that case. The timeout is the fallback
+  // for browsers without requestIdleCallback.
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(load, { timeout: 2500 });
+  } else {
+    setTimeout(load, 1500);
+  }
+  window.addEventListener("pointerdown", load, { once: true, passive: true });
+})();
+
 (function essuBot() {
   if (document.getElementById("essu-bot")) return;
 

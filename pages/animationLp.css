@@ -21,12 +21,6 @@ html {
 
 /* -----------------------------------------------------------------------
    MOBILE SAFETY NET
-   A defensive guard against horizontal scroll on small screens (e.g. any
-   future fixed-width/negative-margin element slipping past the
-   viewport). Only clips the x-axis so position: sticky on #site-header
-   is unaffected. Also removes the grey tap-flash Android/iOS browsers
-   show on links/buttons, since .btn-pop already provides its own press
-   feedback.
 ----------------------------------------------------------------------- */
 html,
 body {
@@ -46,7 +40,7 @@ button {
   top: 0;
   left: 0;
   transform: translateY(-150%);
-  background: #16a34a;
+  background: #15803d;
   color: #fff;
   padding: 0.75rem 1.25rem;
   font-weight: 600;
@@ -70,17 +64,8 @@ summary:focus-visible {
   border-radius: 4px;
 }
 
-
 /* -----------------------------------------------------------------------
    MASTHEAD SHRINK ON SCROLL
-   #site-header is now the sticky main nav (the old top utility bar lost
-   its sticky position). dotted.js toggles .is-shrunk on #site-header
-   once the page scrolls past a small threshold; these rules define
-   what "shrunk" looks like. When shrunk, the bar becomes a frosted
-   glass pill tinted with the brand green (instead of solid green-700),
-   and the "Eastern Samar State University" subtitle is collapsed away
-   so only the ESSUGGEST wordmark remains — the full lockup was too
-   crowded once the header narrowed into a floating pill.
 ----------------------------------------------------------------------- */
 :root {
   --header-ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -88,6 +73,7 @@ summary:focus-visible {
 }
 
 #site-header {
+  height: 80px;
   transition: padding var(--header-duration) var(--header-ease);
 }
 
@@ -95,13 +81,6 @@ summary:focus-visible {
   padding: 12px 16px 0;
 }
 
-/* The bar is what actually carries the green color/shape. At rest it's
-   full-width with square corners (matches the intact masthead look);
-   shrunk, it becomes an inset, rounded, floating pill — like a Dock —
-   and swaps its solid fill for a richer, saturated green tint. max-width
-   has an explicit starting value (100%) so the browser has two real
-   lengths to interpolate between — without it, the shrink had nothing
-   to animate from and just snapped to 960px instead of easing into it. */
 .site-header-bar {
   width: 100%;
   max-width: 100%;
@@ -122,16 +101,11 @@ summary:focus-visible {
   border-radius: 25px;
   border-color: rgba(255, 255, 255, 0.14);
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.45);
-  /* A saturated green tint, not a frosted pane: a light blur just
-     softens hard edges of whatever scrolls underneath, while the high
-     background opacity keeps the pill reading as color first. */
   background-color: rgba(21, 128, 61, 0.88);
   backdrop-filter: blur(4px) saturate(160%);
   -webkit-backdrop-filter: blur(4px) saturate(160%);
 }
 
-/* padding is transitioned too, so the right-edge tightening below eases
-   in with the rest of the shrink instead of snapping. */
 #site-header .site-header-inner {
   transition: height var(--header-duration) var(--header-ease),
     padding var(--header-duration) var(--header-ease);
@@ -152,10 +126,6 @@ summary:focus-visible {
   transition: font-size var(--header-duration) var(--header-ease);
 }
 
-/* Subtitle ("Eastern Samar State University") collapses away entirely
-   once shrunk — max-height + margin go to 0 alongside opacity, so the
-   wordmark ("ESSUGGEST") re-centers into the freed space instead of
-   just fading in place and leaving a gap. */
 #site-header .site-subtitle {
   transition: font-size var(--header-duration) var(--header-ease),
     opacity var(--header-duration) var(--header-ease),
@@ -165,11 +135,6 @@ summary:focus-visible {
   max-height: 20px;
 }
 
-/* padding-right: the "Create Account" pill sat inside the same 24px
-   side padding as the logo, which looked too far from the pill's
-   rounded right edge. Pulling it in to ~10px roughly matches the
-   button's top/bottom gap (52px bar vs. ~40px button) so the spacing
-   reads as concentric. Tune this value: lower = closer to the edge. */
 #site-header.is-shrunk .site-header-inner {
   height: 52px;
   padding-right: 10px;
@@ -178,7 +143,7 @@ summary:focus-visible {
 #site-header.is-shrunk .site-logo-box {
   width: 34px;
   height: 34px;
-  border-radius: 20px; /* full circle in pill state (beats Tailwind's rounded-xl) */
+  border-radius: 20px;
 }
 
 #site-header.is-shrunk .site-logo-img {
@@ -187,7 +152,7 @@ summary:focus-visible {
 }
 
 #site-header.is-shrunk .site-wordmark {
-  font-size: 0.875rem; /* down from text-base/text-xl */
+  font-size: 0.875rem;
 }
 
 #site-header.is-shrunk .site-subtitle {
@@ -198,78 +163,62 @@ summary:focus-visible {
 }
 
 /* -----------------------------------------------------------------------
-   HERO IMAGE FLOAT + TILT (essuggest.png)
-   .hero-tilt-wrap: the perspective context AND clips the hover bulge
-   to the rounded frame (without overflow:hidden here, a scaled-up
-   image would spill past the rounded corners at the edges).
-
-   .hero-float: a pure-CSS bobbing layer, wrapping the <img>. This is
-   deliberately separate from .hero-tilt-img — dotted.js writes a new
-   inline `transform` on .hero-tilt-img every animation frame while
-   hovering/settling, and an element can only have one `transform`, so
-   a CSS keyframe animation placed directly on that same element would
-   get silently overwritten by the JS and never actually show. Putting
-   the float on the parent instead lets both run at once: this layer
-   bobs up and down on its own slow loop the whole time, while the
-   child <img> underneath gets tilted/bulged by JS on hover, and
-   `transform-style: preserve-3d` keeps the inner rotateX/rotateY
-   reading correctly through the outer translateY.
-
-   .hero-tilt-img: what dotted.js actually rotates. No CSS `transition`
-   on transform here on purpose — dotted.js already eases the rotation
-   itself frame-by-frame (same lerp approach as the dot grid above),
-   and layering a CSS transition on top of that would just add lag on
-   top of lag. The box-shadow transition below is fine since that only
-   changes on hover/leave, not continuously. Note: dotted.js only wires
-   this up via mouse events, so on touch devices the image simply stays
-   flat — that's expected, not a bug.
+   SCROLL REVEAL
 ----------------------------------------------------------------------- */
-.hero-tilt-wrap {
-  perspective: 1000px;
-  overflow: hidden;
+.reveal-ready .scroll-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
 }
 
-.hero-float {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  animation: hero-float-bob 6s ease-in-out infinite;
-  will-change: transform;
+.reveal-ready .scroll-reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
 }
 
-@keyframes hero-float-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-14px);
-  }
+.scroll-reveal-delay-1 {
+  --reveal-delay: 90ms;
 }
 
-.hero-tilt-img {
-  transform: rotateX(0deg) rotateY(0deg) scale(1);
-  transform-style: preserve-3d;
-  will-change: transform;
- 
-  transition: box-shadow 0.4s ease;
+.scroll-reveal-delay-2 {
+  --reveal-delay: 180ms;
+}
+
+.scroll-reveal-delay-3 {
+  --reveal-delay: 260ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-tilt-img {
-    transform: none !important;
-  }
-  .hero-float {
-    animation: none !important;
+  .reveal-ready .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 
 /* -----------------------------------------------------------------------
-   Buttons — a soft, tactile "pop" on hover/press
-   touch-action: manipulation removes the ~300ms tap delay mobile
-   browsers otherwise add while waiting to see if a tap becomes a
-   double-tap zoom.
+   ANCHOR OFFSETS
+----------------------------------------------------------------------- */
+#two-ways,
+#conarea,
+#hero {
+  scroll-margin-top: 96px;
+}
+
+/* -----------------------------------------------------------------------
+   Heading balance
+----------------------------------------------------------------------- */
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+/* -----------------------------------------------------------------------
+   Buttons — soft "pop"
 ----------------------------------------------------------------------- */
 .btn-pop {
   display: inline-block;
@@ -289,7 +238,6 @@ summary:focus-visible {
   transform: translateY(0) scale(0.98);
 }
 
-/* "See how it works →" link — arrow nudges forward on hover */
 .link-arrow span {
   display: inline-block;
   transition: transform 0.25s ease;
@@ -299,7 +247,6 @@ summary:focus-visible {
   transform: translateX(4px);
 }
 
-/* Poll / Suggestion cards — gentle lift on hover */
 .card-float {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.35s ease;
@@ -311,7 +258,7 @@ summary:focus-visible {
 }
 
 /* -----------------------------------------------------------------------
-   Arrow divider — the ↔ style line under "Vote on it, or Suggest it".
+   Arrow divider — caps match the gray line
 ----------------------------------------------------------------------- */
 .arrow-cap {
   width: 0;
@@ -322,129 +269,77 @@ summary:focus-visible {
 }
 
 .arrow-cap-left {
-  border-right: 6px solid #000000; 
+  border-right: 6px solid #9ca3af;
 }
 
 .arrow-cap-right {
-  border-left: 6px solid #000000;
-}
-
-/* Step connector line — small traveling pulse between 01 / 02 / 03 */
-.step-arrow::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 0;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #16a34a;
-  transform: translateY(-50%);
-  animation: step-pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes step-pulse {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: translateY(-50%) scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-50%) scale(1.6);
-  }
+  border-left: 6px solid #9ca3af;
 }
 
 /* -----------------------------------------------------------------------
-   CAPTION MARQUEE
+   CARD FACTS — static replacement for the old marquees
 ----------------------------------------------------------------------- */
-.marquee {
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 12%,
-    black 88%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 12%,
-    black 88%,
-    transparent
-  );
-}
-
-.marquee-track {
+.card-facts {
   display: flex;
-  width: max-content;
-  animation: marquee-scroll 16s linear infinite;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem 0.5rem;
+  width: 100%;
+  margin: 0;
+  padding: 1.25rem 0 0;
+  border-top: 1px solid currentColor;
+  border-top-color: color-mix(in srgb, currentColor 18%, transparent);
+  font-family: var(--font-dm);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
-.marquee:hover .marquee-track {
-  animation-play-state: paused;
-}
-
-.marquee-track span {
+.card-facts li {
+  display: inline-flex;
+  align-items: center;
   white-space: nowrap;
-  margin-right: 2.5rem;
 }
 
-@keyframes marquee-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+.card-facts li + li::before {
+  content: "";
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.5;
+  margin-right: 0.5rem;
+}
 
- }
-
-/* Mobile only: freeze the marquee into a plain static line instead of
-   scrolling. */
-@media (max-width: 639px) {
-  .marquee {
-    -webkit-mask-image: none;
-    mask-image: none;
+@media (max-width: 399px) {
+  .card-facts {
+    flex-direction: column;
+    gap: 0.25rem;
   }
 
-  .marquee-track {
-    animation: none;
-    display: block;
-    width: 100%;
-  }
-
-  .marquee-track span {
-    white-space: normal;
-    margin-right: 0;
-  }
-
-  .marquee-track span:nth-child(2) {
+  .card-facts li + li::before {
     display: none;
   }
 }
- 
+
 /* -----------------------------------------------------------------------
-   FAQ accordion (faq.html)
+   FAQ accordion
 ----------------------------------------------------------------------- */
 .faq-item summary::-webkit-details-marker {
   display: none;
 }
- 
+
 .faq-item summary::marker {
   content: "";
 }
- 
+
 .faq-chevron {
   display: inline-block;
 }
 
 /* -----------------------------------------------------------------------
-   VIDEO SOUND CONTROLS (hero motion graphic)
-   Pill sits bottom-left over the video. On devices with hover, the slider
-   slides out when the pill is hovered or focused; on touch devices it is
-   always visible since there is no hover.
+   VIDEO CONTROLS
 ----------------------------------------------------------------------- */
 .video-controls {
   position: absolute;
@@ -498,10 +393,9 @@ summary:focus-visible {
   opacity: 0;
   border-radius: 999px;
   cursor: pointer;
-  /* --vol is set from JS so the filled part follows the thumb */
   background: linear-gradient(
     to right,
-    #fef08a var(--vol, 0%),
+    var(--color-highlight-strong) var(--vol, 0%),
     rgba(255, 255, 255, 0.3) var(--vol, 0%)
   );
   transition: width 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
@@ -531,7 +425,7 @@ summary:focus-visible {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #fef08a;
+  background: var(--color-highlight-strong);
   border: 0;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
@@ -540,16 +434,13 @@ summary:focus-visible {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #fef08a;
+  background: var(--color-highlight-strong);
   border: 0;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
 /* -----------------------------------------------------------------------
-   SITE SEARCH (top utility bar)
-   Append to the end of animationLp.css. The input sits on the dark
-   green-950 bar; the results panel is a white card that drops below it.
-   z-index 60 keeps the panel above the sticky masthead (z-50).
+   SITE SEARCH
 ----------------------------------------------------------------------- */
 .site-search {
   position: relative;
@@ -565,6 +456,28 @@ summary:focus-visible {
     flex: 0 0 auto;
     width: 18rem;
     max-width: none;
+  }
+}
+
+@media (max-width: 419px) {
+  .utility-bar {
+    height: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .utility-bar .site-search {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+}
+
+@media (max-width: 399px) {
+  #site-header .site-subtitle {
+    display: none;
   }
 }
 
@@ -590,7 +503,6 @@ summary:focus-visible {
   transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* 16px on phones stops iOS Safari from zooming the page on focus */
 @media (max-width: 639px) {
   .site-search-input {
     font-size: 16px;
@@ -607,8 +519,6 @@ summary:focus-visible {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* Subtle focus ring: replaces the global 3px green outline for this
-   input only. A brighter border + faint halo keeps focus visible. */
 .site-search-input:focus-visible {
   outline: none;
   background: rgba(255, 255, 255, 0.16);
@@ -673,7 +583,7 @@ summary:focus-visible {
   font-weight: 600;
   line-height: 1.4;
   color: #262626;
-  background: #f7ea7a;
+  background: var(--color-highlight);
   border-radius: 999px;
 }
 
@@ -687,7 +597,7 @@ summary:focus-visible {
 
 .site-search-results mark {
   color: inherit;
-  background: #fef08a;
+  background: var(--color-highlight-strong);
   border-radius: 2px;
 }
 
@@ -697,12 +607,11 @@ summary:focus-visible {
   color: #6b7280;
 }
 
-/* Highlight applied on the destination page after a result is clicked */
 mark.search-hit {
   color: inherit;
-  background: #fef08a;
+  background: var(--color-highlight-strong);
   border-radius: 2px;
-  box-shadow: 0 0 0 2px #fef08a;
+  box-shadow: 0 0 0 2px var(--color-highlight-strong);
   transition: background-color 0.6s ease, box-shadow 0.6s ease;
 }
 
@@ -712,56 +621,7 @@ mark.search-hit.is-fading {
 }
 
 /* -----------------------------------------------------------------------
-   FINAL CTA BANNER (index.html, bottom of <main>)
-   Mascot/logo left, copy center, white button right. Hover motion only
-   answers the pointer; nothing animates on its own.
------------------------------------------------------------------------ */
-.cta-btn {
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.2s ease, background-color 0.2s ease;
-  touch-action: manipulation;
-}
-
-.cta-btn:hover {
-  transform: translateY(-2px);
-  background-color: #f0fdf4; /* green-50 */
-  box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.4);
-}
-
-.cta-btn:active {
-  transform: translateY(0) scale(0.98);
-}
-
-/* the global green focus ring is invisible on the green banner */
-.cta-btn:focus-visible {
-  outline-color: #fef08a;
-}
-
-.cta-arrow {
-  transition: transform 0.25s ease;
-}
-
-.cta-btn:hover .cta-arrow {
-  transform: translateX(4px);
-}
-
-.cta-mascot {
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.cta-banner:hover .cta-mascot {
-  transform: rotate(-4deg) scale(1.04);
-}
-
-/* -----------------------------------------------------------------------
-   FOOTER WORDMARK (index.html footer)
-   Oversized decorative "ESSUGGEST". Sized from the viewport so the ten
-   letters fill the footer width: ~7.5em wide at Poppins Black, so
-   12.8vw lands just inside the page width on phones and desktops alike.
-   The 20rem cap only kicks in on very wide screens. The wrapper in
-   index.html has no max-width and uses overflow-hidden as a safety net
-   so it can never cause horizontal scroll. If the first/last letters
-   clip, lower 12.8vw a little (e.g. 12vw).
+   FOOTER WORDMARK
 ----------------------------------------------------------------------- */
 .footer-wordmark {
   font-size: clamp(2.5rem, 12.8vw, 20rem);
@@ -770,15 +630,21 @@ mark.search-hit.is-fading {
   white-space: nowrap;
 }
 
+/* Hide the decorative wordmark on phones — the seal + link columns already
+   fill the footer; the wordmark added ~200px of empty dark green below them. */
+@media (max-width: 639px) {
+  .footer-wordmark-wrap {
+    display: none;
+  }
+}
+
 /* -----------------------------------------------------------------------
    FOOTER LOGO TOOLTIP
-   Pure-CSS tooltip: text comes from data-tooltip. Shows on hover, and on
-   keyboard focus of the parent link. Yellow pill matches the brand accent.
 ----------------------------------------------------------------------- */
 .logo-tooltip {
   position: relative;
   display: inline-block;
-  line-height: 0; /* no stray gap under the img */
+  line-height: 0;
 }
 
 .logo-tooltip::after {
@@ -794,7 +660,7 @@ mark.search-hit.is-fading {
   line-height: 1.3;
   white-space: nowrap;
   color: #171717;
-  background: #f7ea7a;
+  background: var(--color-highlight);
   border-radius: 999px;
   box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.45);
   opacity: 0;
@@ -804,7 +670,6 @@ mark.search-hit.is-fading {
   z-index: 70;
 }
 
-/* little arrow under the pill */
 .logo-tooltip::before {
   content: "";
   position: absolute;
@@ -812,7 +677,7 @@ mark.search-hit.is-fading {
   left: 50%;
   transform: translate(-50%, 4px);
   border: 6px solid transparent;
-  border-top-color: #f7ea7a;
+  border-top-color: var(--color-highlight);
   border-bottom-width: 0;
   opacity: 0;
   visibility: hidden;
